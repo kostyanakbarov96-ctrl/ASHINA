@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090b10">
 <link rel="manifest" href="manifest.webmanifest">
-<title>ASHINA Test 1.5</title>
+<title>ASHINA Test 1.6</title>
 
 <style>
 *{box-sizing:border-box}
@@ -163,8 +163,6 @@ font-size:12px;
 display:inline-block;
 }
 
-/* ЛЕНТА */
-
 .feed{
 border:1px solid #292e38;
 border-radius:16px;
@@ -207,8 +205,6 @@ font-size:12px;
 color:#9da2ac;
 min-height:16px;
 }
-
-/* ЧАТ */
 
 .chat-box{
 height:440px;
@@ -358,8 +354,6 @@ color:#fff;
 font-size:18px;
 }
 
-/* ВЛОЖЕНИЯ */
-
 .attachment{
 margin-top:8px;
 padding:8px;
@@ -379,8 +373,6 @@ margin-top:5px;
 margin-top:5px;
 width:100%;
 }
-
-/* НАСТРОЙКИ */
 
 .security{
 padding:14px;
@@ -410,6 +402,16 @@ border-radius:12px;
 padding:11px;
 }
 
+.music-status{
+margin-top:10px;
+padding:9px 11px;
+border:1px solid #292e38;
+border-radius:10px;
+background:#0d1118;
+font-size:12px;
+color:#9da2ac;
+}
+
 @media(max-width:420px){
 
 .logo{
@@ -436,9 +438,7 @@ height:390px;
 
 <header>
 
-<div class="logo">
-ASHINA
-</div>
+<div class="logo">ASHINA</div>
 
 <button class="icon" onclick="show('settings')">
 ⚙
@@ -471,8 +471,6 @@ ASHINA
 <main>
 
 
-<!-- ГЛАВНАЯ -->
-
 <section id="home">
 
 <div class="hero">
@@ -480,12 +478,10 @@ ASHINA
 <div>
 
 <span class="badge">
-ASHINA · TEST 1.5
+ASHINA · TEST 1.6
 </span>
 
-<h1>
-Добро пожаловать
-</h1>
+<h1>Добро пожаловать</h1>
 
 <p class="muted">
 Музыка, общение, новости и игры — всё в одном месте.
@@ -520,18 +516,14 @@ ASHINA · TEST 1.5
 
 
 
-<!-- МУЗЫКА -->
-
 <section id="music" class="hidden">
 
 <div class="card">
 
-<h2>
-🎵 ASHINA Music
-</h2>
+<h2>🎵 ASHINA Music</h2>
 
 <p class="muted">
-Временный трек · музыку заменим позже
+Временный трек · Test 1.6
 </p>
 
 <audio
@@ -569,9 +561,7 @@ value="0">
 0:00 / 0:00
 </span>
 
-<span>
-🔊
-</span>
+<span>🔊</span>
 
 </div>
 
@@ -583,26 +573,27 @@ max="1"
 step="0.01"
 value="0.8">
 
+<div
+id="musicStatus"
+class="music-status">
+Плеер готов.
+</div>
+
 </div>
 
 </section>
 
 
 
-<!-- ЛЕНТА -->
-
 <section id="news" class="hidden">
 
 <div class="card">
 
-<h2>
-📰 Трендовая лента
-</h2>
+<h2>📰 Трендовая лента</h2>
 
 <p class="muted">
 Тест системы реакций ASHINA.
 </p>
-
 
 <div class="feed">
 
@@ -612,9 +603,7 @@ value="0.8">
 🔥 Первая публикация ASHINA
 </strong>
 
-<span class="badge">
-0+
-</span>
+<span class="badge">0+</span>
 
 </div>
 
@@ -655,8 +644,6 @@ class="status">
 
 
 
-<!-- ЧАТ -->
-
 <section id="chat" class="hidden">
 
 <div class="card">
@@ -665,12 +652,10 @@ class="status">
 
 <div>
 
-<h2>
-💬 ASHINA Chat
-</h2>
+<h2>💬 ASHINA Chat</h2>
 
 <p class="muted">
-Локальный чат · Test 1.5
+Локальный чат · Test 1.6
 </p>
 
 </div>
@@ -694,8 +679,7 @@ class="chat-box">
 id="replyBar"
 class="reply-bar">
 
-<span id="replyText">
-</span>
+<span id="replyText"></span>
 
 <button onclick="cancelReply()">
 ✕
@@ -757,22 +741,15 @@ class="status">
 
 
 
-<!-- НАСТРОЙКИ -->
-
 <section id="settings" class="hidden">
 
 <div class="card">
 
-<h2>
-⚙️ Настройки
-</h2>
-
+<h2>⚙️ Настройки</h2>
 
 <div class="row">
 
-<span>
-Сохранять данные
-</span>
+<span>Сохранять данные</span>
 
 <input
 id="saveSettings"
@@ -864,9 +841,8 @@ btn.classList.add('active');
 }
 
 
-
 /* =========================
-   МУЗЫКА
+   МУЗЫКА ASHINA 1.6
 ========================= */
 
 const audio=
@@ -881,16 +857,103 @@ document.getElementById('seek');
 const volume=
 document.getElementById('volume');
 
+const musicStatus=
+document.getElementById('musicStatus');
+
+const MUSIC_TIME_KEY=
+'ashina_music_time';
+
+const MUSIC_VOLUME_KEY=
+'ashina_music_volume';
+
+
+/* Восстановление громкости */
+
+const savedVolume=
+localStorage.getItem(
+MUSIC_VOLUME_KEY
+);
+
+if(savedVolume!==null){
+
+const number=
+Number(savedVolume);
+
+if(
+Number.isFinite(number)
+&&
+number>=0
+&&
+number<=1
+){
+
+audio.volume=number;
+volume.value=number;
+
+}
+
+}
+
+
+/* Восстановление позиции */
+
+audio.addEventListener(
+'loadedmetadata',
+function(){
+
+const savedTime=
+Number(
+localStorage.getItem(
+MUSIC_TIME_KEY
+)
+);
+
+if(
+Number.isFinite(savedTime)
+&&
+savedTime>=0
+&&
+savedTime<audio.duration
+){
+
+audio.currentTime=
+savedTime;
+
+musicStatus.textContent=
+'Позиция восстановлена: '
++
+formatTime(savedTime);
+
+}else{
+
+musicStatus.textContent=
+'Плеер готов.';
+
+}
+
+updateMusicUI();
+
+}
+);
+
+
+/* Play */
 
 play.onclick=function(){
 
 if(audio.paused){
 
-audio.play().catch(function(){
+audio.play()
+.then(function(){
 
-alert(
-'Нажми Play ещё раз для разрешения звука'
-);
+musicStatus.textContent=
+'▶️ Музыка играет';
+
+})
+.catch(function(){
+
+musicStatus.textContent=
+'Нажми ▶️ ещё раз для разрешения звука.';
 
 });
 
@@ -903,28 +966,100 @@ audio.pause();
 };
 
 
+/* Play event */
+
 audio.onplay=function(){
 
 play.textContent='⏸️';
 
+musicStatus.textContent=
+'▶️ Музыка играет';
+
 };
 
+
+/* Pause event */
 
 audio.onpause=function(){
 
 play.textContent='▶️';
 
+saveMusicState();
+
+musicStatus.textContent=
+'⏸️ Пауза · позиция сохранена';
+
 };
 
 
+/* Time update */
+
 audio.ontimeupdate=function(){
+
+saveMusicState();
+
+updateMusicUI();
+
+};
+
+
+/* Metadata */
+
+audio.onloadedmetadata=function(){
+
+updateMusicUI();
+
+};
+
+
+/* Конец трека */
+
+audio.onended=function(){
+
+play.textContent='▶️';
+
+localStorage.setItem(
+MUSIC_TIME_KEY,
+'0'
+);
+
+musicStatus.textContent=
+'Трек завершён.';
+
+updateMusicUI();
+
+};
+
+
+/* Сохранение позиции */
+
+function saveMusicState(){
+
+if(
+Number.isFinite(audio.currentTime)
+){
+
+localStorage.setItem(
+MUSIC_TIME_KEY,
+String(audio.currentTime)
+);
+
+}
+
+}
+
+
+/* Интерфейс */
+
+function updateMusicUI(){
 
 if(audio.duration){
 
 seek.value=
+(
 audio.currentTime/
-audio.duration*
-100;
+audio.duration
+)*100;
 
 }
 
@@ -937,30 +1072,48 @@ formatTime(audio.currentTime)
 +
 formatTime(audio.duration||0);
 
-};
+}
 
+
+/* Перемотка */
 
 seek.oninput=function(){
 
 if(audio.duration){
 
 audio.currentTime=
-seek.value/
-100*
+(
+Number(seek.value)/
+100
+)
+*
 audio.duration;
+
+saveMusicState();
 
 }
 
 };
 
 
+/* Громкость */
+
 volume.oninput=function(){
 
-audio.volume=
-volume.value;
+const value=
+Number(volume.value);
+
+audio.volume=value;
+
+localStorage.setItem(
+MUSIC_VOLUME_KEY,
+String(value)
+);
 
 };
 
+
+/* Назад */
 
 document
 .getElementById('back')
@@ -972,21 +1125,35 @@ Math.max(
 audio.currentTime-10
 );
 
+saveMusicState();
+
 };
 
+
+/* Вперёд */
 
 document
 .getElementById('forward')
 .onclick=function(){
 
+if(!audio.duration){
+
+return;
+
+}
+
 audio.currentTime=
 Math.min(
-audio.duration||0,
+audio.duration,
 audio.currentTime+10
 );
 
+saveMusicState();
+
 };
 
+
+/* Формат времени */
 
 function formatTime(seconds){
 
@@ -1003,6 +1170,16 @@ String(seconds%60)
 }
 
 
+/* Сохранение перед закрытием */
+
+window.addEventListener(
+'beforeunload',
+function(){
+
+saveMusicState();
+
+});
+
 
 /* =========================
    ЛАЙКИ / ДИЗЛАЙКИ
@@ -1014,7 +1191,6 @@ const LIKE_KEY=
 const DISLIKE_KEY=
 'ashina_test15_dislike';
 
-
 let like=
 localStorage.getItem(LIKE_KEY)==='1';
 
@@ -1025,10 +1201,14 @@ localStorage.getItem(DISLIKE_KEY)==='1';
 function updateVoteUI(){
 
 const likeButton=
-document.getElementById('likeButton');
+document.getElementById(
+'likeButton'
+);
 
 const dislikeButton=
-document.getElementById('dislikeButton');
+document.getElementById(
+'dislikeButton'
+);
 
 likeButton.classList.toggle(
 'selected',
@@ -1050,9 +1230,10 @@ document.getElementById(
 ).textContent=
 dislike?'1':'0';
 
-
 const status=
-document.getElementById('voteStatus');
+document.getElementById(
+'voteStatus'
+);
 
 if(like){
 
@@ -1103,7 +1284,6 @@ like=false;
 
 }
 
-
 localStorage.setItem(
 LIKE_KEY,
 like?'1':'0'
@@ -1118,9 +1298,7 @@ updateVoteUI();
 
 }
 
-
 updateVoteUI();
-
 
 
 /* =========================
@@ -1130,9 +1308,7 @@ updateVoteUI();
 const CHAT_KEY=
 'ashina_test15_messages';
 
-
 let messages=[];
-
 
 try{
 
@@ -1147,21 +1323,19 @@ messages=[];
 
 }
 
-
 let replyTo=null;
 
 
-/* =========================
-   РЕНДЕР ЧАТА
-========================= */
+/* Рендер */
 
 function renderChat(){
 
 const box=
-document.getElementById('chatBox');
+document.getElementById(
+'chatBox'
+);
 
 box.innerHTML='';
-
 
 if(messages.length===0){
 
@@ -1191,7 +1365,7 @@ item.className=
 (message.me?' me':'');
 
 
-/* имя */
+/* Имя */
 
 const name=
 document.createElement('div');
@@ -1205,7 +1379,7 @@ message.me?'Ты':'ASHINA';
 item.appendChild(name);
 
 
-/* ответ */
+/* Ответ */
 
 if(message.replyText){
 
@@ -1223,7 +1397,9 @@ item.appendChild(reply);
 }
 
 
-/* текст */
+/* Текст */
+
+if(message.text){
 
 const text=
 document.createElement('div');
@@ -1233,8 +1409,10 @@ message.text;
 
 item.appendChild(text);
 
+}
 
-/* вложение */
+
+/* Файл */
 
 if(message.file){
 
@@ -1246,7 +1424,6 @@ attachment.className=
 
 const type=
 message.file.type||'';
-
 
 const title=
 document.createElement('div');
@@ -1317,7 +1494,7 @@ item.appendChild(attachment);
 }
 
 
-/* время */
+/* Время */
 
 const time=
 document.createElement('div');
@@ -1326,15 +1503,15 @@ time.className=
 'message-time';
 
 time.textContent=
-new Date(message.time)
-.toLocaleTimeString(
+new Date(
+message.time
+).toLocaleTimeString(
 'ru-RU',
 {
 hour:'2-digit',
 minute:'2-digit'
 }
 );
-
 
 if(message.edited){
 
@@ -1351,11 +1528,10 @@ time.appendChild(edited);
 
 }
 
-
 item.appendChild(time);
 
 
-/* реакции */
+/* Реакции */
 
 const reactions=
 document.createElement('div');
@@ -1363,8 +1539,12 @@ document.createElement('div');
 reactions.className=
 'reaction-row';
 
-
-['❤️','👍','😂','🔥'].forEach(
+[
+'❤️',
+'👍',
+'😂',
+'🔥'
+].forEach(
 function(emoji){
 
 const reaction=
@@ -1393,15 +1573,19 @@ renderChat();
 
 };
 
-reactions.appendChild(reaction);
+reactions.appendChild(
+reaction
+);
 
 });
 
 
 if(message.reactions){
 
-Object.keys(message.reactions)
-.forEach(function(emoji){
+Object.keys(
+message.reactions
+).forEach(
+function(emoji){
 
 const count=
 document.createElement('span');
@@ -1410,21 +1594,24 @@ count.className=
 'reaction';
 
 count.textContent=
-emoji+' '+message.reactions[emoji];
+emoji+
+' '+
+message.reactions[emoji];
 
-reactions.appendChild(count);
+reactions.appendChild(
+count
+);
 
 });
 
 }
 
+item.appendChild(
+reactions
+);
 
-item.appendChild(reactions);
 
-
-/* действия */
-
-if(message.me){
+/* Кнопки */
 
 const actions=
 document.createElement('div');
@@ -1432,6 +1619,8 @@ document.createElement('div');
 actions.className=
 'message-actions';
 
+
+if(message.me){
 
 const edit=
 document.createElement('button');
@@ -1444,6 +1633,8 @@ edit.onclick=function(){
 editMessage(message.id);
 
 };
+
+actions.appendChild(edit);
 
 
 const del=
@@ -1458,19 +1649,29 @@ deleteMessage(message.id);
 
 };
 
+actions.appendChild(del);
 
-const reply=
+}
+
+
+const replyButton=
 document.createElement('button');
 
-reply.textContent=
+replyButton.textContent=
 '↩️ Ответить';
 
-reply.onclick=function(){
+replyButton.onclick=function(){
 
 startReply(message);
 
 };
 
+actions.appendChild(
+replyButton
+);
+
+
+if(message.text){
 
 const copy=
 document.createElement('button');
@@ -1484,40 +1685,14 @@ copyText(message.text);
 
 };
 
-
-actions.appendChild(edit);
-actions.appendChild(del);
-actions.appendChild(reply);
 actions.appendChild(copy);
-
-item.appendChild(actions);
-
-}else{
-
-const actions=
-document.createElement('div');
-
-actions.className=
-'message-actions';
-
-const reply=
-document.createElement('button');
-
-reply.textContent=
-'↩️ Ответить';
-
-reply.onclick=function(){
-
-startReply(message);
-
-};
-
-actions.appendChild(reply);
-
-item.appendChild(actions);
 
 }
 
+
+item.appendChild(
+actions
+);
 
 box.appendChild(item);
 
@@ -1530,9 +1705,7 @@ box.scrollHeight;
 }
 
 
-/* =========================
-   СОХРАНЕНИЕ
-========================= */
+/* Сохранение */
 
 function saveMessages(){
 
@@ -1548,33 +1721,30 @@ JSON.stringify(messages)
 document.getElementById(
 'chatStatus'
 ).textContent=
-'⚠️ Не удалось сохранить данные. Возможно, вложение слишком большое.';
+'⚠️ Не удалось сохранить данные. Возможно, файл слишком большой.';
 
 }
 
 }
 
 
-
-/* =========================
-   ОТПРАВКА
-========================= */
+/* Отправка */
 
 function sendMessage(){
 
 const input=
-document.getElementById('chatInput');
+document.getElementById(
+'chatInput'
+);
 
 const text=
 input.value.trim();
-
 
 if(!text){
 
 return;
 
 }
-
 
 const message={
 
@@ -1601,9 +1771,7 @@ replyTo.text;
 
 }
 
-
 messages.push(message);
-
 
 if(messages.length>100){
 
@@ -1611,7 +1779,6 @@ messages=
 messages.slice(-100);
 
 }
-
 
 saveMessages();
 
@@ -1624,20 +1791,16 @@ renderChat();
 }
 
 
-
-/* =========================
-   РЕДАКТИРОВАНИЕ
-========================= */
+/* Редактирование */
 
 function editMessage(id){
 
 const message=
-messages.find(function(x){
-
+messages.find(
+function(x){
 return x.id===id;
-
-});
-
+}
+);
 
 if(!message){
 
@@ -1645,13 +1808,11 @@ return;
 
 }
 
-
 const newText=
 prompt(
 'Измени сообщение:',
 message.text
 );
-
 
 if(newText===null){
 
@@ -1659,17 +1820,14 @@ return;
 
 }
 
-
 const clean=
 newText.trim();
-
 
 if(!clean){
 
 return;
 
 }
-
 
 message.text=
 clean;
@@ -1683,10 +1841,7 @@ renderChat();
 }
 
 
-
-/* =========================
-   УДАЛЕНИЕ
-========================= */
+/* Удаление */
 
 function deleteMessage(id){
 
@@ -1695,21 +1850,18 @@ confirm(
 'Удалить это сообщение?'
 );
 
-
 if(!ok){
 
 return;
 
 }
 
-
 messages=
-messages.filter(function(x){
-
+messages.filter(
+function(x){
 return x.id!==id;
-
-});
-
+}
+);
 
 saveMessages();
 
@@ -1718,28 +1870,21 @@ renderChat();
 }
 
 
-
-/* =========================
-   ОТВЕТ
-========================= */
+/* Ответ */
 
 function startReply(message){
 
 replyTo=message;
 
+document
+.getElementById('replyBar')
+.classList.add('show');
 
-const bar=
-document.getElementById('replyBar');
-
-const text=
-document.getElementById('replyText');
-
-
-bar.classList.add('show');
-
-text.textContent=
-'↩ Ответ на: '+message.text;
-
+document
+.getElementById('replyText')
+.textContent=
+'↩ Ответ на: '+
+(message.text||message.file?.name||'файл');
 
 document
 .getElementById('chatInput')
@@ -1759,31 +1904,27 @@ document
 }
 
 
-
-/* =========================
-   КОПИРОВАНИЕ
-========================= */
+/* Копирование */
 
 function copyText(text){
 
-if(
-navigator.clipboard
-){
+if(navigator.clipboard){
 
 navigator.clipboard
 .writeText(text)
 .then(function(){
 
+const status=
 document.getElementById(
 'chatStatus'
-).textContent=
+);
+
+status.textContent=
 '📋 Скопировано';
 
 setTimeout(function(){
 
-document.getElementById(
-'chatStatus'
-).textContent='';
+status.textContent='';
 
 },1500);
 
@@ -1798,15 +1939,14 @@ alert(text);
 }
 
 
-
-/* =========================
-   ЭМОДЗИ
-========================= */
+/* Эмодзи */
 
 function insertEmoji(emoji){
 
 const input=
-document.getElementById('chatInput');
+document.getElementById(
+'chatInput'
+);
 
 input.value+=emoji;
 
@@ -1815,10 +1955,7 @@ input.focus();
 }
 
 
-
-/* =========================
-   ФАЙЛЫ
-========================= */
+/* Файлы */
 
 function openFilePicker(){
 
@@ -1836,8 +1973,9 @@ document
 function(event){
 
 const files=
-Array.from(event.target.files||[]);
-
+Array.from(
+event.target.files||[]
+);
 
 if(!files.length){
 
@@ -1845,12 +1983,10 @@ return;
 
 }
 
-
 files.forEach(function(file){
 
 const reader=
 new FileReader();
-
 
 reader.onload=function(){
 
@@ -1889,9 +2025,7 @@ replyTo.text;
 
 }
 
-
 messages.push(message);
-
 
 if(messages.length>100){
 
@@ -1900,18 +2034,15 @@ messages.slice(-100);
 
 }
 
-
 saveMessages();
 
 renderChat();
 
 };
 
-
 reader.readAsDataURL(file);
 
 });
-
 
 event.target.value='';
 
@@ -1920,10 +2051,7 @@ cancelReply();
 });
 
 
-
-/* =========================
-   ОЧИСТКА
-========================= */
+/* Очистка */
 
 function clearChat(){
 
@@ -1933,19 +2061,16 @@ return;
 
 }
 
-
 const ok=
 confirm(
 'Очистить весь локальный чат?'
 );
-
 
 if(!ok){
 
 return;
 
 }
-
 
 messages=[];
 
@@ -1958,10 +2083,7 @@ renderChat();
 }
 
 
-
-/* =========================
-   ENTER
-========================= */
+/* Enter */
 
 document
 .getElementById('chatInput')
@@ -1992,10 +2114,10 @@ document.getElementById(
 const SAVE_KEY=
 'ashina_test15_save';
 
-
 const saved=
-localStorage.getItem(SAVE_KEY);
-
+localStorage.getItem(
+SAVE_KEY
+);
 
 if(saved!==null){
 
@@ -2003,7 +2125,6 @@ saveSettings.checked=
 saved==='1';
 
 }
-
 
 saveSettings.onchange=function(){
 
@@ -2015,13 +2136,11 @@ saveSettings.checked?'1':'0'
 };
 
 
-
 /* =========================
    ЗАПУСК
 ========================= */
 
 renderChat();
-
 
 if(
 'serviceWorker'
