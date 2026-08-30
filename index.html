@@ -1,1 +1,639 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111827"><link rel="manifest" href="manifest.webmanifest"><title>ASHINA Test 1.1</title><style>*{box-sizing:border-box}body{margin:0;background:#0b0f16;color:#fff;font-family:system-ui,sans-serif}header{padding:22px 18px 12px}.logo{font-size:28px;font-weight:800;letter-spacing:2px}.sub,.muted{opacity:.65;font-size:13px}nav{display:flex;gap:8px;padding:10px 14px;background:#0b0f16;position:sticky;top:0}button{border:1px solid #303846;background:#151b25;color:#fff;border-radius:12px;padding:11px 14px}nav .active{background:#26354b}main{padding:12px 14px}.card{background:#111722;border:1px solid #252e3b;border-radius:18px;padding:18px;margin:12px 0}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.big{font-size:20px;font-weight:700}.controls{display:flex;gap:10px;margin:16px 0}.progress{width:100%}.hidden{display:none}input[type=range]{accent-color:#fff}.badge{padding:5px 9px;border-radius:99px;background:#1b2636;font-size:12px}</style></head><body><header><div class="logo">ASHINA</div><div class="sub">Test 1.1 · Music / Chat / Settings</div></header><nav><button class="active" data-tab="chat">💬 Чат</button><button data-tab="music">🎵 Музыка</button><button data-tab="settings">⚙️ Настройки</button></nav><main><section id="chat"><div class="card"><h2>Чат</h2><p class="muted">Тестовый экран ASHINA.</p><span class="badge">0+</span> <span class="badge">Безопасный режим</span></div></section><section id="music" class="hidden"><div class="card"><h2>🎵 ASHINA Music</h2><div class="row"><div><div class="big">ASHINA Test Tone — 2:00</div><div class="muted">Удлинённый встроенный аудиотрек для проверки плеера</div></div><span class="badge">TEST</span></div><audio id="audio" preload="auto" src="audio.wav"></audio><div class="controls"><button id="play">▶️</button><button id="back">↺ 10с</button><button id="forward">10с ↻</button></div><input id="seek" class="progress" type="range" min="0" max="100" value="0"><div class="row"><span id="time">0:00 / 0:00</span><span>🔊 <input id="volume" type="range" min="0" max="1" step=".01" value=".8"></span></div><p class="muted">Теперь 10-секундную перемотку можно нормально проверить.</p></div></section><section id="settings" class="hidden"><div class="card"><h2>⚙️ Настройки</h2><div class="row"><span>Сохранение настроек</span><input id="save" type="checkbox" checked></div><p class="muted">Тест реакции настроек.</p></div></section></main><script>document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll("main>section").forEach(s=>s.classList.add("hidden"));document.getElementById(b.dataset.tab).classList.remove("hidden")});const a=document.getElementById("audio"),p=document.getElementById("play"),s=document.getElementById("seek");p.onclick=async()=>{if(a.paused){try{await a.play()}catch(e){alert("Нажми Play ещё раз для разрешения звука")}}else a.pause()};a.onplay=()=>p.textContent="⏸️";a.onpause=()=>p.textContent="▶️";a.ontimeupdate=()=>{if(a.duration)s.value=a.currentTime/a.duration*100;document.getElementById("time").textContent=f(a.currentTime)+" / "+f(a.duration||0)};s.oninput=()=>{if(a.duration)a.currentTime=s.value/100*a.duration};document.getElementById("volume").oninput=e=>a.volume=e.target.value;document.getElementById("back").onclick=()=>a.currentTime=Math.max(0,a.currentTime-10);document.getElementById("forward").onclick=()=>a.currentTime=Math.min(a.duration||0,a.currentTime+10);function f(x){x=Math.floor(x||0);return Math.floor(x/60)+":"+String(x%60).padStart(2,"0")}if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});</script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b10">
+<link rel="manifest" href="manifest.webmanifest">
+<title>ASHINA Test 1.2</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#090b10;
+color:#fff;
+font-family:system-ui,-apple-system,sans-serif;
+}
+
+header{
+padding:18px 16px 10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logo{
+font-size:28px;
+font-weight:900;
+letter-spacing:3px;
+}
+
+.icon{
+border:1px solid #292e38;
+background:#131720;
+color:#fff;
+border-radius:12px;
+padding:10px 13px;
+font-size:18px;
+}
+
+nav{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:7px;
+padding:8px 12px;
+position:sticky;
+top:0;
+background:#090b10;
+z-index:2;
+}
+
+nav button{
+border:1px solid #292e38;
+background:#131720;
+color:#fff;
+border-radius:12px;
+padding:10px 4px;
+font-size:13px;
+}
+
+nav .active{
+background:#5b1519;
+}
+
+main{
+padding:10px 12px 80px;
+max-width:900px;
+margin:auto;
+}
+
+.hero,.card{
+background:#11141b;
+border:1px solid #292e38;
+border-radius:20px;
+padding:18px;
+margin-top:12px;
+}
+
+.hero{
+min-height:250px;
+display:flex;
+align-items:end;
+background:
+linear-gradient(
+135deg,
+#171923,
+#0d0f14 60%,
+#250f12
+);
+}
+
+h1{
+font-size:32px;
+margin:10px 0;
+}
+
+h2{
+margin-top:0;
+}
+
+.muted{
+color:#9da2ac;
+font-size:13px;
+}
+
+.quick{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-top:12px;
+}
+
+.quick button{
+border:1px solid #292e38;
+background:#131720;
+color:#fff;
+border-radius:12px;
+padding:13px;
+font-size:14px;
+}
+
+.controls{
+display:flex;
+gap:8px;
+margin-top:12px;
+}
+
+.controls button{
+flex:1;
+border:1px solid #292e38;
+background:#131720;
+color:#fff;
+border-radius:12px;
+padding:12px;
+}
+
+audio{
+width:100%;
+margin-top:12px;
+}
+
+input[type=range]{
+width:100%;
+accent-color:#ddd;
+}
+
+.hidden{
+display:none;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+}
+
+.badge{
+background:#202530;
+border-radius:99px;
+padding:5px 9px;
+font-size:12px;
+display:inline-block;
+}
+
+.player-title{
+font-size:20px;
+font-weight:700;
+margin-bottom:4px;
+}
+
+.feed{
+border:1px solid #292e38;
+border-radius:16px;
+padding:15px;
+margin-top:12px;
+background:#131720;
+}
+
+.like-row{
+display:flex;
+gap:8px;
+margin-top:12px;
+}
+
+.like-row button{
+flex:1;
+border:1px solid #292e38;
+background:#0f131a;
+color:#fff;
+border-radius:10px;
+padding:10px;
+}
+
+@media(max-width:420px){
+.logo{font-size:25px}
+nav button{font-size:11px}
+h1{font-size:28px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">ASHINA</div>
+<button class="icon" onclick="show('settings')">⚙</button>
+</header>
+
+<nav>
+
+<button class="active" onclick="show('home',this)">
+⌂<br>Главная
+</button>
+
+<button onclick="show('music',this)">
+♫<br>Музыка
+</button>
+
+<button onclick="show('news',this)">
+▣<br>Лента
+</button>
+
+<button onclick="show('games',this)">
+◇<br>Игры
+</button>
+
+</nav>
+
+<main>
+
+<!-- ГЛАВНАЯ -->
+
+<section id="home">
+
+<div class="hero">
+
+<div>
+
+<span class="badge">
+ASHINA · TEST 1.2
+</span>
+
+<h1>
+Добро пожаловать
+</h1>
+
+<p class="muted">
+Музыка, общение, новости и игры — всё в одном месте.
+</p>
+
+</div>
+
+</div>
+
+<div class="quick">
+
+<button onclick="show('music')">
+🎵 Музыка
+</button>
+
+<button onclick="show('news')">
+📰 Лента
+</button>
+
+<button onclick="show('games')">
+🎮 Игры
+</button>
+
+<button onclick="show('settings')">
+⚙️ Настройки
+</button>
+
+</div>
+
+</section>
+
+
+<!-- МУЗЫКА -->
+
+<section id="music" class="hidden">
+
+<div class="card">
+
+<h2>
+🎵 ASHINA Music
+</h2>
+
+<div class="row">
+
+<div>
+
+<div class="player-title">
+ASHINA Test Tone
+</div>
+
+<div class="muted">
+Тестовый аудиотрек
+</div>
+
+</div>
+
+<span class="badge">
+TEST
+</span>
+
+</div>
+
+<audio
+id="audio"
+preload="auto"
+src="audio.wav">
+</audio>
+
+<div class="controls">
+
+<button id="play">
+▶️
+</button>
+
+<button id="back">
+↺ 10с
+</button>
+
+<button id="forward">
+10с ↻
+</button>
+
+</div>
+
+<input
+id="seek"
+type="range"
+min="0"
+max="100"
+value="0">
+
+<div class="row">
+
+<span
+id="time"
+class="muted">
+0:00 / 0:00
+</span>
+
+<span>
+🔊
+</span>
+
+</div>
+
+<input
+id="volume"
+type="range"
+min="0"
+max="1"
+step="0.01"
+value="0.8">
+
+</div>
+
+</section>
+
+
+<!-- НОВОСТИ -->
+
+<section id="news" class="hidden">
+
+<div class="card">
+
+<h2>
+📰 Трендовая лента
+</h2>
+
+<p class="muted">
+Тестовая версия будущей новостной ленты ASHINA.
+</p>
+
+<div class="feed">
+
+<strong>
+🔥 Популярное
+</strong>
+
+<p class="muted">
+Здесь в будущем будут появляться самые трендовые публикации.
+</p>
+
+<div class="like-row">
+
+<button>
+👍 0
+</button>
+
+<button>
+👎 0
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ИГРЫ -->
+
+<section id="games" class="hidden">
+
+<div class="card">
+
+<h2>
+🎮 Мини-игры
+</h2>
+
+<p class="muted">
+Раздел подготовлен для будущих мини-игр ASHINA.
+</p>
+
+<div class="feed">
+
+<strong>
+🎲 Скоро
+</strong>
+
+<p class="muted">
+Здесь появятся первые игровые тесты.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- НАСТРОЙКИ -->
+
+<section id="settings" class="hidden">
+
+<div class="card">
+
+<h2>
+⚙️ Настройки
+</h2>
+
+<div class="row">
+
+<span>
+Сохранять настройки
+</span>
+
+<input
+type="checkbox"
+checked>
+
+</div>
+
+<p class="muted">
+Тестовый раздел настроек ASHINA.
+</p>
+
+</div>
+
+</section>
+
+</main>
+
+
+<script>
+
+const ids=[
+'home',
+'music',
+'news',
+'games',
+'settings'
+];
+
+function show(id,btn){
+
+ids.forEach(function(x){
+
+document
+.getElementById(x)
+.classList
+.toggle('hidden',x!==id);
+
+});
+
+document
+.querySelectorAll('nav button')
+.forEach(function(x){
+
+x.classList.remove('active');
+
+});
+
+if(btn){
+btn.classList.add('active');
+}
+
+}
+
+
+const audio=document.getElementById('audio');
+
+const play=document.getElementById('play');
+
+const seek=document.getElementById('seek');
+
+const volume=document.getElementById('volume');
+
+
+play.onclick=function(){
+
+if(audio.paused){
+
+audio.play().catch(function(){
+
+alert('Нажми Play ещё раз для разрешения звука');
+
+});
+
+}else{
+
+audio.pause();
+
+}
+
+};
+
+
+audio.onplay=function(){
+
+play.textContent='⏸️';
+
+};
+
+
+audio.onpause=function(){
+
+play.textContent='▶️';
+
+};
+
+
+audio.ontimeupdate=function(){
+
+if(audio.duration){
+
+seek.value=
+audio.currentTime/
+audio.duration*
+100;
+
+}
+
+document.getElementById('time').textContent=
+formatTime(audio.currentTime)
++
+' / '
++
+formatTime(audio.duration||0);
+
+};
+
+
+seek.oninput=function(){
+
+if(audio.duration){
+
+audio.currentTime=
+seek.value/
+100*
+audio.duration;
+
+}
+
+};
+
+
+volume.oninput=function(){
+
+audio.volume=volume.value;
+
+};
+
+
+document.getElementById('back').onclick=function(){
+
+audio.currentTime=
+Math.max(
+0,
+audio.currentTime-10
+);
+
+};
+
+
+document.getElementById('forward').onclick=function(){
+
+audio.currentTime=
+Math.min(
+audio.duration||0,
+audio.currentTime+10
+);
+
+};
+
+
+function formatTime(seconds){
+
+seconds=Math.floor(seconds||0);
+
+return Math.floor(seconds/60)
++
+':'
++
+String(seconds%60).padStart(2,'0');
+
+}
+
+
+if('serviceWorker' in navigator){
+
+navigator.serviceWorker
+.register('sw.js')
+.catch(function(){});
+
+}
+
+</script>
+
+</body>
+</html>
