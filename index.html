@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090b10">
 <link rel="manifest" href="manifest.webmanifest">
-<title>ASHINA Test 1.2</title>
+<title>ASHINA Test 1.3</title>
 
 <style>
 *{box-sizing:border-box}
@@ -81,8 +81,7 @@ margin-top:12px;
 min-height:250px;
 display:flex;
 align-items:end;
-background:
-linear-gradient(
+background:linear-gradient(
 135deg,
 #171923,
 #0d0f14 60%,
@@ -164,18 +163,19 @@ font-size:12px;
 display:inline-block;
 }
 
-.player-title{
-font-size:20px;
-font-weight:700;
-margin-bottom:4px;
-}
-
 .feed{
 border:1px solid #292e38;
 border-radius:16px;
 padding:15px;
 margin-top:12px;
 background:#131720;
+}
+
+.feed-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
 }
 
 .like-row{
@@ -191,12 +191,35 @@ background:#0f131a;
 color:#fff;
 border-radius:10px;
 padding:10px;
+font-size:14px;
+}
+
+.like-row button.selected{
+background:#5b1519;
+border-color:#7a2026;
+}
+
+.status{
+margin-top:9px;
+font-size:12px;
+color:#9da2ac;
+min-height:16px;
 }
 
 @media(max-width:420px){
-.logo{font-size:25px}
-nav button{font-size:11px}
-h1{font-size:28px}
+
+.logo{
+font-size:25px;
+}
+
+nav button{
+font-size:11px;
+}
+
+h1{
+font-size:28px;
+}
+
 }
 </style>
 </head>
@@ -204,9 +227,17 @@ h1{font-size:28px}
 <body>
 
 <header>
-<div class="logo">ASHINA</div>
-<button class="icon" onclick="show('settings')">⚙</button>
+
+<div class="logo">
+ASHINA
+</div>
+
+<button class="icon" onclick="show('settings')">
+⚙
+</button>
+
 </header>
+
 
 <nav>
 
@@ -228,7 +259,9 @@ h1{font-size:28px}
 
 </nav>
 
+
 <main>
+
 
 <!-- ГЛАВНАЯ -->
 
@@ -239,7 +272,7 @@ h1{font-size:28px}
 <div>
 
 <span class="badge">
-ASHINA · TEST 1.2
+ASHINA · TEST 1.3
 </span>
 
 <h1>
@@ -253,6 +286,7 @@ ASHINA · TEST 1.2
 </div>
 
 </div>
+
 
 <div class="quick">
 
@@ -277,6 +311,7 @@ ASHINA · TEST 1.2
 </section>
 
 
+
 <!-- МУЗЫКА -->
 
 <section id="music" class="hidden">
@@ -291,12 +326,12 @@ ASHINA · TEST 1.2
 
 <div>
 
-<div class="player-title">
+<div style="font-size:20px;font-weight:700">
 ASHINA Test Tone
 </div>
 
 <div class="muted">
-Тестовый аудиотрек
+Текущий тестовый аудиотрек
 </div>
 
 </div>
@@ -307,11 +342,13 @@ TEST
 
 </div>
 
+
 <audio
 id="audio"
 preload="auto"
 src="audio.wav">
 </audio>
+
 
 <div class="controls">
 
@@ -329,6 +366,7 @@ src="audio.wav">
 
 </div>
 
+
 <input
 id="seek"
 type="range"
@@ -336,11 +374,10 @@ min="0"
 max="100"
 value="0">
 
+
 <div class="row">
 
-<span
-id="time"
-class="muted">
+<span id="time" class="muted">
 0:00 / 0:00
 </span>
 
@@ -349,6 +386,7 @@ class="muted">
 </span>
 
 </div>
+
 
 <input
 id="volume"
@@ -363,7 +401,8 @@ value="0.8">
 </section>
 
 
-<!-- НОВОСТИ -->
+
+<!-- ЛЕНТА -->
 
 <section id="news" class="hidden">
 
@@ -374,36 +413,57 @@ value="0.8">
 </h2>
 
 <p class="muted">
-Тестовая версия будущей новостной ленты ASHINA.
+Предварительный тест системы реакций.
 </p>
+
 
 <div class="feed">
 
+<div class="feed-header">
+
 <strong>
-🔥 Популярное
+🔥 Тестовая публикация
 </strong>
 
-<p class="muted">
-Здесь в будущем будут появляться самые трендовые публикации.
+<span class="badge">
+0+
+</span>
+
+</div>
+
+
+<p>
+Это первая тестовая публикация ASHINA.
 </p>
+
+
+<p class="muted">
+Проверь работу лайка и дизлайка.
+</p>
+
 
 <div class="like-row">
 
-<button>
-👍 0
+<button id="likeButton" onclick="vote('like')">
+👍 <span id="likeCount">0</span>
 </button>
 
-<button>
-👎 0
+
+<button id="dislikeButton" onclick="vote('dislike')">
+👎 <span id="dislikeCount">0</span>
 </button>
 
 </div>
+
+
+<div id="voteStatus" class="status"></div>
 
 </div>
 
 </div>
 
 </section>
+
 
 
 <!-- ИГРЫ -->
@@ -417,7 +477,7 @@ value="0.8">
 </h2>
 
 <p class="muted">
-Раздел подготовлен для будущих мини-игр ASHINA.
+Раздел подготовлен для будущих игр ASHINA.
 </p>
 
 <div class="feed">
@@ -437,6 +497,7 @@ value="0.8">
 </section>
 
 
+
 <!-- НАСТРОЙКИ -->
 
 <section id="settings" class="hidden">
@@ -454,6 +515,7 @@ value="0.8">
 </span>
 
 <input
+id="saveSettings"
 type="checkbox"
 checked>
 
@@ -467,10 +529,16 @@ checked>
 
 </section>
 
+
 </main>
 
 
+
 <script>
+
+/* =========================
+   НАВИГАЦИЯ
+========================= */
 
 const ids=[
 'home',
@@ -491,6 +559,7 @@ document
 
 });
 
+
 document
 .querySelectorAll('nav button')
 .forEach(function(x){
@@ -499,20 +568,32 @@ x.classList.remove('active');
 
 });
 
+
 if(btn){
+
 btn.classList.add('active');
-}
 
 }
 
+}
 
-const audio=document.getElementById('audio');
 
-const play=document.getElementById('play');
 
-const seek=document.getElementById('seek');
+/* =========================
+   МУЗЫКА
+========================= */
 
-const volume=document.getElementById('volume');
+const audio=
+document.getElementById('audio');
+
+const play=
+document.getElementById('play');
+
+const seek=
+document.getElementById('seek');
+
+const volume=
+document.getElementById('volume');
 
 
 play.onclick=function(){
@@ -521,7 +602,9 @@ if(audio.paused){
 
 audio.play().catch(function(){
 
-alert('Нажми Play ещё раз для разрешения звука');
+alert(
+'Нажми Play ещё раз для разрешения звука'
+);
 
 });
 
@@ -559,7 +642,9 @@ audio.duration*
 
 }
 
-document.getElementById('time').textContent=
+document
+.getElementById('time')
+.textContent=
 formatTime(audio.currentTime)
 +
 ' / '
@@ -585,12 +670,15 @@ audio.duration;
 
 volume.oninput=function(){
 
-audio.volume=volume.value;
+audio.volume=
+volume.value;
 
 };
 
 
-document.getElementById('back').onclick=function(){
+document
+.getElementById('back')
+.onclick=function(){
 
 audio.currentTime=
 Math.max(
@@ -601,7 +689,9 @@ audio.currentTime-10
 };
 
 
-document.getElementById('forward').onclick=function(){
+document
+.getElementById('forward')
+.onclick=function(){
 
 audio.currentTime=
 Math.min(
@@ -614,18 +704,152 @@ audio.currentTime+10
 
 function formatTime(seconds){
 
-seconds=Math.floor(seconds||0);
+seconds=
+Math.floor(seconds||0);
 
 return Math.floor(seconds/60)
 +
 ':'
 +
-String(seconds%60).padStart(2,'0');
+String(seconds%60)
+.padStart(2,'0');
 
 }
 
 
-if('serviceWorker' in navigator){
+
+/* =========================
+   ЛАЙКИ / ДИЗЛАЙКИ
+========================= */
+
+const LIKE_KEY=
+'ashina_test13_like';
+
+const DISLIKE_KEY=
+'ashina_test13_dislike';
+
+
+let like=
+localStorage.getItem(LIKE_KEY)==='1';
+
+let dislike=
+localStorage.getItem(DISLIKE_KEY)==='1';
+
+
+function updateVoteUI(){
+
+const likeButton=
+document.getElementById('likeButton');
+
+const dislikeButton=
+document.getElementById('dislikeButton');
+
+const likeCount=
+document.getElementById('likeCount');
+
+const dislikeCount=
+document.getElementById('dislikeCount');
+
+const status=
+document.getElementById('voteStatus');
+
+
+likeButton.classList.toggle(
+'selected',
+like
+);
+
+dislikeButton.classList.toggle(
+'selected',
+dislike
+);
+
+
+likeCount.textContent=
+like ? '1' : '0';
+
+dislikeCount.textContent=
+dislike ? '1' : '0';
+
+
+if(like){
+
+status.textContent=
+'👍 Твой лайк учтён';
+
+}else if(dislike){
+
+status.textContent=
+'👎 Твой дизлайк учтён';
+
+}else{
+
+status.textContent='';
+
+}
+
+}
+
+
+function vote(type){
+
+if(type==='like'){
+
+if(like){
+
+like=false;
+
+}else{
+
+like=true;
+dislike=false;
+
+}
+
+}else{
+
+if(dislike){
+
+dislike=false;
+
+}else{
+
+dislike=true;
+like=false;
+
+}
+
+}
+
+
+localStorage.setItem(
+LIKE_KEY,
+like ? '1' : '0'
+);
+
+localStorage.setItem(
+DISLIKE_KEY,
+dislike ? '1' : '0'
+);
+
+
+updateVoteUI();
+
+}
+
+
+updateVoteUI();
+
+
+
+/* =========================
+   SERVICE WORKER
+========================= */
+
+if(
+'serviceWorker'
+in navigator
+){
 
 navigator.serviceWorker
 .register('sw.js')
