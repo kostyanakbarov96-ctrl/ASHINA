@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090b10">
 <link rel="manifest" href="manifest.webmanifest">
-<title>ASHINA Test 1.3</title>
+<title>ASHINA Test 1.4</title>
 
 <style>
 *{box-sizing:border-box}
@@ -47,7 +47,7 @@ padding:8px 12px;
 position:sticky;
 top:0;
 background:#090b10;
-z-index:2;
+z-index:5;
 }
 
 nav button{
@@ -78,7 +78,7 @@ margin-top:12px;
 }
 
 .hero{
-min-height:250px;
+min-height:230px;
 display:flex;
 align-items:end;
 background:linear-gradient(
@@ -163,6 +163,8 @@ font-size:12px;
 display:inline-block;
 }
 
+/* ЛЕНТА */
+
 .feed{
 border:1px solid #292e38;
 border-radius:16px;
@@ -206,6 +208,82 @@ color:#9da2ac;
 min-height:16px;
 }
 
+/* ЧАТ */
+
+.chat-box{
+height:420px;
+overflow-y:auto;
+border:1px solid #292e38;
+border-radius:16px;
+background:#0d1118;
+padding:12px;
+}
+
+.message{
+max-width:82%;
+margin:8px 0;
+padding:10px 12px;
+border-radius:14px;
+background:#171d27;
+word-wrap:break-word;
+}
+
+.message.me{
+margin-left:auto;
+background:#5b1519;
+}
+
+.message-name{
+font-size:11px;
+opacity:.6;
+margin-bottom:3px;
+}
+
+.chat-input{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.chat-input input{
+flex:1;
+min-width:0;
+border:1px solid #292e38;
+background:#131720;
+color:#fff;
+border-radius:12px;
+padding:12px;
+outline:none;
+}
+
+.chat-input button{
+border:1px solid #292e38;
+background:#5b1519;
+color:#fff;
+border-radius:12px;
+padding:12px 15px;
+}
+
+/* БЕЗОПАСНОСТЬ */
+
+.security{
+padding:14px;
+border:1px solid #292e38;
+border-radius:15px;
+background:#0d1118;
+margin-top:12px;
+}
+
+.security-title{
+font-weight:700;
+margin-bottom:5px;
+}
+
+.security-status{
+font-size:12px;
+color:#9da2ac;
+}
+
 @media(max-width:420px){
 
 .logo{
@@ -218,6 +296,10 @@ font-size:11px;
 
 h1{
 font-size:28px;
+}
+
+.chat-box{
+height:380px;
 }
 
 }
@@ -253,8 +335,8 @@ ASHINA
 ▣<br>Лента
 </button>
 
-<button onclick="show('games',this)">
-◇<br>Игры
+<button onclick="show('chat',this)">
+💬<br>Чат
 </button>
 
 </nav>
@@ -272,7 +354,7 @@ ASHINA
 <div>
 
 <span class="badge">
-ASHINA · TEST 1.3
+ASHINA · TEST 1.4
 </span>
 
 <h1>
@@ -298,8 +380,8 @@ ASHINA · TEST 1.3
 📰 Лента
 </button>
 
-<button onclick="show('games')">
-🎮 Игры
+<button onclick="show('chat')">
+💬 Чат
 </button>
 
 <button onclick="show('settings')">
@@ -322,33 +404,15 @@ ASHINA · TEST 1.3
 🎵 ASHINA Music
 </h2>
 
-<div class="row">
-
-<div>
-
-<div style="font-size:20px;font-weight:700">
-ASHINA Test Tone
-</div>
-
-<div class="muted">
-Текущий тестовый аудиотрек
-</div>
-
-</div>
-
-<span class="badge">
-TEST
-</span>
-
-</div>
-
+<p class="muted">
+Временный трек · музыку заменим позже
+</p>
 
 <audio
 id="audio"
 preload="auto"
 src="audio.wav">
 </audio>
-
 
 <div class="controls">
 
@@ -366,14 +430,12 @@ src="audio.wav">
 
 </div>
 
-
 <input
 id="seek"
 type="range"
 min="0"
 max="100"
 value="0">
-
 
 <div class="row">
 
@@ -386,7 +448,6 @@ value="0">
 </span>
 
 </div>
-
 
 <input
 id="volume"
@@ -413,7 +474,7 @@ value="0.8">
 </h2>
 
 <p class="muted">
-Предварительный тест системы реакций.
+Тест системы реакций ASHINA.
 </p>
 
 
@@ -422,7 +483,7 @@ value="0.8">
 <div class="feed-header">
 
 <strong>
-🔥 Тестовая публикация
+🔥 Первая публикация ASHINA
 </strong>
 
 <span class="badge">
@@ -431,32 +492,34 @@ value="0.8">
 
 </div>
 
-
 <p>
-Это первая тестовая публикация ASHINA.
+ASHINA развивается. Это первая тестовая публикация нашей ленты.
 </p>
-
 
 <p class="muted">
-Проверь работу лайка и дизлайка.
+Проверь реакции ниже.
 </p>
-
 
 <div class="like-row">
 
-<button id="likeButton" onclick="vote('like')">
+<button
+id="likeButton"
+onclick="vote('like')">
 👍 <span id="likeCount">0</span>
 </button>
 
-
-<button id="dislikeButton" onclick="vote('dislike')">
+<button
+id="dislikeButton"
+onclick="vote('dislike')">
 👎 <span id="dislikeCount">0</span>
 </button>
 
 </div>
 
-
-<div id="voteStatus" class="status"></div>
+<div
+id="voteStatus"
+class="status">
+</div>
 
 </div>
 
@@ -466,31 +529,45 @@ value="0.8">
 
 
 
-<!-- ИГРЫ -->
+<!-- ЧАТ -->
 
-<section id="games" class="hidden">
+<section id="chat" class="hidden">
 
 <div class="card">
 
 <h2>
-🎮 Мини-игры
+💬 ASHINA Chat
 </h2>
 
 <p class="muted">
-Раздел подготовлен для будущих игр ASHINA.
+Локальный тестовый чат. Сообщения сохраняются на этом устройстве.
 </p>
 
-<div class="feed">
 
-<strong>
-🎲 Скоро
-</strong>
+<div
+id="chatBox"
+class="chat-box">
+</div>
 
-<p class="muted">
-Здесь появятся первые игровые тесты.
-</p>
+
+<div class="chat-input">
+
+<input
+id="chatInput"
+type="text"
+maxlength="500"
+placeholder="Напиши сообщение...">
+
+<button onclick="sendMessage()">
+➤
+</button>
 
 </div>
+
+<p
+id="chatStatus"
+class="status">
+</p>
 
 </div>
 
@@ -508,10 +585,11 @@ value="0.8">
 ⚙️ Настройки
 </h2>
 
+
 <div class="row">
 
 <span>
-Сохранять настройки
+Сохранять данные
 </span>
 
 <input
@@ -521,9 +599,32 @@ checked>
 
 </div>
 
-<p class="muted">
-Тестовый раздел настроек ASHINA.
-</p>
+
+<div class="security">
+
+<div class="security-title">
+🔐 Безопасность ASHINA
+</div>
+
+<div class="security-status">
+Защита PIN и отпечатком будет добавлена в будущей версии приложения.
+</div>
+
+</div>
+
+
+<div class="security">
+
+<div class="security-title">
+🛡️ ASHINA Guard
+</div>
+
+<div class="security-status">
+Система защиты приложения находится в разработке.
+</div>
+
+</div>
+
 
 </div>
 
@@ -544,7 +645,7 @@ const ids=[
 'home',
 'music',
 'news',
-'games',
+'chat',
 'settings'
 ];
 
@@ -723,10 +824,10 @@ String(seconds%60)
 ========================= */
 
 const LIKE_KEY=
-'ashina_test13_like';
+'ashina_test14_like';
 
 const DISLIKE_KEY=
-'ashina_test13_dislike';
+'ashina_test14_dislike';
 
 
 let like=
@@ -766,10 +867,10 @@ dislike
 
 
 likeCount.textContent=
-like ? '1' : '0';
+like?'1':'0';
 
 dislikeCount.textContent=
-dislike ? '1' : '0';
+dislike?'1':'0';
 
 
 if(like){
@@ -824,12 +925,12 @@ like=false;
 
 localStorage.setItem(
 LIKE_KEY,
-like ? '1' : '0'
+like?'1':'0'
 );
 
 localStorage.setItem(
 DISLIKE_KEY,
-dislike ? '1' : '0'
+dislike?'1':'0'
 );
 
 
@@ -839,6 +940,200 @@ updateVoteUI();
 
 
 updateVoteUI();
+
+
+
+/* =========================
+   ЛОКАЛЬНЫЙ ЧАТ
+========================= */
+
+const CHAT_KEY=
+'ashina_test14_messages';
+
+
+let messages=[];
+
+
+try{
+
+messages=
+JSON.parse(
+localStorage.getItem(CHAT_KEY)
+)||[];
+
+}catch(e){
+
+messages=[];
+
+}
+
+
+function renderChat(){
+
+const box=
+document.getElementById('chatBox');
+
+box.innerHTML='';
+
+
+if(messages.length===0){
+
+const empty=
+document.createElement('div');
+
+empty.className='muted';
+
+empty.textContent=
+'Пока сообщений нет. Напиши первое сообщение ASHINA.';
+
+box.appendChild(empty);
+
+return;
+
+}
+
+
+messages.forEach(function(message){
+
+const item=
+document.createElement('div');
+
+item.className=
+'message'
++
+(message.me?' me':'');
+
+
+const name=
+document.createElement('div');
+
+name.className=
+'message-name';
+
+name.textContent=
+message.me?'Ты':'ASHINA';
+
+
+const text=
+document.createElement('div');
+
+text.textContent=
+message.text;
+
+
+item.appendChild(name);
+item.appendChild(text);
+
+box.appendChild(item);
+
+});
+
+
+box.scrollTop=
+box.scrollHeight;
+
+}
+
+
+function sendMessage(){
+
+const input=
+document.getElementById('chatInput');
+
+const text=
+input.value.trim();
+
+
+if(!text){
+
+return;
+
+}
+
+
+messages.push({
+
+text:text,
+me:true,
+time:Date.now()
+
+});
+
+
+if(messages.length>100){
+
+messages=
+messages.slice(-100);
+
+}
+
+
+localStorage.setItem(
+CHAT_KEY,
+JSON.stringify(messages)
+);
+
+
+input.value='';
+
+renderChat();
+
+}
+
+
+document
+.getElementById('chatInput')
+.addEventListener(
+'keydown',
+function(event){
+
+if(event.key==='Enter'){
+
+sendMessage();
+
+}
+
+});
+
+
+renderChat();
+
+
+
+/* =========================
+   СОХРАНЕНИЕ НАСТРОЕК
+========================= */
+
+const saveSettings=
+document.getElementById(
+'saveSettings'
+);
+
+
+const SAVE_KEY=
+'ashina_test14_save';
+
+
+const saved=
+localStorage.getItem(SAVE_KEY);
+
+
+if(saved!==null){
+
+saveSettings.checked=
+saved==='1';
+
+}
+
+
+saveSettings.onchange=function(){
+
+localStorage.setItem(
+SAVE_KEY,
+saveSettings.checked?'1':'0'
+);
+
+};
 
 
 
