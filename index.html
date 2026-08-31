@@ -25,8 +25,7 @@ color:#fff;
 font-family:system-ui,-apple-system,sans-serif;
 }
 
-button,
-input{
+button,input{
 font:inherit;
 }
 
@@ -201,11 +200,16 @@ margin-top:12px;
 .controls button{
 flex:1;
 padding:12px;
+font-size:18px;
+}
+
+.audio-wrapper{
+margin-top:12px;
 }
 
 audio{
 width:100%;
-margin-top:12px;
+display:block;
 }
 
 input[type=range]{
@@ -221,6 +225,15 @@ border-radius:10px;
 background:#0d1118;
 font-size:12px;
 color:#9da2ac;
+line-height:1.5;
+}
+
+.music-status.success{
+color:#9fd49f;
+}
+
+.music-status.error{
+color:#e99b9b;
 }
 
 .playlist{
@@ -268,6 +281,11 @@ text-overflow:ellipsis;
 font-size:11px;
 color:#818894;
 margin-top:2px;
+}
+
+.track-play{
+font-size:16px;
+opacity:.7;
 }
 
 .genre-row{
@@ -632,6 +650,10 @@ height:390px;
 max-width:94%;
 }
 
+.controls button{
+padding:10px;
+}
+
 }
 </style>
 </head>
@@ -688,10 +710,7 @@ onclick="show('home',this)">
 
 <main>
 
-
-<!-- =====================================================
-     HOME
-===================================================== -->
+<!-- HOME -->
 
 <section id="home">
 
@@ -769,9 +788,7 @@ AI-ядро:
 </section>
 
 
-<!-- =====================================================
-     MUSIC
-===================================================== -->
+<!-- MUSIC -->
 
 <section id="music" class="hidden">
 
@@ -799,10 +816,17 @@ ASHINA Music
 </div>
 
 
+<div class="audio-wrapper">
+
 <audio
 id="audio"
-preload="metadata">
+preload="metadata"
+controls
+playsinline>
+Ваш браузер не поддерживает HTML Audio.
 </audio>
+
+</div>
 
 
 <div class="controls">
@@ -859,7 +883,7 @@ value="0.8">
 <div
 id="musicStatus"
 class="music-status">
-Плеер готов.
+🟢 Плеер готов. Нажми ▶️, чтобы начать воспроизведение.
 </div>
 
 </div>
@@ -902,9 +926,7 @@ class="playlist">
 </section>
 
 
-<!-- =====================================================
-     NEWS
-===================================================== -->
+<!-- NEWS -->
 
 <section id="news" class="hidden">
 
@@ -972,9 +994,7 @@ class="status">
 </section>
 
 
-<!-- =====================================================
-     CHAT
-===================================================== -->
+<!-- CHAT -->
 
 <section id="chat" class="hidden">
 
@@ -1072,9 +1092,7 @@ class="status">
 </section>
 
 
-<!-- =====================================================
-     AI
-===================================================== -->
+<!-- AI -->
 
 <section id="ai" class="hidden">
 
@@ -1181,9 +1199,7 @@ class="ai-memory">
 </section>
 
 
-<!-- =====================================================
-     SETTINGS
-===================================================== -->
+<!-- SETTINGS -->
 
 <section id="settings" class="hidden">
 
@@ -1322,7 +1338,7 @@ onclick="clearEverything()">
    GLOBAL
 ===================================================== */
 
-const APP_VERSION='2.0';
+const APP_VERSION='2.0.1';
 
 const NAV_IDS=[
 'home',
@@ -1338,8 +1354,7 @@ function show(id,btn){
 
 NAV_IDS.forEach(function(x){
 
-const element=
-document.getElementById(x);
+const element=document.getElementById(x);
 
 if(element){
 
@@ -1394,24 +1409,30 @@ behavior:'smooth'
 
 
 /* =====================================================
-   MUSIC ENGINE
+   MUSIC ENGINE 2.0.1
 ===================================================== */
 
 /*
-   Добавляй свои файлы сюда.
+   ВАЖНО:
 
-   Например:
+   Музыкальные файлы должны реально находиться
+   в папке music рядом с index.html:
 
-   {
-     title:'Naruto Theme',
-     artist:'Artist',
-     genre:'Аниме',
-     src:'music/naruto.mp3'
-   }
+   music/calm.mp3
+   music/energy.mp3
+   music/anime.mp3
+   music/night.mp3
 
-   Файл должен реально находиться
-   в указанной папке сайта.
+   Музыка НЕ запускается автоматически при загрузке.
+
+   Первый запуск производится только после
+   действия пользователя:
+   - кнопка ▶️
+   - выбор трека
+   - следующий/предыдущий трек
+   - стандартная кнопка audio
 */
+
 
 const playlistData=[
 
@@ -1448,6 +1469,7 @@ src:'music/night.mp3'
 
 let currentTrack=0;
 let currentGenre='all';
+let userHasInteractedWithMusic=false;
 
 
 const audio=
@@ -1476,26 +1498,31 @@ const MUSIC_VOLUME_KEY=
 'ashina20_music_volume';
 
 
-const savedVolume=
-Number(
-localStorage.getItem(
-MUSIC_VOLUME_KEY
-)
+/* =========================
+   STATUS
+========================= */
+
+function setMusicStatus(text,type=''){
+
+musicStatus.textContent=text;
+
+musicStatus.classList.remove(
+'success',
+'error'
 );
 
-if(
-Number.isFinite(savedVolume)
-&&
-savedVolume>=0
-&&
-savedVolume<=1
-){
+if(type){
 
-audio.volume=savedVolume;
-volume.value=savedVolume;
+musicStatus.classList.add(type);
 
 }
 
+}
+
+
+/* =========================
+   TIME
+========================= */
 
 function formatTime(seconds){
 
@@ -1514,6 +1541,10 @@ String(seconds%60).padStart(2,'0')
 
 }
 
+
+/* =========================
+   RENDER
+========================= */
 
 function renderPlaylist(){
 
@@ -1570,8 +1601,7 @@ info.className=
 const title=
 document.createElement('div');
 
-title.className=
-'track-name';
+title.className='track-name';
 
 title.textContent=
 track.title;
@@ -1580,8 +1610,7 @@ track.title;
 const meta=
 document.createElement('div');
 
-meta.className=
-'track-meta';
+meta.className='track-meta';
 
 meta.textContent=
 track.artist+
@@ -1589,14 +1618,30 @@ track.artist+
 track.genre;
 
 
+const play=
+document.createElement('div');
+
+play.className='track-play';
+
+play.textContent=
+index===currentTrack && !audio.paused
+?
+'⏸️'
+:
+'▶️';
+
+
 info.appendChild(title);
 info.appendChild(meta);
 
 item.appendChild(number);
 item.appendChild(info);
+item.appendChild(play);
 
 
 item.onclick=function(){
+
+userHasInteractedWithMusic=true;
 
 loadTrack(index,true);
 
@@ -1610,9 +1655,18 @@ box.appendChild(item);
 }
 
 
+/* =========================
+   LOAD TRACK
+========================= */
+
 function loadTrack(index,autoPlay=false){
 
 if(!playlistData.length){
+
+setMusicStatus(
+'⚠️ Плейлист пуст.',
+'error'
+);
 
 return;
 
@@ -1638,8 +1692,16 @@ const track=
 playlistData[currentTrack];
 
 
-audio.src=
-track.src;
+audio.pause();
+
+audio.removeAttribute('src');
+
+audio.load();
+
+
+audio.src=track.src;
+
+audio.load();
 
 
 document
@@ -1667,28 +1729,100 @@ MUSIC_TIME_KEY,
 );
 
 
+seek.value=0;
+
+document
+.getElementById('time')
+.textContent=
+'0:00 / 0:00';
+
+
 renderPlaylist();
 
 
-musicStatus.textContent=
-'Выбран трек: '+
-track.title;
+setMusicStatus(
+'🎵 Выбран трек: '+track.title+
+'. Нажми ▶️ для запуска.'
+);
 
 
 if(autoPlay){
 
-audio.play()
+playCurrentTrack();
+
+}
+
+}
+
+
+/* =========================
+   PLAY
+========================= */
+
+function playCurrentTrack(){
+
+if(!audio.src){
+
+loadTrack(currentTrack,false);
+
+}
+
+
+userHasInteractedWithMusic=true;
+
+
+const playPromise=
+audio.play();
+
+
+if(playPromise){
+
+playPromise
 .then(function(){
 
-musicStatus.textContent=
+setMusicStatus(
 '▶️ Играет: '+
-track.title;
+playlistData[currentTrack].title,
+'success'
+);
 
 })
-.catch(function(){
+.catch(function(error){
 
-musicStatus.textContent=
-'⚠️ Нажми ▶️ ещё раз для запуска.';
+console.warn(
+'ASHINA music play error:',
+error
+);
+
+
+if(
+error &&
+error.name==='NotAllowedError'
+){
+
+setMusicStatus(
+'⚠️ Браузер заблокировал запуск. Нажми ▶️ ещё раз.',
+'error'
+);
+
+}else if(
+error &&
+error.name==='NotSupportedError'
+){
+
+setMusicStatus(
+'⚠️ Формат аудиофайла не поддерживается браузером.',
+'error'
+);
+
+}else{
+
+setMusicStatus(
+'⚠️ Не удалось запустить файл. Проверь путь к MP3.',
+'error'
+);
+
+}
 
 });
 
@@ -1697,7 +1831,14 @@ musicStatus.textContent=
 }
 
 
+/* =========================
+   TOGGLE
+========================= */
+
 function toggleMusic(){
+
+userHasInteractedWithMusic=true;
+
 
 if(!audio.src){
 
@@ -1708,40 +1849,29 @@ loadTrack(currentTrack,false);
 
 if(audio.paused){
 
-audio.play()
-.then(function(){
-
-musicStatus.textContent=
-'▶️ Музыка играет';
-
-})
-.catch(function(){
-
-musicStatus.textContent=
-'⚠️ Браузер не разрешил запуск. Нажми ещё раз.';
-
-});
+playCurrentTrack();
 
 }else{
 
 audio.pause();
 
-}
-
-}
-
-
-function previousTrack(){
-
-loadTrack(
-currentTrack-1,
-true
+setMusicStatus(
+'⏸️ Музыка остановлена.',
+''
 );
 
 }
 
+}
+
+
+/* =========================
+   NEXT
+========================= */
 
 function nextTrack(){
+
+userHasInteractedWithMusic=true;
 
 loadTrack(
 currentTrack+1,
@@ -1751,48 +1881,69 @@ true
 }
 
 
-audio.onplay=function(){
+/* =========================
+   PREVIOUS
+========================= */
+
+function previousTrack(){
+
+userHasInteractedWithMusic=true;
+
+loadTrack(
+currentTrack-1,
+true
+);
+
+}
+
+
+/* =========================
+   AUDIO EVENTS
+========================= */
+
+audio.addEventListener(
+'play',
+function(){
 
 playButton.textContent='⏸️';
 
-};
+renderPlaylist();
 
-audio.onpause=function(){
+});
+
+
+audio.addEventListener(
+'pause',
+function(){
 
 playButton.textContent='▶️';
 
+renderPlaylist();
+
 saveMusicState();
 
-};
+});
 
-audio.onended=function(){
+
+audio.addEventListener(
+'ended',
+function(){
+
+if(userHasInteractedWithMusic){
 
 nextTrack();
 
-};
+}
 
-audio.onerror=function(){
-
-musicStatus.textContent=
-'⚠️ Не найден музыкальный файл: '+
-(
-playlistData[currentTrack]?.src||''
-);
-
-};
+});
 
 
-audio.ontimeupdate=function(){
+audio.addEventListener(
+'loadedmetadata',
+function(){
 
 updateMusicUI();
-saveMusicState();
 
-};
-
-
-audio.onloadedmetadata=function(){
-
-updateMusicUI();
 
 const savedTime=
 Number(
@@ -1801,33 +1952,77 @@ MUSIC_TIME_KEY
 )
 );
 
+
 if(
 Number.isFinite(savedTime)
 &&
 savedTime>0
 &&
+Number.isFinite(audio.duration)
+&&
 savedTime<audio.duration
 ){
 
+try{
+
 audio.currentTime=savedTime;
+
+}catch(error){}
 
 }
 
-};
+});
 
+
+audio.addEventListener(
+'timeupdate',
+function(){
+
+updateMusicUI();
+saveMusicState();
+
+});
+
+
+audio.addEventListener(
+'error',
+function(){
+
+const source=
+playlistData[currentTrack]
+?
+playlistData[currentTrack].src
+:
+'';
+
+
+setMusicStatus(
+'❌ Не удалось загрузить: '+source+
+'. Проверь, что файл существует.',
+'error'
+);
+
+});
+
+
+/* =========================
+   UI
+========================= */
 
 function updateMusicUI(){
 
+const duration=
+audio.duration;
+
 if(
-Number.isFinite(audio.duration)
+Number.isFinite(duration)
 &&
-audio.duration>0
+duration>0
 ){
 
 seek.value=
 (
-audio.currentTime/
-audio.duration
+audio.currentTime/duration
 )*100;
 
 }
@@ -1839,24 +2034,24 @@ formatTime(audio.currentTime)
 +
 ' / '
 +
-formatTime(audio.duration);
+formatTime(duration);
 
 }
 
 
-function saveMusicState(){
+/* =========================
+   SEEK
+========================= */
 
-localStorage.setItem(
-MUSIC_TIME_KEY,
-String(audio.currentTime||0)
-);
+seek.addEventListener(
+'input',
+function(){
 
-}
-
-
-seek.oninput=function(){
-
-if(audio.duration){
+if(
+Number.isFinite(audio.duration)
+&&
+audio.duration>0
+){
 
 audio.currentTime=
 (
@@ -1866,10 +2061,44 @@ audio.duration;
 
 }
 
-};
+});
 
 
-volume.oninput=function(){
+/* =========================
+   VOLUME
+========================= */
+
+const savedVolume=
+Number(
+localStorage.getItem(
+MUSIC_VOLUME_KEY
+)
+);
+
+if(
+Number.isFinite(savedVolume)
+&&
+savedVolume>=0
+&&
+savedVolume<=1
+){
+
+audio.volume=savedVolume;
+
+volume.value=savedVolume;
+
+}else{
+
+audio.volume=.8;
+
+volume.value=.8;
+
+}
+
+
+volume.addEventListener(
+'input',
+function(){
 
 const value=
 Number(volume.value);
@@ -1881,8 +2110,36 @@ MUSIC_VOLUME_KEY,
 String(value)
 );
 
-};
+});
 
+
+/* =========================
+   SAVE STATE
+========================= */
+
+function saveMusicState(){
+
+try{
+
+localStorage.setItem(
+MUSIC_TIME_KEY,
+String(
+Number.isFinite(audio.currentTime)
+?
+audio.currentTime
+:
+0
+)
+);
+
+}catch(error){}
+
+}
+
+
+/* =========================
+   FILTER
+========================= */
 
 function filterGenre(genre,button){
 
@@ -1903,6 +2160,10 @@ renderPlaylist();
 }
 
 
+/* =========================
+   RESTORE TRACK
+========================= */
+
 const savedTrack=
 Number(
 localStorage.getItem(
@@ -1922,7 +2183,16 @@ currentTrack=savedTrack;
 
 }
 
-loadTrack(currentTrack,false);
+
+/*
+   Только загружаем информацию о треке.
+   НЕ запускаем audio.play().
+*/
+
+loadTrack(
+currentTrack,
+false
+);
 
 
 /* =====================================================
@@ -2134,8 +2404,7 @@ item.className=
 const name=
 document.createElement('div');
 
-name.className=
-'message-name';
+name.className='message-name';
 
 name.textContent=
 message.me
@@ -2417,26 +2686,6 @@ event.target.value='';
    AI CORE 2.0
 ===================================================== */
 
-/*
-   Это главное изменение.
-
-   Теперь AI не проверяет только одну конкретную
-   фразу.
-
-   Он сначала определяет НАМЕРЕНИЕ пользователя,
-   затем выполняет действие.
-
-   Это позволяет понимать:
-
-   "открой музыку"
-   "зайди в музыкальный раздел"
-   "покажи музыку"
-   "перейди к музыке"
-
-   как одну и ту же задачу.
-*/
-
-
 const AI_HISTORY_KEY=
 'ashina20_ai_history';
 
@@ -2658,13 +2907,6 @@ thinking
 }
 
 
-/*
-   Нормализация речи.
-
-   Убираем лишние слова, чтобы AI мог
-   понимать разные формулировки.
-*/
-
 function normalize(text){
 
 return text
@@ -2676,10 +2918,6 @@ return text
 }
 
 
-/*
-   Проверка нескольких вариантов фраз.
-*/
-
 function containsAny(text,words){
 
 return words.some(function(word){
@@ -2690,10 +2928,6 @@ return text.includes(word);
 
 }
 
-
-/*
-   Определение раздела.
-*/
 
 function detectSection(text){
 
@@ -2775,10 +3009,6 @@ return null;
 
 }
 
-
-/*
-   Определение музыкального действия.
-*/
 
 function detectMusicAction(text){
 
@@ -2868,10 +3098,6 @@ return null;
 }
 
 
-/*
-   Выполнение музыки.
-*/
-
 function executeMusicAction(action){
 
 if(action==='next'){
@@ -2906,14 +3132,7 @@ if(action==='play'){
 
 show('music');
 
-if(!audio.src){
-
-loadTrack(currentTrack,false);
-
-}
-
-audio.play()
-.catch(function(){});
+playCurrentTrack();
 
 return 'Запускаю музыку. ▶️';
 
@@ -2932,12 +3151,6 @@ return null;
 }
 
 
-/*
-   Основной AI-процессор.
-
-   Здесь появляется система INTENT.
-*/
-
 function processAICommand(raw){
 
 const text=
@@ -2950,10 +3163,6 @@ return 'Я не получила команду.';
 
 }
 
-
-/* =========================
-   ПАМЯТЬ И ИМЯ
-========================= */
 
 const nameMatch=
 text.match(
@@ -2972,10 +3181,6 @@ aiMemory.name+'. 🧠';
 
 }
 
-
-/* =========================
-   ПРИВЕТСТВИЕ
-========================= */
 
 if(
 containsAny(
@@ -3001,10 +3206,6 @@ return aiMemory.name
 }
 
 
-/* =========================
-   КТО ТЫ
-========================= */
-
 if(
 containsAny(
 text,
@@ -3020,10 +3221,6 @@ return 'Я ASHINA AI 2.0 — локальное интеллектуальное
 
 }
 
-
-/* =========================
-   ВОЗМОЖНОСТИ
-========================= */
 
 if(
 containsAny(
@@ -3043,10 +3240,6 @@ return 'Я умею открывать разделы, управлять муз
 }
 
 
-/* =========================
-   ВРЕМЯ
-========================= */
-
 if(
 containsAny(
 text,
@@ -3063,10 +3256,6 @@ return 'Сейчас '+getTime()+'. ⏰';
 }
 
 
-/* =========================
-   ПОВТОР
-========================= */
-
 if(
 containsAny(
 text,
@@ -3082,10 +3271,6 @@ return lastAIText||'Мне пока нечего повторять.';
 
 }
 
-
-/* =========================
-   ПАМЯТЬ
-========================= */
 
 if(
 containsAny(
@@ -3130,10 +3315,6 @@ return result;
 }
 
 
-/* =========================
-   ОЧИСТКА ПАМЯТИ
-========================= */
-
 if(
 containsAny(
 text,
@@ -3163,10 +3344,6 @@ return 'Память ASHINA очищена. 🧹';
 }
 
 
-/* =========================
-   СТАТУС
-========================= */
-
 if(
 containsAny(
 text,
@@ -3183,10 +3360,6 @@ return 'ASHINA работает в штатном режиме. AI-ядро он
 
 }
 
-
-/* =========================
-   GUARD
-========================= */
 
 if(
 containsAny(
@@ -3212,9 +3385,9 @@ return 'Запускаю ASHINA Guard. 🛡️';
 }
 
 
-/* =========================
-   МУЗЫКА
-========================= */
+/*
+   Сначала музыкальные команды.
+*/
 
 const musicAction=
 detectMusicAction(text);
@@ -3222,6 +3395,7 @@ detectMusicAction(text);
 if(musicAction){
 
 aiMemory.lastSection='music';
+
 aiMemory.lastCommand=raw;
 
 const result=
@@ -3238,9 +3412,9 @@ return result;
 }
 
 
-/* =========================
-   НАВИГАЦИЯ
-========================= */
+/*
+   Затем обычная навигация.
+*/
 
 const section=
 detectSection(text);
@@ -3278,10 +3452,6 @@ return 'Открываю '+names[section]+'.';
 }
 
 
-/* =========================
-   КОМБИНИРОВАННЫЕ КОМАНДЫ
-========================= */
-
 const wantsMusic=
 containsAny(
 text,
@@ -3304,6 +3474,7 @@ text,
 ]
 );
 
+
 if(
 wantsMusic
 &&
@@ -3312,16 +3483,12 @@ wantsPlay
 
 show('music');
 
-toggleMusic();
+playCurrentTrack();
 
 return 'Открываю музыку и запускаю воспроизведение. 🎵▶️';
 
 }
 
-
-/* =========================
-   ВОПРОС О ПРИЛОЖЕНИИ
-========================= */
 
 if(
 containsAny(
@@ -3339,10 +3506,6 @@ return 'ASHINA состоит из нескольких локальных мо�
 
 }
 
-
-/* =========================
-   НЕИЗВЕСТНАЯ КОМАНДА
-========================= */
 
 return 'Я поняла сообщение, но пока не знаю, какое действие выполнить. Попробуй сказать, например: «Открой музыку», «Включи музыку», «Следующий трек», «Открой чат» или «Проверь защиту».';
 
@@ -3438,7 +3601,7 @@ sendAI();
 
 
 /* =====================================================
-   AI VOICE
+   VOICE INPUT
 ===================================================== */
 
 let recognition=null;
@@ -3550,7 +3713,7 @@ setAIStatus(
 
 
 /* =====================================================
-   AI SPEECH
+   SPEECH
 ===================================================== */
 
 function speakText(text){
@@ -3624,11 +3787,6 @@ speakText(lastAIText);
 
 }
 
-
-/*
-   Автоматическая озвучка ответа.
-   Можно отключить, если захочешь.
-*/
 
 let AUTO_SPEECH=false;
 
@@ -3871,7 +4029,7 @@ checks.length+
 
 
 /* =====================================================
-   ADMIN PROTOTYPE
+   ADMIN
 ===================================================== */
 
 function openAdmin(){
@@ -3887,13 +4045,6 @@ return;
 
 }
 
-
-/*
-   ВАЖНО:
-   Это НЕ настоящая серверная защита.
-   PIN находится в клиентском коде.
-   Позже вынесем авторизацию на сервер.
-*/
 
 if(pin!=='2468'){
 
