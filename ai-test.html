@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b10">
+
+<title>ASHINA AI Test</title>
+
+<style>
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+min-height:100vh;
+background:
+radial-gradient(circle at 50% 20%,#261116 0,#090b10 45%);
+color:#fff;
+font-family:system-ui,-apple-system,sans-serif;
+}
+
+main{
+max-width:760px;
+margin:auto;
+padding:25px 14px 70px;
+}
+
+.logo{
+text-align:center;
+font-size:30px;
+font-weight:900;
+letter-spacing:4px;
+}
+
+.version{
+text-align:center;
+color:#8e949e;
+font-size:12px;
+margin-top:5px;
+}
+
+.core{
+width:170px;
+height:170px;
+border-radius:50%;
+margin:35px auto;
+display:flex;
+align-items:center;
+justify-content:center;
+border:2px solid #86252d;
+box-shadow:
+0 0 25px rgba(180,30,45,.25),
+inset 0 0 35px rgba(180,30,45,.15);
+position:relative;
+}
+
+.core.active{
+animation:pulse 1.3s infinite;
+}
+
+.core::before{
+content:"";
+position:absolute;
+width:125px;
+height:125px;
+border-radius:50%;
+border:1px solid #4b535f;
+}
+
+.core-text{
+font-size:17px;
+font-weight:800;
+letter-spacing:2px;
+z-index:2;
+}
+
+@keyframes pulse{
+0%{
+box-shadow:0 0 12px rgba(190,30,45,.2);
+}
+
+50%{
+box-shadow:0 0 45px rgba(220,40,55,.65);
+}
+
+100%{
+box-shadow:0 0 12px rgba(190,30,45,.2);
+}
+}
+
+.card{
+background:#11141b;
+border:1px solid #292e38;
+border-radius:18px;
+padding:15px;
+margin-top:12px;
+}
+
+.title{
+font-weight:800;
+margin-bottom:8px;
+}
+
+.status{
+font-size:13px;
+color:#9da2ac;
+}
+
+.log{
+height:240px;
+overflow:auto;
+background:#090d13;
+border:1px solid #292e38;
+border-radius:14px;
+padding:10px;
+}
+
+.message{
+padding:9px 10px;
+border-radius:12px;
+margin:7px 0;
+font-size:14px;
+}
+
+.user{
+background:#51151a;
+margin-left:15%;
+}
+
+.ai{
+background:#171d27;
+margin-right:15%;
+}
+
+.controls{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+input{
+flex:1;
+min-width:0;
+background:#0d1118;
+color:#fff;
+border:1px solid #292e38;
+border-radius:12px;
+padding:12px;
+outline:none;
+}
+
+button{
+border:1px solid #292e38;
+background:#171d27;
+color:#fff;
+border-radius:12px;
+padding:11px 14px;
+}
+
+.send{
+background:#5b1519;
+}
+
+.quick{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px;
+margin-top:10px;
+}
+
+.quick button{
+font-size:12px;
+}
+
+.green{
+color:#99d79c;
+}
+
+.red{
+color:#ef9c9c;
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<div class="logo">
+ASHINA
+</div>
+
+<div class="version">
+AI CORE · TEST 0.1
+</div>
+
+
+<div
+id="core"
+class="core">
+
+<div class="core-text">
+AI CORE
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="title">
+🧠 ASHINA AI
+</div>
+
+<div
+id="aiStatus"
+class="status">
+Система готова.
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="title">
+💬 Диалог
+</div>
+
+<div
+id="log"
+class="log">
+</div>
+
+
+<div class="controls">
+
+<input
+id="command"
+type="text"
+placeholder="Скажи или напиши команду..."
+autocomplete="off">
+
+<button
+id="mic"
+onclick="startVoice()">
+🎙️
+</button>
+
+<button
+class="send"
+onclick="sendCommand()">
+➤
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="title">
+⚡ Быстрые команды
+</div>
+
+<div class="quick">
+
+<button onclick="ask('Привет')">
+👋 Привет
+</button>
+
+<button onclick="ask('Статус системы')">
+🛡️ Статус
+</button>
+
+<button onclick="ask('Кто ты')">
+🧠 Кто ты?
+</button>
+
+<button onclick="ask('Что ты умеешь')">
+⚙️ Возможности
+</button>
+
+<button onclick="ask('Включи музыку')">
+🎵 Музыка
+</button>
+
+<button onclick="ask('Останови музыку')">
+⏸️ Стоп
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="title">
+🛡️ Состояние
+</div>
+
+<div id="systemStatus" class="status">
+Проверка...
+</div>
+
+</div>
+
+
+<audio
+id="music"
+src="audio.wav"
+preload="metadata">
+</audio>
+
+</main>
+
+
+<script>
+
+const log=
+document.getElementById("log");
+
+const input=
+document.getElementById("command");
+
+const core=
+document.getElementById("core");
+
+const aiStatus=
+document.getElementById("aiStatus");
+
+const music=
+document.getElementById("music");
+
+
+/* =========================
+   СООБЩЕНИЯ
+========================= */
+
+function addMessage(text,type){
+
+const div=
+document.createElement("div");
+
+div.className=
+"message "+
+(type==="user" ? "user" : "ai");
+
+div.textContent=
+text;
+
+log.appendChild(div);
+
+log.scrollTop=
+log.scrollHeight;
+
+}
+
+
+/* =========================
+   ГОЛОС ASHINA
+========================= */
+
+function speak(text){
+
+if(
+!("speechSynthesis" in window)
+){
+
+return;
+
+}
+
+speechSynthesis.cancel();
+
+const speech=
+new SpeechSynthesisUtterance(text);
+
+speech.lang="ru-RU";
+
+speech.rate=.95;
+
+speech.pitch=.9;
+
+speech.volume=1;
+
+speech.onstart=function(){
+
+core.classList.add("active");
+
+aiStatus.textContent=
+"ASHINA говорит...";
+
+};
+
+speech.onend=function(){
+
+core.classList.remove("active");
+
+aiStatus.textContent=
+"Система готова.";
+
+};
+
+speechSynthesis.speak(speech);
+
+}
+
+
+/* =========================
+   ОТВЕТ
+========================= */
+
+function answer(text){
+
+addMessage(
+text,
+"ai"
+);
+
+speak(text);
+
+}
+
+
+/* =========================
+   КОМАНДЫ
+========================= */
+
+function processCommand(command){
+
+const text=
+command
+.toLowerCase()
+.trim();
+
+
+if(
+text.includes("привет")
+||
+text.includes("здравствуй")
+){
+
+answer(
+"Привет. ASHINA на связи."
+);
+
+return;
+
+}
+
+
+if(
+text.includes("кто ты")
+){
+
+answer(
+"Я тестовая система ASHINA AI. В будущем я смогу управлять функциями приложения и помогать пользователю."
+);
+
+return;
+
+}
+
+
+if(
+text.includes("что ты умеешь")
+||
+text.includes("возможност")
+){
+
+answer(
+"Сейчас я умею принимать текстовые и голосовые команды, говорить голосом, проверять состояние системы и управлять тестовой музыкой."
+);
+
+return;
+
+}
+
+
+if(
+text.includes("статус")
+||
+text.includes("система")
+){
+
+runStatus(true);
+
+return;
+
+}
+
+
+if(
+text.includes("включи музыку")
+||
+text.includes("запусти музыку")
+){
+
+music.play()
+.then(function(){
+
+answer(
+"Музыка включена."
+);
+
+})
+.catch(function(){
+
+answer(
+"Не удалось автоматически включить музыку. Нажми на экран и попробуй ещё раз."
+);
+
+});
+
+return;
+
+}
+
+
+if(
+text.includes("останови музыку")
+||
+text.includes("выключи музыку")
+||
+text.includes("пауза")
+){
+
+music.pause();
+
+answer(
+"Музыка остановлена."
+);
+
+return;
+
+}
+
+
+if(
+text.includes("время")
+){
+
+const now=
+new Date();
+
+answer(
+"Сейчас "
++
+now.toLocaleTimeString(
+"ru-RU",
+{
+hour:"2-digit",
+minute:"2-digit"
+}
+)
+);
+
+return;
+
+}
+
+
+answer(
+"Эта команда пока мне неизвестна. Когда мы подключим настоящий искусственный интеллект, я смогу понимать намного больше."
+);
+
+}
+
+
+/* =========================
+   ОТПРАВКА
+========================= */
+
+function sendCommand(){
+
+const text=
+input.value.trim();
+
+if(!text){
+
+return;
+
+}
+
+input.value="";
+
+ask(text);
+
+}
+
+
+function ask(text){
+
+addMessage(
+text,
+"user"
+);
+
+processCommand(text);
+
+}
+
+
+input.addEventListener(
+"keydown",
+function(event){
+
+if(event.key==="Enter"){
+
+event.preventDefault();
+
+sendCommand();
+
+}
+
+}
+);
+
+
+/* =========================
+   РАСПОЗНАВАНИЕ ГОЛОСА
+========================= */
+
+function startVoice(){
+
+const Recognition=
+window.SpeechRecognition
+||
+window.webkitSpeechRecognition;
+
+
+if(!Recognition){
+
+answer(
+"На этом браузере распознавание речи сейчас недоступно."
+);
+
+return;
+
+}
+
+
+const recognition=
+new Recognition();
+
+recognition.lang=
+"ru-RU";
+
+recognition.interimResults=
+false;
+
+recognition.maxAlternatives=
+1;
+
+
+aiStatus.textContent=
+"🎙️ Слушаю...";
+
+core.classList.add(
+"active"
+);
+
+
+recognition.onresult=
+function(event){
+
+const text=
+event.results[0][0].transcript;
+
+core.classList.remove(
+"active"
+);
+
+aiStatus.textContent=
+"Команда распознана.";
+
+ask(text);
+
+};
+
+
+recognition.onerror=
+function(){
+
+core.classList.remove(
+"active"
+);
+
+aiStatus.textContent=
+"Не удалось распознать речь.";
+
+};
+
+
+recognition.onend=
+function(){
+
+core.classList.remove(
+"active"
+);
+
+};
+
+
+recognition.start();
+
+}
+
+
+/* =========================
+   ПРОВЕРКА СИСТЕМЫ
+========================= */
+
+async function runStatus(sayResult=false){
+
+const status=
+document.getElementById(
+"systemStatus"
+);
+
+status.textContent=
+"Проверяю компоненты...";
+
+
+const checks=[];
+
+
+/* LocalStorage */
+
+try{
+
+localStorage.setItem(
+"ashina_ai_test",
+"1"
+);
+
+localStorage.removeItem(
+"ashina_ai_test"
+);
+
+checks.push(
+["Локальное хранилище",true]
+);
+
+}catch(error){
+
+checks.push(
+["Локальное хранилище",false]
+);
+
+}
+
+
+/* Service Worker */
+
+checks.push([
+"Service Worker",
+"serviceWorker" in navigator
+]);
+
+
+/* audio.wav */
+
+try{
+
+const response=
+await fetch(
+"audio.wav",
+{
+method:"HEAD",
+cache:"no-store"
+}
+);
+
+checks.push([
+"audio.wav",
+response.ok
+]);
+
+}catch(error){
+
+checks.push([
+"audio.wav",
+false
+]);
+
+}
+
+
+/* manifest */
+
+try{
+
+const response=
+await fetch(
+"manifest.webmanifest",
+{
+method:"HEAD",
+cache:"no-store"
+}
+);
+
+checks.push([
+"Manifest",
+response.ok
+]);
+
+}catch(error){
+
+checks.push([
+"Manifest",
+false
+]);
+
+}
+
+
+let html="";
+
+let good=0;
+
+
+checks.forEach(function(check){
+
+if(check[1]){
+
+good++;
+
+}
+
+html+=
+'<div class="'
++
+(check[1] ? "green" : "red")
++
+'">'
++
+(check[1] ? "🟢 " : "🔴 ")
++
+check[0]
++
+"</div>";
+
+});
+
+
+status.innerHTML=
+html
++
+"<br><strong>"
++
+good
++
+"/"
++
+checks.length
++
+" систем доступны</strong>";
+
+
+if(sayResult){
+
+answer(
+"Проверка завершена. "
++
+good
++
+" из "
++
+checks.length
++
+" систем работают нормально."
+);
+
+}
+
+}
+
+
+/* =========================
+   СТАРТ
+========================= */
+
+addMessage(
+"ASHINA AI запущена. Напиши команду или нажми на микрофон.",
+"ai"
+);
+
+runStatus();
+
+</script>
+
+</body>
+</html>
