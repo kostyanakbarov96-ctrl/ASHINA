@@ -483,7 +483,7 @@ ASHINA развивается. Проверь реакции.
 <h2>💬 ASHINA Chat</h2>
 
 <p class="muted">
-Локальный чат
+Локальный чат · IndexedDB
 </p>
 
 <div id="chatBox" class="chat-box"></div>
@@ -644,6 +644,7 @@ btn.classList.add("active");
 
 /* =========================
    МУЗЫКА
+   audio.wav НЕ ИЗМЕНЯЕТСЯ
 ========================= */
 
 const audio=
@@ -989,45 +990,498 @@ updateVoteUI();
 
 
 /* =========================
-   ЧАТ
+   CHAT · INDEXEDDB
 ========================= */
 
-const CHAT_KEY=
-"ashina_messages";
+const CHAT_DB_NAME="ASHINA_DB";
+const CHAT_DB_VERSION=1;
+const CHAT_STORE="messages";
+const CHAT_LIMIT=100;
 
 let messages=[];
-
-try{
-
-messages=
-JSON.parse(
-localStorage.getItem(CHAT_KEY)
-)||[];
-
-}catch(e){
-
-messages=[];
-
-}
-
 let replyTo=null;
+let chatDB=null;
+let chatDBReady=null;
 
 
-function saveMessages(){
-
-try{
-
-localStorage.setItem(
-CHAT_KEY,
-JSON.stringify(messages)
-);
-
-}catch(e){
+function setChatStatus(text){
 
 document.getElementById(
 "chatStatus"
 ).textContent=
-"⚠️ Не удалось сохранить данные.";
+text||"";
+
+}
+
+
+function openChatDB(){
+
+if(chatDBReady){
+
+return chatDBReady;
+
+}
+
+chatDBReady=
+new Promise(function(resolve,reject){
+
+if(!("indexedDB" in window)){
+
+reject(
+new Error("IndexedDB недоступен")
+);
+
+return;
+
+}
+
+
+const request=
+indexedDB.open(
+CHAT_DB_NAME,
+CHAT_DB_VERSION
+);
+
+
+request.onupgradeneeded=
+function(event){
+
+const db=
+event.target.result;
+
+let store;
+
+
+if(
+!db.objectStoreNames.contains(
+CHAT_STORE
+)
+){
+
+store=
+db.createObjectStore(
+CHAT_STORE,
+{
+keyPath:"id"
+}
+);
+
+}else{
+
+store=
+event.target.transaction
+.objectStore(CHAT_STORE);
+
+}
+
+
+if(
+!store.indexNames.contains("time")
+){
+
+store.createIndex(
+"time",
+"time",
+{
+unique:false
+}
+);
+
+}
+
+};
+
+
+request.onsuccess=
+function(){
+
+chatDB=
+request.result;
+
+chatDB.onversionchange=
+function(){
+
+chatDB.close();
+
+chatDB=null;
+chatDBReady=null;
+
+};
+
+resolve(chatDB);
+
+};
+
+
+request.onerror=
+function(){
+
+reject(
+request.error||
+new Error(
+"Не удалось открыть IndexedDB"
+)
+);
+
+};
+
+});
+
+return chatDBReady;
+
+}
+
+
+function idbGetAllMessages(){
+
+return openChatDB()
+.then(function(db){
+
+return new Promise(
+function(resolve,reject){
+
+const transaction=
+db.transaction(
+CHAT_STORE,
+"readonly"
+);
+
+const store=
+transaction.objectStore(
+CHAT_STORE
+);
+
+const request=
+store.getAll();
+
+
+request.onsuccess=
+function(){
+
+const result=
+(request.result||[])
+.sort(
+function(a,b){
+
+return Number(a.time||0)
+-
+Number(b.time||0);
+
+}
+);
+
+resolve(result);
+
+};
+
+
+request.onerror=
+function(){
+
+reject(
+request.error||
+new Error(
+"Не удалось прочитать чат"
+)
+);
+
+};
+
+});
+
+});
+
+}
+
+
+function idbPutMessages(list){
+
+return openChatDB()
+.then(function(db){
+
+return new Promise(
+function(resolve,reject){
+
+const transaction=
+db.transaction(
+CHAT_STORE,
+"readwrite"
+);
+
+const store=
+transaction.objectStore(
+CHAT_STORE
+);
+
+list.forEach(function(message){
+
+store.put(message);
+
+});
+
+
+transaction.oncomplete=
+function(){
+
+resolve();
+
+};
+
+
+transaction.onerror=
+function(){
+
+reject(
+transaction.error||
+new Error(
+"Не удалось сохранить сообщения"
+)
+);
+
+};
+
+});
+
+});
+
+}
+
+
+function idbDeleteMessage(id){
+
+return openChatDB()
+.then(function(db){
+
+return new Promise(
+function(resolve,reject){
+
+const transaction=
+db.transaction(
+CHAT_STORE,
+"readwrite"
+);
+
+transaction
+.objectStore(CHAT_STORE)
+.delete(id);
+
+
+transaction.oncomplete=
+function(){
+
+resolve();
+
+};
+
+
+transaction.onerror=
+function(){
+
+reject(
+transaction.error||
+new Error(
+"Не удалось удалить сообщение"
+)
+);
+
+};
+
+});
+
+});
+
+}
+
+
+function idbClearMessages(){
+
+return openChatDB()
+.then(function(db){
+
+return new Promise(
+function(resolve,reject){
+
+const transaction=
+db.transaction(
+CHAT_STORE,
+"readwrite"
+);
+
+transaction
+.objectStore(CHAT_STORE)
+.clear();
+
+
+transaction.oncomplete=
+function(){
+
+resolve();
+
+};
+
+
+transaction.onerror=
+function(){
+
+reject(
+transaction.error||
+new Error(
+"Не удалось очистить чат"
+)
+);
+
+};
+
+});
+
+});
+
+
+function trimMessages(){
+
+if(
+messages.length<=CHAT_LIMIT
+){
+
+return [];
+
+}
+
+const removed=
+messages.slice(
+0,
+messages.length-CHAT_LIMIT
+);
+
+messages=
+messages.slice(-CHAT_LIMIT);
+
+return removed;
+
+}
+
+
+async function saveMessages(){
+
+try{
+
+const removed=
+trimMessages();
+
+await idbPutMessages(
+messages
+);
+
+
+if(removed.length){
+
+for(
+const message of removed
+){
+
+await idbDeleteMessage(
+message.id
+);
+
+}
+
+}
+
+setChatStatus("");
+
+}catch(error){
+
+console.error(
+"ASHINA Chat IndexedDB:",
+error
+);
+
+setChatStatus(
+"⚠️ Не удалось сохранить чат локально."
+);
+
+}
+
+}
+
+
+async function loadMessages(){
+
+try{
+
+messages=
+await idbGetAllMessages();
+
+
+if(
+messages.length>CHAT_LIMIT
+){
+
+const removed=
+messages.slice(
+0,
+messages.length-CHAT_LIMIT
+);
+
+messages=
+messages.slice(-CHAT_LIMIT);
+
+
+for(
+const message of removed
+){
+
+await idbDeleteMessage(
+message.id
+);
+
+}
+
+}
+
+
+renderChat();
+
+setChatStatus(
+messages.length
+?
+"💾 Чат восстановлен из IndexedDB."
+:
+"💾 Локальная база чата готова."
+);
+
+
+setTimeout(function(){
+
+if(
+document.getElementById(
+"chatStatus"
+)
+){
+
+document.getElementById(
+"chatStatus"
+).textContent="";
+
+}
+
+},2500);
+
+
+}catch(error){
+
+console.error(
+"ASHINA Chat IndexedDB:",
+error
+);
+
+setChatStatus(
+"⚠️ IndexedDB недоступна. Чат не будет сохранён."
+);
+
+messages=[];
+
+renderChat();
 
 }
 
@@ -1037,9 +1491,12 @@ document.getElementById(
 function renderChat(){
 
 const box=
-document.getElementById("chatBox");
+document.getElementById(
+"chatBox"
+);
 
 box.innerHTML="";
+
 
 if(!messages.length){
 
@@ -1058,23 +1515,35 @@ return;
 }
 
 
-messages.forEach(function(message){
+messages.forEach(
+function(message){
 
 const item=
 document.createElement("div");
 
 item.className=
 "message"+
-(message.me?" me":"");
+(
+message.me
+?
+" me"
+:
+""
+);
 
 
 const name=
 document.createElement("div");
 
-name.className="message-name";
+name.className=
+"message-name";
 
 name.textContent=
-message.me?"Ты":"ASHINA";
+message.me
+?
+"Ты"
+:
+"ASHINA";
 
 item.appendChild(name);
 
@@ -1112,7 +1581,9 @@ if(message.file){
 const attachment=
 document.createElement("div");
 
-attachment.className="attachment";
+attachment.className=
+"attachment";
+
 
 const title=
 document.createElement("div");
@@ -1124,15 +1595,33 @@ attachment.appendChild(title);
 
 
 if(
-message.file.type.startsWith("image/")
-&&
+message.file.type &&
+message.file.type.startsWith(
+"image/"
+) &&
 message.file.data
 ){
 
 const img=
 document.createElement("img");
 
-img.src=message.file.data;
+
+if(
+message.file.data instanceof Blob
+){
+
+img.src=
+URL.createObjectURL(
+message.file.data
+);
+
+}else{
+
+img.src=
+message.file.data;
+
+}
+
 
 attachment.appendChild(img);
 
@@ -1140,15 +1629,34 @@ attachment.appendChild(img);
 
 
 if(
-message.file.type.startsWith("video/")
-&&
+message.file.type &&
+message.file.type.startsWith(
+"video/"
+) &&
 message.file.data
 ){
 
 const video=
 document.createElement("video");
 
-video.src=message.file.data;
+
+if(
+message.file.data instanceof Blob
+){
+
+video.src=
+URL.createObjectURL(
+message.file.data
+);
+
+}else{
+
+video.src=
+message.file.data;
+
+}
+
+
 video.controls=true;
 
 attachment.appendChild(video);
@@ -1157,22 +1665,46 @@ attachment.appendChild(video);
 
 
 if(
-message.file.type.startsWith("audio/")
-&&
+message.file.type &&
+message.file.type.startsWith(
+"audio/"
+) &&
 message.file.data
 ){
 
 const audioEl=
 document.createElement("audio");
 
-audioEl.src=message.file.data;
-audioEl.controls=true;
 
-attachment.appendChild(audioEl);
+if(
+message.file.data instanceof Blob
+){
+
+audioEl.src=
+URL.createObjectURL(
+message.file.data
+);
+
+}else{
+
+audioEl.src=
+message.file.data;
 
 }
 
-item.appendChild(attachment);
+
+audioEl.controls=true;
+
+attachment.appendChild(
+audioEl
+);
+
+}
+
+
+item.appendChild(
+attachment
+);
 
 }
 
@@ -1180,10 +1712,13 @@ item.appendChild(attachment);
 const time=
 document.createElement("div");
 
-time.className="message-time";
+time.className=
+"message-time";
 
 time.textContent=
-new Date(message.time)
+new Date(
+message.time
+)
 .toLocaleTimeString(
 "ru-RU",
 {
@@ -1192,18 +1727,24 @@ minute:"2-digit"
 }
 );
 
+
 if(message.edited){
 
 const edited=
 document.createElement("span");
 
-edited.className="message-edited";
+edited.className=
+"message-edited";
 
-edited.textContent="(изменено)";
+edited.textContent=
+"(изменено)";
 
-time.appendChild(edited);
+time.appendChild(
+edited
+);
 
 }
+
 
 item.appendChild(time);
 
@@ -1211,23 +1752,41 @@ item.appendChild(time);
 const reactions=
 document.createElement("div");
 
-reactions.className="reaction-row";
+reactions.className=
+"reaction-row";
+
 
 [
 "❤️",
 "👍",
 "😂",
 "🔥"
-].forEach(function(emoji){
+].forEach(
+function(emoji){
 
 const button=
-document.createElement("button");
+document.createElement(
+"button"
+);
 
-button.className="reaction";
+button.className=
+"reaction";
 
-button.textContent=emoji;
+button.textContent=
+emoji+
+(
+message.reactions &&
+message.reactions[emoji]
+?
+" "+
+message.reactions[emoji]
+:
+""
+);
 
-button.onclick=function(){
+
+button.onclick=
+function(){
 
 if(!message.reactions){
 
@@ -1235,8 +1794,12 @@ message.reactions={};
 
 }
 
+
 message.reactions[emoji]=
-(message.reactions[emoji]||0)+1;
+(
+message.reactions[emoji]||0
+)+1;
+
 
 saveMessages();
 
@@ -1244,18 +1807,24 @@ renderChat();
 
 };
 
-reactions.appendChild(button);
+
+reactions.appendChild(
+button
+);
 
 });
 
 
-item.appendChild(reactions);
+item.appendChild(
+reactions
+);
 
 
 const actions=
 document.createElement("div");
 
-actions.className="message-actions";
+actions.className=
+"message-actions";
 
 
 if(message.me){
@@ -1263,29 +1832,41 @@ if(message.me){
 const edit=
 document.createElement("button");
 
-edit.textContent="✏️ Изменить";
+edit.textContent=
+"✏️ Изменить";
 
-edit.onclick=function(){
+edit.onclick=
+function(){
 
-editMessage(message.id);
+editMessage(
+message.id
+);
 
 };
 
-actions.appendChild(edit);
+actions.appendChild(
+edit
+);
 
 
 const del=
 document.createElement("button");
 
-del.textContent="🗑️ Удалить";
+del.textContent=
+"🗑️ Удалить";
 
-del.onclick=function(){
+del.onclick=
+function(){
 
-deleteMessage(message.id);
+deleteMessage(
+message.id
+);
 
 };
 
-actions.appendChild(del);
+actions.appendChild(
+del
+);
 
 }
 
@@ -1293,15 +1874,19 @@ actions.appendChild(del);
 const replyButton=
 document.createElement("button");
 
-replyButton.textContent="↩️ Ответить";
+replyButton.textContent=
+"↩️ Ответить";
 
-replyButton.onclick=function(){
+replyButton.onclick=
+function(){
 
 startReply(message);
 
 };
 
-actions.appendChild(replyButton);
+actions.appendChild(
+replyButton
+);
 
 
 if(message.text){
@@ -1309,38 +1894,52 @@ if(message.text){
 const copy=
 document.createElement("button");
 
-copy.textContent="📋 Копировать";
+copy.textContent=
+"📋 Копировать";
 
-copy.onclick=function(){
+copy.onclick=
+function(){
 
-copyText(message.text);
+copyText(
+message.text
+);
 
 };
 
-actions.appendChild(copy);
+actions.appendChild(
+copy
+);
 
 }
 
 
-item.appendChild(actions);
+item.appendChild(
+actions
+);
 
-box.appendChild(item);
+box.appendChild(
+item
+);
 
 });
 
 
-box.scrollTop=box.scrollHeight;
+box.scrollTop=
+box.scrollHeight;
 
 }
 
 
-function sendMessage(){
+async function sendMessage(){
 
 const input=
-document.getElementById("chatInput");
+document.getElementById(
+"chatInput"
+);
 
 const text=
 input.value.trim();
+
 
 if(!text){
 
@@ -1348,31 +1947,37 @@ return;
 
 }
 
+
 const message={
-id:Date.now()+Math.random(),
+
+id:
+Date.now()+Math.random(),
+
 text:text,
+
 me:true,
+
 time:Date.now(),
+
 edited:false
+
 };
 
 
 if(replyTo){
 
 message.replyText=
-replyTo.text||"файл";
+replyTo.text||
+"файл";
 
 }
 
-messages.push(message);
 
-if(messages.length>100){
+messages.push(
+message
+);
 
-messages=messages.slice(-100);
-
-}
-
-saveMessages();
+trimMessages();
 
 input.value="";
 
@@ -1380,15 +1985,22 @@ cancelReply();
 
 renderChat();
 
+await saveMessages();
+
 }
 
 
-function editMessage(id){
+async function editMessage(id){
 
 const message=
 messages.find(
-x=>x.id===id
+function(x){
+
+return x.id===id;
+
+}
 );
+
 
 if(!message){
 
@@ -1396,11 +2008,13 @@ return;
 
 }
 
+
 const value=
 prompt(
 "Измени сообщение:",
 message.text
 );
+
 
 if(value===null){
 
@@ -1408,7 +2022,10 @@ return;
 
 }
 
-const clean=value.trim();
+
+const clean=
+value.trim();
+
 
 if(!clean){
 
@@ -1416,53 +2033,98 @@ return;
 
 }
 
-message.text=clean;
-message.edited=true;
 
-saveMessages();
+message.text=
+clean;
+
+message.edited=
+true;
 
 renderChat();
+
+await saveMessages();
 
 }
 
 
-function deleteMessage(id){
+async function deleteMessage(id){
 
-if(!confirm("Удалить сообщение?")){
+if(!confirm(
+"Удалить сообщение?"
+)){
 
 return;
 
 }
 
+
 messages=
 messages.filter(
-x=>x.id!==id
+function(x){
+
+return x.id!==id;
+
+}
 );
 
-saveMessages();
-
 renderChat();
+
+
+try{
+
+await idbDeleteMessage(
+id
+);
+
+setChatStatus(
+"🗑️ Сообщение удалено."
+);
+
+
+setTimeout(function(){
+
+document.getElementById(
+"chatStatus"
+).textContent="";
+
+},1800);
+
+
+}catch(error){
+
+console.error(error);
+
+setChatStatus(
+"⚠️ Не удалось удалить сообщение из базы."
+);
+
+}
 
 }
 
 
 function startReply(message){
 
-replyTo=message;
+replyTo=
+message;
+
 
 document
 .getElementById("replyBar")
 .classList
 .add("show");
 
+
 document
 .getElementById("replyText")
 .textContent=
-"↩ "+(
+"↩ "+
+(
 message.text||
 message.file?.name||
 "файл"
 );
+
 
 document
 .getElementById("chatInput")
@@ -1474,6 +2136,7 @@ document
 function cancelReply(){
 
 replyTo=null;
+
 
 document
 .getElementById("replyBar")
@@ -1510,7 +2173,9 @@ alert(text);
 function insertEmoji(emoji){
 
 const input=
-document.getElementById("chatInput");
+document.getElementById(
+"chatInput"
+);
 
 input.value+=emoji;
 
@@ -1532,23 +2197,29 @@ document
 .getElementById("fileInput")
 .addEventListener(
 "change",
-function(event){
+async function(event){
 
 const selected=
 Array.from(
 event.target.files||[]
 );
 
-selected.forEach(function(file){
 
-const reader=
-new FileReader();
+if(!selected.length){
 
-reader.onload=function(){
+return;
 
-messages.push({
+}
 
-id:Date.now()+Math.random(),
+
+for(
+const file of selected
+){
+
+const message={
+
+id:
+Date.now()+Math.random(),
 
 text:"",
 
@@ -1559,41 +2230,48 @@ time:Date.now(),
 edited:false,
 
 file:{
+
 name:file.name,
-type:file.type,
-data:reader.result
+
+type:
+file.type||
+"application/octet-stream",
+
+size:file.size,
+
+data:file
+
 }
-
-});
-
-if(messages.length>100){
-
-messages=messages.slice(-100);
-
-}
-
-saveMessages();
-
-renderChat();
 
 };
 
-reader.readAsDataURL(file);
 
-});
+messages.push(
+message
+);
+
+trimMessages();
+
+renderChat();
+
+await saveMessages();
+
+}
+
 
 event.target.value="";
 
 });
 
 
-function clearChat(){
+async function clearChat(){
 
 if(!messages.length){
 
 return;
 
 }
+
 
 if(!confirm(
 "Очистить весь локальный чат?"
@@ -1603,13 +2281,42 @@ return;
 
 }
 
+
+try{
+
+await idbClearMessages();
+
 messages=[];
 
-localStorage.removeItem(
-CHAT_KEY
-);
+replyTo=null;
+
+cancelReply();
 
 renderChat();
+
+setChatStatus(
+"🧹 Локальный чат очищен."
+);
+
+
+setTimeout(function(){
+
+document.getElementById(
+"chatStatus"
+).textContent="";
+
+},2000);
+
+
+}catch(error){
+
+console.error(error);
+
+setChatStatus(
+"⚠️ Не удалось очистить локальный чат."
+);
+
+}
 
 }
 
@@ -1643,10 +2350,12 @@ document.getElementById(
 const SAVE_KEY=
 "ashina_save_settings";
 
+
 const savedSetting=
 localStorage.getItem(
 SAVE_KEY
 );
+
 
 if(savedSetting!==null){
 
@@ -1655,11 +2364,17 @@ savedSetting==="1";
 
 }
 
-saveSettings.onchange=function(){
+
+saveSettings.onchange=
+function(){
 
 localStorage.setItem(
 SAVE_KEY,
-saveSettings.checked?"1":"0"
+saveSettings.checked
+?
+"1"
+:
+"0"
 );
 
 };
@@ -1686,7 +2401,10 @@ document.getElementById(
 "guardTotal"
 );
 
-result.classList.add("show");
+
+result.classList.add(
+"show"
+);
 
 files.innerHTML=
 "Проверка...";
@@ -1695,8 +2413,7 @@ total.textContent="";
 
 
 const worker=
-navigator.serviceWorker
-&&
+navigator.serviceWorker &&
 navigator.serviceWorker.controller;
 
 
@@ -1716,6 +2433,7 @@ return;
 const channel=
 new MessageChannel();
 
+
 const timeout=
 setTimeout(function(){
 
@@ -1733,8 +2451,10 @@ function(event){
 
 clearTimeout(timeout);
 
+
 const data=
 event.data;
+
 
 if(
 !data||
@@ -1751,6 +2471,7 @@ return;
 
 files.innerHTML="";
 
+
 const entries=
 Object.entries(
 data.files||{}
@@ -1759,10 +2480,15 @@ data.files||{}
 let good=0;
 
 
-entries.forEach(function(entry){
+entries.forEach(
+function(entry){
 
-const file=entry[0];
-const ok=entry[1];
+const file=
+entry[0];
+
+const ok=
+entry[1];
+
 
 if(ok){
 
@@ -1770,19 +2496,32 @@ good++;
 
 }
 
-const row=
-document.createElement("div");
 
-row.className="guard-item";
+const row=
+document.createElement(
+"div"
+);
+
+row.className=
+"guard-item";
+
 
 const name=
-document.createElement("span");
+document.createElement(
+"span"
+);
 
 name.textContent=
-file.replace("./","");
+file.replace(
+"./",
+""
+);
+
 
 const state=
-document.createElement("span");
+document.createElement(
+"span"
+);
 
 state.className=
 ok
@@ -1798,10 +2537,18 @@ ok
 :
 "🔴 Ошибка";
 
-row.appendChild(name);
-row.appendChild(state);
 
-files.appendChild(row);
+row.appendChild(
+name
+);
+
+row.appendChild(
+state
+);
+
+files.appendChild(
+row
+);
 
 });
 
@@ -1837,6 +2584,9 @@ channel.port2
 ========================= */
 
 renderChat();
+
+loadMessages();
+
 
 if(
 "serviceWorker"
