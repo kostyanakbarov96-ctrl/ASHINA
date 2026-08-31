@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090b10">
 <link rel="manifest" href="manifest.webmanifest">
-<title>ASHINA Test 1.6</title>
+<title>ASHINA</title>
 
 <style>
 *{box-sizing:border-box}
@@ -14,29 +14,28 @@ body{
 margin:0;
 background:#090b10;
 color:#fff;
-font-family:system-ui,-apple-system,sans-serif;
+font-family:system-ui,-apple-system,sans-serif
 }
 
 header{
 padding:18px 16px 10px;
 display:flex;
 justify-content:space-between;
-align-items:center;
+align-items:center
 }
 
 .logo{
 font-size:28px;
 font-weight:900;
-letter-spacing:3px;
+letter-spacing:3px
 }
 
-.icon{
+.icon,button{
 border:1px solid #292e38;
 background:#131720;
 color:#fff;
 border-radius:12px;
-padding:10px 13px;
-font-size:18px;
+padding:11px
 }
 
 nav{
@@ -47,26 +46,21 @@ padding:8px 12px;
 position:sticky;
 top:0;
 background:#090b10;
-z-index:5;
+z-index:5
 }
 
 nav button{
-border:1px solid #292e38;
-background:#131720;
-color:#fff;
-border-radius:12px;
-padding:10px 4px;
-font-size:13px;
+font-size:12px
 }
 
 nav .active{
-background:#5b1519;
+background:#5b1519
 }
 
 main{
 padding:10px 12px 80px;
 max-width:900px;
-margin:auto;
+margin:auto
 }
 
 .hero,.card{
@@ -74,93 +68,73 @@ background:#11141b;
 border:1px solid #292e38;
 border-radius:20px;
 padding:18px;
-margin-top:12px;
+margin-top:12px
 }
 
 .hero{
 min-height:230px;
 display:flex;
 align-items:end;
-background:linear-gradient(
-135deg,
-#171923,
-#0d0f14 60%,
-#250f12
-);
+background:linear-gradient(135deg,#171923,#0d0f14 60%,#250f12)
 }
 
 h1{
 font-size:32px;
-margin:10px 0;
-}
-
-h2{
-margin-top:0;
+margin:10px 0
 }
 
 .muted{
 color:#9da2ac;
-font-size:13px;
+font-size:13px
 }
 
 .quick{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:8px;
-margin-top:12px;
+margin-top:12px
 }
 
 .quick button{
-border:1px solid #292e38;
-background:#131720;
-color:#fff;
-border-radius:12px;
-padding:13px;
-font-size:14px;
+width:100%
 }
 
 .controls{
 display:flex;
 gap:8px;
-margin-top:12px;
+margin-top:12px
 }
 
 .controls button{
-flex:1;
-border:1px solid #292e38;
-background:#131720;
-color:#fff;
-border-radius:12px;
-padding:12px;
+flex:1
 }
 
 audio{
 width:100%;
-margin-top:12px;
+margin-top:12px
 }
 
 input[type=range]{
 width:100%;
-accent-color:#ddd;
+accent-color:#ddd
 }
 
 .hidden{
-display:none;
+display:none
 }
 
 .row{
 display:flex;
 justify-content:space-between;
 align-items:center;
-gap:10px;
+gap:10px
 }
 
 .badge{
 background:#202530;
 border-radius:99px;
 padding:5px 9px;
-font-size:12px;
-display:inline-block;
+font-size:12px
 }
 
 .feed{
@@ -168,51 +142,37 @@ border:1px solid #292e38;
 border-radius:16px;
 padding:15px;
 margin-top:12px;
-background:#131720;
-}
-
-.feed-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
+background:#131720
 }
 
 .like-row{
 display:flex;
 gap:8px;
-margin-top:12px;
+margin-top:12px
 }
 
 .like-row button{
-flex:1;
-border:1px solid #292e38;
-background:#0f131a;
-color:#fff;
-border-radius:10px;
-padding:10px;
-font-size:14px;
+flex:1
 }
 
-.like-row button.selected{
-background:#5b1519;
-border-color:#7a2026;
+.like-row .selected{
+background:#5b1519
 }
 
 .status{
 margin-top:9px;
 font-size:12px;
 color:#9da2ac;
-min-height:16px;
+min-height:18px
 }
 
 .chat-box{
-height:440px;
+height:400px;
 overflow-y:auto;
 border:1px solid #292e38;
 border-radius:16px;
 background:#0d1118;
-padding:12px;
+padding:12px
 }
 
 .message{
@@ -220,76 +180,89 @@ max-width:88%;
 margin:10px 0;
 padding:10px 12px;
 border-radius:14px;
-background:#171d27;
-position:relative;
+background:#171d27
 }
 
 .message.me{
 margin-left:auto;
-background:#5b1519;
+background:#5b1519
 }
 
 .message-name{
 font-size:11px;
 opacity:.6;
-margin-bottom:3px;
+margin-bottom:4px
 }
 
 .message-time{
 font-size:10px;
 opacity:.5;
-margin-top:5px;
+margin-top:5px
 }
 
 .message-edited{
-font-size:10px;
-opacity:.5;
-margin-left:5px;
+margin-left:5px
 }
 
 .message-actions{
 display:flex;
 gap:5px;
-margin-top:8px;
 flex-wrap:wrap;
+margin-top:8px
 }
 
 .message-actions button{
-border:1px solid rgba(255,255,255,.15);
-background:rgba(0,0,0,.18);
-color:#fff;
-border-radius:8px;
 padding:5px 7px;
-font-size:11px;
-}
-
-.reply-preview{
-border-left:3px solid #aaa;
-padding-left:8px;
-margin-bottom:7px;
-font-size:11px;
-opacity:.65;
+font-size:11px
 }
 
 .reaction-row{
 display:flex;
 gap:5px;
 margin-top:7px;
+flex-wrap:wrap
 }
 
 .reaction{
-border:1px solid rgba(255,255,255,.15);
-background:rgba(0,0,0,.15);
-color:#fff;
-border-radius:99px;
-padding:3px 7px;
+padding:4px 7px;
 font-size:11px;
+border-radius:99px
+}
+
+.attachment{
+margin-top:8px;
+padding:8px;
+border:1px solid rgba(255,255,255,.15);
+border-radius:10px;
+font-size:12px
+}
+
+.attachment img,
+.attachment video{
+max-width:100%;
+border-radius:10px;
+margin-top:5px
+}
+
+.attachment audio{
+margin-top:5px
+}
+
+.chat-tools{
+display:flex;
+gap:7px;
+margin-top:8px;
+flex-wrap:wrap
+}
+
+.chat-tools button{
+font-size:12px
 }
 
 .chat-input{
 display:flex;
 gap:8px;
-margin-top:10px;
+margin-top:10px
 }
 
 .chat-input input{
@@ -300,34 +273,15 @@ background:#131720;
 color:#fff;
 border-radius:12px;
 padding:12px;
-outline:none;
+outline:none
 }
 
 .chat-input button{
-border:1px solid #292e38;
-background:#5b1519;
-color:#fff;
-border-radius:12px;
-padding:12px 15px;
-}
-
-.chat-tools{
-display:flex;
-gap:7px;
-margin-top:8px;
-}
-
-.chat-tools button{
-border:1px solid #292e38;
-background:#131720;
-color:#fff;
-border-radius:10px;
-padding:8px 10px;
-font-size:12px;
+background:#5b1519
 }
 
 #fileInput{
-display:none;
+display:none
 }
 
 .reply-bar{
@@ -337,99 +291,74 @@ background:#131720;
 border-radius:12px;
 padding:9px;
 margin-top:9px;
-font-size:12px;
+font-size:12px
 }
 
 .reply-bar.show{
 display:flex;
 justify-content:space-between;
-align-items:center;
-gap:8px;
-}
-
-.reply-bar button{
-border:0;
-background:transparent;
-color:#fff;
-font-size:18px;
-}
-
-.attachment{
-margin-top:8px;
-padding:8px;
-border:1px solid rgba(255,255,255,.15);
-border-radius:10px;
-font-size:12px;
-}
-
-.attachment img,
-.attachment video{
-max-width:100%;
-border-radius:10px;
-margin-top:5px;
-}
-
-.attachment audio{
-margin-top:5px;
-width:100%;
+align-items:center
 }
 
 .security{
-padding:14px;
+padding:15px;
 border:1px solid #292e38;
 border-radius:15px;
 background:#0d1118;
-margin-top:12px;
+margin-top:12px
 }
 
 .security-title{
 font-weight:700;
-margin-bottom:5px;
+margin-bottom:6px
 }
 
-.security-status{
-font-size:12px;
-color:#9da2ac;
+.guard-button{
+width:100%;
+margin-top:12px;
+background:#5b1519
+}
+
+.guard-result{
+display:none;
+margin-top:12px
+}
+
+.guard-result.show{
+display:block
+}
+
+.guard-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px 0;
+border-bottom:1px solid #292e38;
+font-size:13px
+}
+
+.guard-item:last-child{
+border-bottom:0
+}
+
+.guard-ok{
+color:#9fd49f
+}
+
+.guard-error{
+color:#e99b9b
+}
+
+.guard-total{
+margin-top:12px;
+font-weight:700
 }
 
 .danger{
-margin-top:12px;
 width:100%;
-border:1px solid #59242a;
+margin-top:12px;
 background:#1c1114;
-color:#fff;
-border-radius:12px;
-padding:11px;
-}
-
-.music-status{
-margin-top:10px;
-padding:9px 11px;
-border:1px solid #292e38;
-border-radius:10px;
-background:#0d1118;
-font-size:12px;
-color:#9da2ac;
-}
-
-@media(max-width:420px){
-
-.logo{
-font-size:25px;
-}
-
-nav button{
-font-size:11px;
-}
-
-h1{
-font-size:28px;
-}
-
-.chat-box{
-height:390px;
-}
-
+border-color:#59242a
 }
 </style>
 </head>
@@ -437,83 +366,39 @@ height:390px;
 <body>
 
 <header>
-
 <div class="logo">ASHINA</div>
-
-<button class="icon" onclick="show('settings')">
-⚙
-</button>
-
+<button class="icon" onclick="show('settings')">⚙</button>
 </header>
 
-
 <nav>
-
-<button class="active" onclick="show('home',this)">
-⌂<br>Главная
-</button>
-
-<button onclick="show('music',this)">
-♫<br>Музыка
-</button>
-
-<button onclick="show('news',this)">
-▣<br>Лента
-</button>
-
-<button onclick="show('chat',this)">
-💬<br>Чат
-</button>
-
+<button class="active" onclick="show('home',this)">⌂<br>Главная</button>
+<button onclick="show('music',this)">♫<br>Музыка</button>
+<button onclick="show('news',this)">▣<br>Лента</button>
+<button onclick="show('chat',this)">💬<br>Чат</button>
 </nav>
 
-
 <main>
-
 
 <section id="home">
 
 <div class="hero">
-
 <div>
-
-<span class="badge">
-ASHINA · TEST 1.6
-</span>
-
+<span class="badge">ASHINA · GUARD 1.0</span>
 <h1>Добро пожаловать</h1>
-
 <p class="muted">
-Музыка, общение, новости и игры — всё в одном месте.
+Музыка, общение, файлы и безопасность — в одном месте.
 </p>
-
 </div>
-
 </div>
-
 
 <div class="quick">
-
-<button onclick="show('music')">
-🎵 Музыка
-</button>
-
-<button onclick="show('news')">
-📰 Лента
-</button>
-
-<button onclick="show('chat')">
-💬 Чат
-</button>
-
-<button onclick="show('settings')">
-⚙️ Настройки
-</button>
-
+<button onclick="show('music')">🎵 Музыка</button>
+<button onclick="show('news')">📰 Лента</button>
+<button onclick="show('chat')">💬 Чат</button>
+<button onclick="show('settings')">⚙️ Настройки</button>
 </div>
 
 </section>
-
 
 
 <section id="music" class="hidden">
@@ -523,66 +408,33 @@ ASHINA · TEST 1.6
 <h2>🎵 ASHINA Music</h2>
 
 <p class="muted">
-Временный трек · Test 1.6
+Временный трек · отдельный музыкальный плеер
 </p>
 
-<audio
-id="audio"
-preload="auto"
-src="audio.wav">
-</audio>
+<audio id="audio" preload="auto" src="audio.wav"></audio>
 
 <div class="controls">
-
-<button id="play">
-▶️
-</button>
-
-<button id="back">
-↺ 10с
-</button>
-
-<button id="forward">
-10с ↻
-</button>
-
+<button id="play">▶️</button>
+<button id="back">↺ 10с</button>
+<button id="forward">10с ↻</button>
 </div>
 
-<input
-id="seek"
-type="range"
-min="0"
-max="100"
-value="0">
+<input id="seek" type="range" min="0" max="100" value="0">
 
 <div class="row">
-
-<span id="time" class="muted">
-0:00 / 0:00
-</span>
-
+<span id="time" class="muted">0:00 / 0:00</span>
 <span>🔊</span>
-
 </div>
 
-<input
-id="volume"
-type="range"
-min="0"
-max="1"
-step="0.01"
-value="0.8">
+<input id="volume" type="range" min="0" max="1" step=".01" value=".8">
 
-<div
-id="musicStatus"
-class="music-status">
+<p id="musicStatus" class="status">
 Плеер готов.
-</div>
+</p>
 
 </div>
 
 </section>
-
 
 
 <section id="news" class="hidden">
@@ -592,49 +444,30 @@ class="music-status">
 <h2>📰 Трендовая лента</h2>
 
 <p class="muted">
-Тест системы реакций ASHINA.
+Тестовая публикация ASHINA.
 </p>
 
 <div class="feed">
 
-<div class="feed-header">
-
-<strong>
-🔥 Первая публикация ASHINA
-</strong>
-
-<span class="badge">0+</span>
-
-</div>
+<strong>🔥 Первая публикация ASHINA</strong>
 
 <p>
-ASHINA развивается. Это первая тестовая публикация нашей ленты.
-</p>
-
-<p class="muted">
-Проверь реакции ниже.
+ASHINA развивается. Проверь реакции.
 </p>
 
 <div class="like-row">
 
-<button
-id="likeButton"
-onclick="vote('like')">
+<button id="likeButton" onclick="vote('like')">
 👍 <span id="likeCount">0</span>
 </button>
 
-<button
-id="dislikeButton"
-onclick="vote('dislike')">
+<button id="dislikeButton" onclick="vote('dislike')">
 👎 <span id="dislikeCount">0</span>
 </button>
 
 </div>
 
-<div
-id="voteStatus"
-class="status">
-</div>
+<div id="voteStatus" class="status"></div>
 
 </div>
 
@@ -643,78 +476,38 @@ class="status">
 </section>
 
 
-
 <section id="chat" class="hidden">
 
 <div class="card">
 
-<div class="row">
-
-<div>
-
 <h2>💬 ASHINA Chat</h2>
 
 <p class="muted">
-Локальный чат · Test 1.6
+Локальный чат
 </p>
 
-</div>
+<div id="chatBox" class="chat-box"></div>
 
-<button
-class="chat-tools"
-onclick="clearChat()">
-🧹
-</button>
-
-</div>
-
-
-<div
-id="chatBox"
-class="chat-box">
-</div>
-
-
-<div
-id="replyBar"
-class="reply-bar">
-
+<div id="replyBar" class="reply-bar">
 <span id="replyText"></span>
-
-<button onclick="cancelReply()">
-✕
-</button>
-
+<button onclick="cancelReply()">✕</button>
 </div>
-
 
 <div class="chat-tools">
 
-<button onclick="openFilePicker()">
-📎 Файл
-</button>
-
-<button onclick="insertEmoji('😀')">
-😀
-</button>
-
-<button onclick="insertEmoji('❤️')">
-❤️
-</button>
-
-<button onclick="insertEmoji('🔥')">
-🔥
-</button>
+<button onclick="openFilePicker()">📎 Файл</button>
+<button onclick="insertEmoji('😀')">😀</button>
+<button onclick="insertEmoji('❤️')">❤️</button>
+<button onclick="insertEmoji('🔥')">🔥</button>
 
 </div>
-
 
 <input
 id="fileInput"
 type="file"
 accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
-multiple>
-
+multiple
+>
 
 <div class="chat-input">
 
@@ -722,23 +515,18 @@ multiple>
 id="chatInput"
 type="text"
 maxlength="1000"
-placeholder="Напиши сообщение...">
+placeholder="Напиши сообщение..."
+>
 
-<button onclick="sendMessage()">
-➤
-</button>
+<button onclick="sendMessage()">➤</button>
 
 </div>
 
-<p
-id="chatStatus"
-class="status">
-</p>
+<p id="chatStatus" class="status"></p>
 
 </div>
 
 </section>
-
 
 
 <section id="settings" class="hidden">
@@ -751,10 +539,7 @@ class="status">
 
 <span>Сохранять данные</span>
 
-<input
-id="saveSettings"
-type="checkbox"
-checked>
+<input id="saveSettings" type="checkbox" checked>
 
 </div>
 
@@ -765,8 +550,9 @@ checked>
 🔐 Безопасность ASHINA
 </div>
 
-<div class="security-status">
-Локальная защита подготовлена. PIN и биометрия будут подключены позже.
+<div class="muted">
+Локальная защита приложения.
+PIN и биометрия будут добавлены отдельно.
 </div>
 
 </div>
@@ -778,8 +564,23 @@ checked>
 🛡️ ASHINA Guard
 </div>
 
-<div class="security-status">
-Защита файлов, аккаунтов и сервера будет добавлена при подключении облачной системы.
+<div class="muted">
+Проверяет доступность основных компонентов приложения.
+</div>
+
+<button
+class="guard-button"
+onclick="runGuard()"
+>
+🔍 Проверить защиту
+</button>
+
+<div id="guardResult" class="guard-result">
+
+<div id="guardFiles"></div>
+
+<div id="guardTotal" class="guard-total"></div>
+
 </div>
 
 </div>
@@ -787,14 +588,14 @@ checked>
 
 <button
 class="danger"
-onclick="clearChat()">
+onclick="clearChat()"
+>
 🧹 Очистить локальный чат
 </button>
 
 </div>
 
 </section>
-
 
 </main>
 
@@ -806,11 +607,11 @@ onclick="clearChat()">
 ========================= */
 
 const ids=[
-'home',
-'music',
-'news',
-'chat',
-'settings'
+"home",
+"music",
+"news",
+"chat",
+"settings"
 ];
 
 function show(id,btn){
@@ -820,21 +621,21 @@ ids.forEach(function(x){
 document
 .getElementById(x)
 .classList
-.toggle('hidden',x!==id);
+.toggle("hidden",x!==id);
 
 });
 
 document
-.querySelectorAll('nav button')
+.querySelectorAll("nav button")
 .forEach(function(x){
 
-x.classList.remove('active');
+x.classList.remove("active");
 
 });
 
 if(btn){
 
-btn.classList.add('active');
+btn.classList.add("active");
 
 }
 
@@ -842,70 +643,61 @@ btn.classList.add('active');
 
 
 /* =========================
-   МУЗЫКА ASHINA 1.6
+   МУЗЫКА
 ========================= */
 
 const audio=
-document.getElementById('audio');
+document.getElementById("audio");
 
 const play=
-document.getElementById('play');
+document.getElementById("play");
 
 const seek=
-document.getElementById('seek');
+document.getElementById("seek");
 
 const volume=
-document.getElementById('volume');
+document.getElementById("volume");
 
 const musicStatus=
-document.getElementById('musicStatus');
+document.getElementById("musicStatus");
 
-const MUSIC_TIME_KEY=
-'ashina_music_time';
+const MUSIC_TIME=
+"ashina_music_time";
 
-const MUSIC_VOLUME_KEY=
-'ashina_music_volume';
+const MUSIC_VOLUME=
+"ashina_music_volume";
 
-
-/* Восстановление громкости */
 
 const savedVolume=
-localStorage.getItem(
-MUSIC_VOLUME_KEY
+Number(
+localStorage.getItem(MUSIC_VOLUME)
 );
 
-if(savedVolume!==null){
-
-const number=
-Number(savedVolume);
-
 if(
-Number.isFinite(number)
+Number.isFinite(savedVolume)
 &&
-number>=0
+savedVolume>=0
 &&
-number<=1
+savedVolume<=1
 ){
 
-audio.volume=number;
-volume.value=number;
+audio.volume=savedVolume;
+volume.value=savedVolume;
+
+}else{
+
+audio.volume=.8;
 
 }
 
-}
-
-
-/* Восстановление позиции */
 
 audio.addEventListener(
-'loadedmetadata',
+"loadedmetadata",
 function(){
 
 const savedTime=
 Number(
-localStorage.getItem(
-MUSIC_TIME_KEY
-)
+localStorage.getItem(MUSIC_TIME)
 );
 
 if(
@@ -916,18 +708,10 @@ savedTime>=0
 savedTime<audio.duration
 ){
 
-audio.currentTime=
-savedTime;
+audio.currentTime=savedTime;
 
 musicStatus.textContent=
-'Позиция восстановлена: '
-+
-formatTime(savedTime);
-
-}else{
-
-musicStatus.textContent=
-'Плеер готов.';
+"Позиция восстановлена.";
 
 }
 
@@ -937,8 +721,6 @@ updateMusicUI();
 );
 
 
-/* Play */
-
 play.onclick=function(){
 
 if(audio.paused){
@@ -947,13 +729,13 @@ audio.play()
 .then(function(){
 
 musicStatus.textContent=
-'▶️ Музыка играет';
+"▶️ Музыка играет";
 
 })
 .catch(function(){
 
 musicStatus.textContent=
-'Нажми ▶️ ещё раз для разрешения звука.';
+"Нажми ▶️ ещё раз для разрешения звука.";
 
 });
 
@@ -966,158 +748,102 @@ audio.pause();
 };
 
 
-/* Play event */
-
 audio.onplay=function(){
 
-play.textContent='⏸️';
-
-musicStatus.textContent=
-'▶️ Музыка играет';
+play.textContent="⏸️";
+musicStatus.textContent="▶️ Музыка играет";
 
 };
 
-
-/* Pause event */
 
 audio.onpause=function(){
 
-play.textContent='▶️';
+play.textContent="▶️";
 
-saveMusicState();
-
-musicStatus.textContent=
-'⏸️ Пауза · позиция сохранена';
+saveMusic();
 
 };
 
-
-/* Time update */
 
 audio.ontimeupdate=function(){
 
-saveMusicState();
-
+saveMusic();
 updateMusicUI();
 
 };
 
-
-/* Metadata */
-
-audio.onloadedmetadata=function(){
-
-updateMusicUI();
-
-};
-
-
-/* Конец трека */
 
 audio.onended=function(){
 
-play.textContent='▶️';
+play.textContent="▶️";
 
 localStorage.setItem(
-MUSIC_TIME_KEY,
-'0'
+MUSIC_TIME,
+"0"
 );
-
-musicStatus.textContent=
-'Трек завершён.';
 
 updateMusicUI();
 
 };
 
 
-/* Сохранение позиции */
-
-function saveMusicState(){
-
-if(
-Number.isFinite(audio.currentTime)
-){
+function saveMusic(){
 
 localStorage.setItem(
-MUSIC_TIME_KEY,
+MUSIC_TIME,
 String(audio.currentTime)
 );
 
 }
 
-}
-
-
-/* Интерфейс */
 
 function updateMusicUI(){
 
 if(audio.duration){
 
 seek.value=
-(
-audio.currentTime/
-audio.duration
-)*100;
+audio.currentTime/audio.duration*100;
 
 }
 
-document
-.getElementById('time')
-.textContent=
+document.getElementById("time").textContent=
 formatTime(audio.currentTime)
 +
-' / '
+" / "
 +
 formatTime(audio.duration||0);
 
 }
 
 
-/* Перемотка */
-
 seek.oninput=function(){
 
 if(audio.duration){
 
 audio.currentTime=
-(
-Number(seek.value)/
-100
-)
-*
-audio.duration;
+Number(seek.value)/100*audio.duration;
 
-saveMusicState();
+saveMusic();
 
 }
 
 };
 
 
-/* Громкость */
-
 volume.oninput=function(){
 
-const value=
+audio.volume=
 Number(volume.value);
 
-audio.volume=value;
-
 localStorage.setItem(
-MUSIC_VOLUME_KEY,
-String(value)
+MUSIC_VOLUME,
+String(audio.volume)
 );
 
 };
 
 
-/* Назад */
-
-document
-.getElementById('back')
-.onclick=function(){
+document.getElementById("back").onclick=function(){
 
 audio.currentTime=
 Math.max(
@@ -1125,22 +851,14 @@ Math.max(
 audio.currentTime-10
 );
 
-saveMusicState();
+saveMusic();
 
 };
 
 
-/* Вперёд */
+document.getElementById("forward").onclick=function(){
 
-document
-.getElementById('forward')
-.onclick=function(){
-
-if(!audio.duration){
-
-return;
-
-}
+if(audio.duration){
 
 audio.currentTime=
 Math.min(
@@ -1148,115 +866,84 @@ audio.duration,
 audio.currentTime+10
 );
 
-saveMusicState();
+saveMusic();
+
+}
 
 };
 
 
-/* Формат времени */
+function formatTime(x){
 
-function formatTime(seconds){
+x=Math.floor(x||0);
 
-seconds=
-Math.floor(seconds||0);
-
-return Math.floor(seconds/60)
+return Math.floor(x/60)
 +
-':'
+":"
 +
-String(seconds%60)
-.padStart(2,'0');
+String(x%60).padStart(2,"0");
 
 }
 
 
-/* Сохранение перед закрытием */
-
 window.addEventListener(
-'beforeunload',
-function(){
-
-saveMusicState();
-
-});
+"beforeunload",
+saveMusic
+);
 
 
 /* =========================
    ЛАЙКИ / ДИЗЛАЙКИ
 ========================= */
 
-const LIKE_KEY=
-'ashina_test15_like';
-
-const DISLIKE_KEY=
-'ashina_test15_dislike';
-
 let like=
-localStorage.getItem(LIKE_KEY)==='1';
+localStorage.getItem("ashina_like")==="1";
 
 let dislike=
-localStorage.getItem(DISLIKE_KEY)==='1';
+localStorage.getItem("ashina_dislike")==="1";
 
 
 function updateVoteUI(){
 
-const likeButton=
-document.getElementById(
-'likeButton'
-);
+document
+.getElementById("likeButton")
+.classList
+.toggle("selected",like);
 
-const dislikeButton=
-document.getElementById(
-'dislikeButton'
-);
+document
+.getElementById("dislikeButton")
+.classList
+.toggle("selected",dislike);
 
-likeButton.classList.toggle(
-'selected',
+document.getElementById(
+"likeCount"
+).textContent=
+like?"1":"0";
+
+document.getElementById(
+"dislikeCount"
+).textContent=
+dislike?"1":"0";
+
+document.getElementById(
+"voteStatus"
+).textContent=
 like
-);
-
-dislikeButton.classList.toggle(
-'selected',
+?
+"👍 Твой лайк учтён"
+:
 dislike
-);
-
-document.getElementById(
-'likeCount'
-).textContent=
-like?'1':'0';
-
-document.getElementById(
-'dislikeCount'
-).textContent=
-dislike?'1':'0';
-
-const status=
-document.getElementById(
-'voteStatus'
-);
-
-if(like){
-
-status.textContent=
-'👍 Твой лайк учтён';
-
-}else if(dislike){
-
-status.textContent=
-'👎 Твой дизлайк учтён';
-
-}else{
-
-status.textContent='';
-
-}
+?
+"👎 Твой дизлайк учтён"
+:
+"";
 
 }
 
 
 function vote(type){
 
-if(type==='like'){
+if(type==="like"){
 
 if(like){
 
@@ -1285,13 +972,13 @@ like=false;
 }
 
 localStorage.setItem(
-LIKE_KEY,
-like?'1':'0'
+"ashina_like",
+like?"1":"0"
 );
 
 localStorage.setItem(
-DISLIKE_KEY,
-dislike?'1':'0'
+"ashina_dislike",
+dislike?"1":"0"
 );
 
 updateVoteUI();
@@ -1306,7 +993,7 @@ updateVoteUI();
 ========================= */
 
 const CHAT_KEY=
-'ashina_test15_messages';
+"ashina_messages";
 
 let messages=[];
 
@@ -1326,26 +1013,43 @@ messages=[];
 let replyTo=null;
 
 
-/* Рендер */
+function saveMessages(){
+
+try{
+
+localStorage.setItem(
+CHAT_KEY,
+JSON.stringify(messages)
+);
+
+}catch(e){
+
+document.getElementById(
+"chatStatus"
+).textContent=
+"⚠️ Не удалось сохранить данные.";
+
+}
+
+}
+
 
 function renderChat(){
 
 const box=
-document.getElementById(
-'chatBox'
-);
+document.getElementById("chatBox");
 
-box.innerHTML='';
+box.innerHTML="";
 
-if(messages.length===0){
+if(!messages.length){
 
 const empty=
-document.createElement('div');
+document.createElement("div");
 
-empty.className='muted';
+empty.className="muted";
 
 empty.textContent=
-'Пока сообщений нет. Напиши первое сообщение ASHINA.';
+"Пока сообщений нет.";
 
 box.appendChild(empty);
 
@@ -1357,52 +1061,43 @@ return;
 messages.forEach(function(message){
 
 const item=
-document.createElement('div');
+document.createElement("div");
 
 item.className=
-'message'
-+
-(message.me?' me':'');
+"message"+
+(message.me?" me":"");
 
-
-/* Имя */
 
 const name=
-document.createElement('div');
+document.createElement("div");
 
-name.className=
-'message-name';
+name.className="message-name";
 
 name.textContent=
-message.me?'Ты':'ASHINA';
+message.me?"Ты":"ASHINA";
 
 item.appendChild(name);
 
 
-/* Ответ */
-
 if(message.replyText){
 
 const reply=
-document.createElement('div');
+document.createElement("div");
 
-reply.className=
-'reply-preview';
+reply.className="muted";
 
 reply.textContent=
-'↩ '+message.replyText;
+"↩ "+message.replyText;
 
 item.appendChild(reply);
 
 }
 
 
-/* Текст */
-
 if(message.text){
 
 const text=
-document.createElement('div');
+document.createElement("div");
 
 text.textContent=
 message.text;
@@ -1412,39 +1107,32 @@ item.appendChild(text);
 }
 
 
-/* Файл */
-
 if(message.file){
 
 const attachment=
-document.createElement('div');
+document.createElement("div");
 
-attachment.className=
-'attachment';
-
-const type=
-message.file.type||'';
+attachment.className="attachment";
 
 const title=
-document.createElement('div');
+document.createElement("div");
 
 title.textContent=
-'📎 '+message.file.name;
+"📎 "+message.file.name;
 
 attachment.appendChild(title);
 
 
 if(
-type.startsWith('image/')
+message.file.type.startsWith("image/")
 &&
 message.file.data
 ){
 
 const img=
-document.createElement('img');
+document.createElement("img");
 
-img.src=
-message.file.data;
+img.src=message.file.data;
 
 attachment.appendChild(img);
 
@@ -1452,17 +1140,15 @@ attachment.appendChild(img);
 
 
 if(
-type.startsWith('video/')
+message.file.type.startsWith("video/")
 &&
 message.file.data
 ){
 
 const video=
-document.createElement('video');
+document.createElement("video");
 
-video.src=
-message.file.data;
-
+video.src=message.file.data;
 video.controls=true;
 
 attachment.appendChild(video);
@@ -1471,58 +1157,49 @@ attachment.appendChild(video);
 
 
 if(
-type.startsWith('audio/')
+message.file.type.startsWith("audio/")
 &&
 message.file.data
 ){
 
 const audioEl=
-document.createElement('audio');
+document.createElement("audio");
 
-audioEl.src=
-message.file.data;
-
+audioEl.src=message.file.data;
 audioEl.controls=true;
 
 attachment.appendChild(audioEl);
 
 }
 
-
 item.appendChild(attachment);
 
 }
 
 
-/* Время */
-
 const time=
-document.createElement('div');
+document.createElement("div");
 
-time.className=
-'message-time';
+time.className="message-time";
 
 time.textContent=
-new Date(
-message.time
-).toLocaleTimeString(
-'ru-RU',
+new Date(message.time)
+.toLocaleTimeString(
+"ru-RU",
 {
-hour:'2-digit',
-minute:'2-digit'
+hour:"2-digit",
+minute:"2-digit"
 }
 );
 
 if(message.edited){
 
 const edited=
-document.createElement('span');
+document.createElement("span");
 
-edited.className=
-'message-edited';
+edited.className="message-edited";
 
-edited.textContent=
-'(изменено)';
+edited.textContent="(изменено)";
 
 time.appendChild(edited);
 
@@ -1531,32 +1208,26 @@ time.appendChild(edited);
 item.appendChild(time);
 
 
-/* Реакции */
-
 const reactions=
-document.createElement('div');
+document.createElement("div");
 
-reactions.className=
-'reaction-row';
+reactions.className="reaction-row";
 
 [
-'❤️',
-'👍',
-'😂',
-'🔥'
-].forEach(
-function(emoji){
+"❤️",
+"👍",
+"😂",
+"🔥"
+].forEach(function(emoji){
 
-const reaction=
-document.createElement('button');
+const button=
+document.createElement("button");
 
-reaction.className=
-'reaction';
+button.className="reaction";
 
-reaction.textContent=
-emoji;
+button.textContent=emoji;
 
-reaction.onclick=function(){
+button.onclick=function(){
 
 if(!message.reactions){
 
@@ -1573,60 +1244,26 @@ renderChat();
 
 };
 
-reactions.appendChild(
-reaction
-);
+reactions.appendChild(button);
 
 });
 
 
-if(message.reactions){
+item.appendChild(reactions);
 
-Object.keys(
-message.reactions
-).forEach(
-function(emoji){
-
-const count=
-document.createElement('span');
-
-count.className=
-'reaction';
-
-count.textContent=
-emoji+
-' '+
-message.reactions[emoji];
-
-reactions.appendChild(
-count
-);
-
-});
-
-}
-
-item.appendChild(
-reactions
-);
-
-
-/* Кнопки */
 
 const actions=
-document.createElement('div');
+document.createElement("div");
 
-actions.className=
-'message-actions';
+actions.className="message-actions";
 
 
 if(message.me){
 
 const edit=
-document.createElement('button');
+document.createElement("button");
 
-edit.textContent=
-'✏️ Изменить';
+edit.textContent="✏️ Изменить";
 
 edit.onclick=function(){
 
@@ -1638,10 +1275,9 @@ actions.appendChild(edit);
 
 
 const del=
-document.createElement('button');
+document.createElement("button");
 
-del.textContent=
-'🗑️ Удалить';
+del.textContent="🗑️ Удалить";
 
 del.onclick=function(){
 
@@ -1655,10 +1291,9 @@ actions.appendChild(del);
 
 
 const replyButton=
-document.createElement('button');
+document.createElement("button");
 
-replyButton.textContent=
-'↩️ Ответить';
+replyButton.textContent="↩️ Ответить";
 
 replyButton.onclick=function(){
 
@@ -1666,18 +1301,15 @@ startReply(message);
 
 };
 
-actions.appendChild(
-replyButton
-);
+actions.appendChild(replyButton);
 
 
 if(message.text){
 
 const copy=
-document.createElement('button');
+document.createElement("button");
 
-copy.textContent=
-'📋 Копировать';
+copy.textContent="📋 Копировать";
 
 copy.onclick=function(){
 
@@ -1690,52 +1322,22 @@ actions.appendChild(copy);
 }
 
 
-item.appendChild(
-actions
-);
+item.appendChild(actions);
 
 box.appendChild(item);
 
 });
 
 
-box.scrollTop=
-box.scrollHeight;
+box.scrollTop=box.scrollHeight;
 
 }
 
-
-/* Сохранение */
-
-function saveMessages(){
-
-try{
-
-localStorage.setItem(
-CHAT_KEY,
-JSON.stringify(messages)
-);
-
-}catch(e){
-
-document.getElementById(
-'chatStatus'
-).textContent=
-'⚠️ Не удалось сохранить данные. Возможно, файл слишком большой.';
-
-}
-
-}
-
-
-/* Отправка */
 
 function sendMessage(){
 
 const input=
-document.getElementById(
-'chatInput'
-);
+document.getElementById("chatInput");
 
 const text=
 input.value.trim();
@@ -1747,27 +1349,18 @@ return;
 }
 
 const message={
-
 id:Date.now()+Math.random(),
-
 text:text,
-
 me:true,
-
 time:Date.now(),
-
 edited:false
-
 };
 
 
 if(replyTo){
 
-message.replyId=
-replyTo.id;
-
 message.replyText=
-replyTo.text;
+replyTo.text||"файл";
 
 }
 
@@ -1775,14 +1368,13 @@ messages.push(message);
 
 if(messages.length>100){
 
-messages=
-messages.slice(-100);
+messages=messages.slice(-100);
 
 }
 
 saveMessages();
 
-input.value='';
+input.value="";
 
 cancelReply();
 
@@ -1791,15 +1383,11 @@ renderChat();
 }
 
 
-/* Редактирование */
-
 function editMessage(id){
 
 const message=
 messages.find(
-function(x){
-return x.id===id;
-}
+x=>x.id===id
 );
 
 if(!message){
@@ -1808,20 +1396,19 @@ return;
 
 }
 
-const newText=
+const value=
 prompt(
-'Измени сообщение:',
+"Измени сообщение:",
 message.text
 );
 
-if(newText===null){
+if(value===null){
 
 return;
 
 }
 
-const clean=
-newText.trim();
+const clean=value.trim();
 
 if(!clean){
 
@@ -1829,9 +1416,7 @@ return;
 
 }
 
-message.text=
-clean;
-
+message.text=clean;
 message.edited=true;
 
 saveMessages();
@@ -1841,16 +1426,9 @@ renderChat();
 }
 
 
-/* Удаление */
-
 function deleteMessage(id){
 
-const ok=
-confirm(
-'Удалить это сообщение?'
-);
-
-if(!ok){
+if(!confirm("Удалить сообщение?")){
 
 return;
 
@@ -1858,9 +1436,7 @@ return;
 
 messages=
 messages.filter(
-function(x){
-return x.id!==id;
-}
+x=>x.id!==id
 );
 
 saveMessages();
@@ -1870,24 +1446,26 @@ renderChat();
 }
 
 
-/* Ответ */
-
 function startReply(message){
 
 replyTo=message;
 
 document
-.getElementById('replyBar')
-.classList.add('show');
+.getElementById("replyBar")
+.classList
+.add("show");
 
 document
-.getElementById('replyText')
+.getElementById("replyText")
 .textContent=
-'↩ Ответ на: '+
-(message.text||message.file?.name||'файл');
+"↩ "+(
+message.text||
+message.file?.name||
+"файл"
+);
 
 document
-.getElementById('chatInput')
+.getElementById("chatInput")
 .focus();
 
 }
@@ -1898,13 +1476,12 @@ function cancelReply(){
 replyTo=null;
 
 document
-.getElementById('replyBar')
-.classList.remove('show');
+.getElementById("replyBar")
+.classList
+.remove("show");
 
 }
 
-
-/* Копирование */
 
 function copyText(text){
 
@@ -1914,19 +1491,10 @@ navigator.clipboard
 .writeText(text)
 .then(function(){
 
-const status=
 document.getElementById(
-'chatStatus'
-);
-
-status.textContent=
-'📋 Скопировано';
-
-setTimeout(function(){
-
-status.textContent='';
-
-},1500);
+"chatStatus"
+).textContent=
+"📋 Скопировано";
 
 });
 
@@ -1939,14 +1507,10 @@ alert(text);
 }
 
 
-/* Эмодзи */
-
 function insertEmoji(emoji){
 
 const input=
-document.getElementById(
-'chatInput'
-);
+document.getElementById("chatInput");
 
 input.value+=emoji;
 
@@ -1955,46 +1519,38 @@ input.focus();
 }
 
 
-/* Файлы */
-
 function openFilePicker(){
 
 document
-.getElementById('fileInput')
+.getElementById("fileInput")
 .click();
 
 }
 
 
 document
-.getElementById('fileInput')
+.getElementById("fileInput")
 .addEventListener(
-'change',
+"change",
 function(event){
 
-const files=
+const selected=
 Array.from(
 event.target.files||[]
 );
 
-if(!files.length){
-
-return;
-
-}
-
-files.forEach(function(file){
+selected.forEach(function(file){
 
 const reader=
 new FileReader();
 
 reader.onload=function(){
 
-const message={
+messages.push({
 
 id:Date.now()+Math.random(),
 
-text:'',
+text:"",
 
 me:true,
 
@@ -2003,34 +1559,16 @@ time:Date.now(),
 edited:false,
 
 file:{
-
 name:file.name,
-
 type:file.type,
-
 data:reader.result
-
 }
 
-};
-
-
-if(replyTo){
-
-message.replyId=
-replyTo.id;
-
-message.replyText=
-replyTo.text;
-
-}
-
-messages.push(message);
+});
 
 if(messages.length>100){
 
-messages=
-messages.slice(-100);
+messages=messages.slice(-100);
 
 }
 
@@ -2044,14 +1582,10 @@ reader.readAsDataURL(file);
 
 });
 
-event.target.value='';
-
-cancelReply();
+event.target.value="";
 
 });
 
-
-/* Очистка */
 
 function clearChat(){
 
@@ -2061,12 +1595,9 @@ return;
 
 }
 
-const ok=
-confirm(
-'Очистить весь локальный чат?'
-);
-
-if(!ok){
+if(!confirm(
+"Очистить весь локальный чат?"
+)){
 
 return;
 
@@ -2083,15 +1614,13 @@ renderChat();
 }
 
 
-/* Enter */
-
 document
-.getElementById('chatInput')
+.getElementById("chatInput")
 .addEventListener(
-'keydown',
+"keydown",
 function(event){
 
-if(event.key==='Enter'){
+if(event.key==="Enter"){
 
 event.preventDefault();
 
@@ -2108,21 +1637,21 @@ sendMessage();
 
 const saveSettings=
 document.getElementById(
-'saveSettings'
+"saveSettings"
 );
 
 const SAVE_KEY=
-'ashina_test15_save';
+"ashina_save_settings";
 
-const saved=
+const savedSetting=
 localStorage.getItem(
 SAVE_KEY
 );
 
-if(saved!==null){
+if(savedSetting!==null){
 
 saveSettings.checked=
-saved==='1';
+savedSetting==="1";
 
 }
 
@@ -2130,25 +1659,192 @@ saveSettings.onchange=function(){
 
 localStorage.setItem(
 SAVE_KEY,
-saveSettings.checked?'1':'0'
+saveSettings.checked?"1":"0"
 );
 
 };
 
 
 /* =========================
-   ЗАПУСК
+   ASHINA GUARD
+========================= */
+
+function runGuard(){
+
+const result=
+document.getElementById(
+"guardResult"
+);
+
+const files=
+document.getElementById(
+"guardFiles"
+);
+
+const total=
+document.getElementById(
+"guardTotal"
+);
+
+result.classList.add("show");
+
+files.innerHTML=
+"Проверка...";
+
+total.textContent="";
+
+
+const worker=
+navigator.serviceWorker
+&&
+navigator.serviceWorker.controller;
+
+
+if(!worker){
+
+files.innerHTML=
+'<div class="status">⚠️ Service Worker ещё не подключён. Обнови приложение и попробуй снова.</div>';
+
+total.textContent=
+"ASHINA Guard: ожидание Service Worker";
+
+return;
+
+}
+
+
+const channel=
+new MessageChannel();
+
+const timeout=
+setTimeout(function(){
+
+files.innerHTML=
+'<div class="status">⚠️ Guard не получил ответ от Service Worker.</div>';
+
+total.textContent=
+"Проверка не завершена.";
+
+},5000);
+
+
+channel.port1.onmessage=
+function(event){
+
+clearTimeout(timeout);
+
+const data=
+event.data;
+
+if(
+!data||
+data.type!=="ASHINA_GUARD_RESULT"
+){
+
+files.innerHTML=
+'<div class="status">⚠️ Получен неизвестный ответ.</div>';
+
+return;
+
+}
+
+
+files.innerHTML="";
+
+const entries=
+Object.entries(
+data.files||{}
+);
+
+let good=0;
+
+
+entries.forEach(function(entry){
+
+const file=entry[0];
+const ok=entry[1];
+
+if(ok){
+
+good++;
+
+}
+
+const row=
+document.createElement("div");
+
+row.className="guard-item";
+
+const name=
+document.createElement("span");
+
+name.textContent=
+file.replace("./","");
+
+const state=
+document.createElement("span");
+
+state.className=
+ok
+?
+"guard-ok"
+:
+"guard-error";
+
+state.textContent=
+ok
+?
+"🟢 Доступен"
+:
+"🔴 Ошибка";
+
+row.appendChild(name);
+row.appendChild(state);
+
+files.appendChild(row);
+
+});
+
+
+total.textContent=
+"ASHINA Guard: "
++
+good
++
+"/"
++
+entries.length
++
+" компонентов доступны";
+
+};
+
+
+worker.postMessage(
+{
+type:"ASHINA_GUARD_CHECK"
+},
+[
+channel.port2
+]
+);
+
+}
+
+
+/* =========================
+   START
 ========================= */
 
 renderChat();
 
 if(
-'serviceWorker'
+"serviceWorker"
 in navigator
 ){
 
 navigator.serviceWorker
-.register('sw.js')
+.register("sw.js")
 .catch(function(){});
 
 }
