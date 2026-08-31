@@ -1,13 +1,29 @@
-const CACHE_NAME = "ashina-cache-1-7";
+const CACHE_NAME = "ashina-cache-1-8";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./sw.js",
   "./audio.wav"
 ];
 
-/* Установка нового Service Worker */
+
+/* =========================
+   ASHINA GUARD
+========================= */
+
+const GUARD_FILES = [
+  "./index.html",
+  "./manifest.webmanifest",
+  "./sw.js",
+  "./audio.wav"
+];
+
+
+/* =========================
+   INSTALL
+========================= */
 
 self.addEventListener("install", event => {
 
@@ -24,7 +40,9 @@ self.addEventListener("install", event => {
 });
 
 
-/* Активация нового Service Worker */
+/* =========================
+   ACTIVATE
+========================= */
 
 self.addEventListener("activate", event => {
 
@@ -32,9 +50,9 @@ self.addEventListener("activate", event => {
 
     caches.keys()
 
-      .then(keys =>
+      .then(keys => {
 
-        Promise.all(
+        return Promise.all(
 
           keys
 
@@ -42,9 +60,9 @@ self.addEventListener("activate", event => {
 
             .map(key => caches.delete(key))
 
-        )
+        );
 
-      )
+      })
 
       .then(() => self.clients.claim())
 
@@ -53,7 +71,9 @@ self.addEventListener("activate", event => {
 });
 
 
-/* Обработка запросов */
+/* =========================
+   REQUESTS
+========================= */
 
 self.addEventListener("fetch", event => {
 
@@ -61,19 +81,19 @@ self.addEventListener("fetch", event => {
 
     caches.match(event.request)
 
-      .then(cachedResponse => {
+      .then(cached => {
 
-        if (cachedResponse) {
+        if (cached) {
 
-          return cachedResponse;
+          return cached;
 
         }
 
         return fetch(event.request)
 
-          .then(networkResponse => {
+          .then(response => {
 
-            return networkResponse;
+            return response;
 
           })
 
@@ -86,5 +106,83 @@ self.addEventListener("fetch", event => {
       })
 
   );
+
+});
+
+
+/* =========================
+   ASHINA GUARD CHECK
+========================= */
+
+async function checkGuardFiles() {
+
+  const result = {};
+
+  for (const file of GUARD_FILES) {
+
+    try {
+
+      const response = await fetch(
+        file,
+        {
+          cache: "no-store"
+        }
+      );
+
+      result[file] = response.ok;
+
+    } catch (error) {
+
+      result[file] = false;
+
+    }
+
+  }
+
+  return result;
+
+}
+
+
+/* =========================
+   MESSAGE SYSTEM
+========================= */
+
+self.addEventListener("message", event => {
+
+  if (!event.data) {
+
+    return;
+
+  }
+
+
+  if (event.data.type === "ASHINA_GUARD_CHECK") {
+
+    event.waitUntil(
+
+      checkGuardFiles()
+
+        .then(result => {
+
+          if (event.ports && event.ports[0]) {
+
+            event.ports[0].postMessage({
+
+              type: "ASHINA_GUARD_RESULT",
+
+              files: result,
+
+              time: Date.now()
+
+            });
+
+          }
+
+        })
+
+    );
+
+  }
 
 });
