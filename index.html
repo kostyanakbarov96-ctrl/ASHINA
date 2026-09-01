@@ -1,21 +1,17 @@
-```html
 <!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090b10">
+<link rel="manifest" href="manifest.webmanifest">
 
-<title>ASHINA 2.1 AI</title>
+<title>ASHINA 2.0 AI</title>
 
 <style>
-*{
-box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
-html{
-scroll-behavior:smooth;
-}
+html{scroll-behavior:smooth}
 
 body{
 margin:0;
@@ -26,10 +22,7 @@ color:#fff;
 font-family:system-ui,-apple-system,sans-serif;
 }
 
-button,
-input{
-font:inherit;
-}
+button,input{font:inherit}
 
 button{
 border:1px solid #292e38;
@@ -40,13 +33,8 @@ cursor:pointer;
 transition:.15s;
 }
 
-button:hover{
-background:#1b202b;
-}
-
-button:active{
-transform:scale(.97);
-}
+button:hover{background:#1b202b}
+button:active{transform:scale(.97)}
 
 header{
 padding:18px 16px 10px;
@@ -102,12 +90,9 @@ max-width:900px;
 margin:auto;
 }
 
-.hidden{
-display:none!important;
-}
+.hidden{display:none!important}
 
-.card,
-.hero{
+.card,.hero{
 background:#11141b;
 border:1px solid #292e38;
 border-radius:20px;
@@ -120,12 +105,7 @@ min-height:230px;
 display:flex;
 align-items:end;
 background:
-linear-gradient(
-135deg,
-#171923,
-#0d0f14 60%,
-#250f12
-);
+linear-gradient(135deg,#171923,#0d0f14 60%,#250f12);
 }
 
 h1{
@@ -133,9 +113,7 @@ font-size:32px;
 margin:10px 0;
 }
 
-h2{
-margin-top:0;
-}
+h2{margin-top:0}
 
 .muted{
 color:#9da2ac;
@@ -170,9 +148,7 @@ padding:13px;
 font-size:14px;
 }
 
-/* =========================
-MUSIC
-========================= */
+/* MUSIC */
 
 .music-player{
 background:#0d1118;
@@ -185,9 +161,6 @@ margin-top:12px;
 .track-title{
 font-size:18px;
 font-weight:800;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
 }
 
 .track-artist{
@@ -205,7 +178,6 @@ margin-top:12px;
 .controls button{
 flex:1;
 padding:12px;
-font-size:18px;
 }
 
 audio{
@@ -220,36 +192,12 @@ accent-color:#ddd;
 
 .music-status{
 margin-top:10px;
-padding:10px 11px;
+padding:9px 11px;
 border:1px solid #292e38;
 border-radius:10px;
 background:#0d1118;
 font-size:12px;
 color:#9da2ac;
-line-height:1.4;
-}
-
-.music-status.ok{
-color:#a9dba9;
-}
-
-.music-status.error{
-color:#e99b9b;
-}
-
-.upload-music{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin-top:10px;
-}
-
-.upload-music button{
-padding:11px;
-}
-
-#musicFileInput{
-display:none;
 }
 
 .playlist{
@@ -267,10 +215,6 @@ border:1px solid #292e38;
 background:#131720;
 border-radius:12px;
 cursor:pointer;
-}
-
-.track:hover{
-background:#191e28;
 }
 
 .track.active{
@@ -303,11 +247,6 @@ color:#818894;
 margin-top:2px;
 }
 
-.track-delete{
-padding:6px 8px;
-font-size:12px;
-}
-
 .genre-row{
 display:flex;
 gap:6px;
@@ -326,20 +265,7 @@ font-size:11px;
 background:#5b1519;
 }
 
-.music-info{
-margin-top:12px;
-padding:12px;
-background:#0d1118;
-border:1px solid #292e38;
-border-radius:12px;
-font-size:11px;
-color:#858c97;
-line-height:1.5;
-}
-
-/* =========================
-NEWS
-========================= */
+/* NEWS */
 
 .feed{
 border:1px solid #292e38;
@@ -379,12 +305,10 @@ color:#9da2ac;
 min-height:16px;
 }
 
-/* =========================
-CHAT
-========================= */
+/* CHAT */
 
 .chat-box{
-height:440px;
+height:460px;
 overflow-y:auto;
 border:1px solid #292e38;
 border-radius:16px;
@@ -409,13 +333,13 @@ background:#5b1519;
 .message-name{
 font-size:11px;
 opacity:.6;
-margin-bottom:3px;
+margin-bottom:5px;
 }
 
 .message-time{
 font-size:10px;
 opacity:.5;
-margin-top:6px;
+margin-top:7px;
 }
 
 .message-text{
@@ -446,9 +370,7 @@ padding:8px 10px;
 font-size:12px;
 }
 
-#fileInput{
-display:none;
-}
+#fileInput{display:none}
 
 .chat-input{
 display:flex;
@@ -468,15 +390,86 @@ padding:12px;
 outline:none;
 }
 
+.chat-input input:focus,
+.ai-input input:focus{
+border-color:#7a2026;
+}
+
 .chat-input button,
 .ai-input button{
 background:#5b1519;
 padding:12px 15px;
 }
 
-/* =========================
-AI
-========================= */
+/* REAL ATTACHMENTS */
+
+.attachment{
+margin-top:9px;
+border:1px solid #343a46;
+border-radius:12px;
+padding:8px;
+background:#0d1118;
+overflow:hidden;
+}
+
+.attachment-name{
+font-size:11px;
+color:#c4c8d0;
+margin-bottom:7px;
+word-break:break-all;
+}
+
+.attachment img{
+display:block;
+width:100%;
+max-height:320px;
+object-fit:contain;
+border-radius:9px;
+background:#080a0e;
+}
+
+.attachment video{
+display:block;
+width:100%;
+max-height:320px;
+border-radius:9px;
+background:#000;
+}
+
+.attachment audio{
+width:100%;
+margin:2px 0 0;
+}
+
+.file-open{
+display:block;
+width:100%;
+padding:10px;
+text-align:center;
+text-decoration:none;
+color:#fff;
+background:#171d27;
+border:1px solid #343a46;
+border-radius:10px;
+}
+
+.file-open:hover{
+background:#202633;
+}
+
+.file-size{
+font-size:10px;
+color:#777e89;
+margin-top:5px;
+}
+
+.attachment-icon{
+font-size:32px;
+text-align:center;
+padding:10px;
+}
+
+/* AI */
 
 .ai-core{
 height:460px;
@@ -542,18 +535,14 @@ font-size:12px;
 color:#9da2ac;
 }
 
-.ai-online{
-color:#9fd49f;
-}
+.ai-online{color:#9fd49f}
 
 .ai-thinking{
 animation:thinking 1s infinite;
 }
 
 @keyframes thinking{
-50%{
-opacity:.45;
-}
+50%{opacity:.45}
 }
 
 .ai-memory{
@@ -562,9 +551,7 @@ font-size:11px;
 color:#777e89;
 }
 
-/* =========================
-SECURITY
-========================= */
+/* SECURITY */
 
 .security{
 padding:14px;
@@ -603,22 +590,15 @@ border-bottom:1px solid #292e38;
 font-size:12px;
 }
 
-.guard-ok{
-color:#9fd49f;
-}
-
-.guard-error{
-color:#e99b9b;
-}
+.guard-ok{color:#9fd49f}
+.guard-error{color:#e99b9b}
 
 .guard-total{
 margin-top:10px;
 font-weight:700;
 }
 
-/* =========================
-ADMIN
-========================= */
+/* ADMIN */
 
 .admin-panel{
 margin-top:12px;
@@ -628,9 +608,7 @@ border-radius:15px;
 background:#0d1118;
 }
 
-.admin-hidden{
-display:none;
-}
+.admin-hidden{display:none}
 
 .admin-log{
 font-size:11px;
@@ -653,23 +631,15 @@ background:#1c1114;
 padding:11px;
 }
 
-/* =========================
-MOBILE
-========================= */
+/* MOBILE */
 
 @media(max-width:420px){
 
-.logo{
-font-size:25px;
-}
+.logo{font-size:25px}
 
-nav button{
-font-size:10px;
-}
+nav button{font-size:10px}
 
-h1{
-font-size:28px;
-}
+h1{font-size:28px}
 
 .chat-box,
 .ai-core{
@@ -681,10 +651,6 @@ height:390px;
 max-width:94%;
 }
 
-.upload-music{
-grid-template-columns:1fr;
-}
-
 }
 </style>
 </head>
@@ -694,29 +660,22 @@ grid-template-columns:1fr;
 <header>
 
 <div>
-
 <div class="logo">ASHINA</div>
 
 <div class="version">
-AI CORE · 2.1
+AI CORE · 2.0
+</div>
 </div>
 
-</div>
-
-<button
-class="icon"
-onclick="show('settings')">
+<button class="icon" onclick="show('settings')">
 ⚙
 </button>
 
 </header>
 
-
 <nav>
 
-<button
-class="active"
-onclick="show('home',this)">
+<button class="active" onclick="show('home',this)">
 ⌂<br>Главная
 </button>
 
@@ -738,7 +697,6 @@ onclick="show('home',this)">
 
 </nav>
 
-
 <main>
 
 <!-- HOME -->
@@ -750,7 +708,7 @@ onclick="show('home',this)">
 <div>
 
 <span class="badge">
-ASHINA · 2.1 AI
+ASHINA · 2.0 AI
 </span>
 
 <h1>
@@ -764,7 +722,6 @@ ASHINA · 2.1 AI
 </div>
 
 </div>
-
 
 <div class="card">
 
@@ -786,13 +743,6 @@ AI-ядро:
 
 <br>
 
-Музыкальный движок:
-<span class="ai-online">
-● READY
-</span>
-
-<br>
-
 Память:
 <span id="homeMemory">
 активна
@@ -801,7 +751,6 @@ AI-ядро:
 </div>
 
 </div>
-
 
 <div class="quick">
 
@@ -825,7 +774,6 @@ AI-ядро:
 
 </section>
 
-
 <!-- MUSIC -->
 
 <section id="music" class="hidden">
@@ -837,31 +785,20 @@ AI-ядро:
 </h2>
 
 <p class="muted">
-Музыкальная система ASHINA 2.1
+Музыкальная система ASHINA.
 </p>
-
 
 <div class="music-player">
 
-<div
-id="trackTitle"
-class="track-title">
-Музыка не выбрана
+<div id="trackTitle" class="track-title">
+Выбери композицию
 </div>
 
-<div
-id="trackArtist"
-class="track-artist">
-Добавь аудиофайл
+<div id="trackArtist" class="track-artist">
+ASHINA Music
 </div>
 
-
-<audio
-id="audio"
-preload="metadata"
-controls>
-</audio>
-
+<audio id="audio" preload="metadata" controls></audio>
 
 <div class="controls">
 
@@ -869,9 +806,7 @@ controls>
 ⏮
 </button>
 
-<button
-id="playButton"
-onclick="toggleMusic()">
+<button id="playButton" onclick="toggleMusic()">
 ▶️
 </button>
 
@@ -881,73 +816,29 @@ onclick="toggleMusic()">
 
 </div>
 
-
-<input
-id="seek"
-type="range"
-min="0"
-max="100"
-value="0">
-
+<input id="seek" type="range" min="0" max="100" value="0">
 
 <div class="row">
 
-<span
-id="time"
-class="muted">
+<span id="time" class="muted">
 0:00 / 0:00
 </span>
 
-<span>
-🔊
-</span>
+<span>🔊</span>
 
 </div>
 
+<input id="volume" type="range" min="0" max="1" step="0.01" value="0.8">
 
-<input
-id="volume"
-type="range"
-min="0"
-max="1"
-step="0.01"
-value="0.8">
-
-
-<div
-id="musicStatus"
-class="music-status">
-🟢 Музыкальный движок готов.
+<div id="musicStatus" class="music-status">
+Плеер готов.
 </div>
 
 </div>
-
-
-<div class="upload-music">
-
-<button onclick="openMusicPicker()">
-➕ Добавить музыку
-</button>
-
-<button onclick="testBrowserAudio()">
-🔍 Проверить браузер
-</button>
-
-</div>
-
-
-<input
-id="musicFileInput"
-type="file"
-accept="audio/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac"
-multiple>
-
 
 <div class="genre-row">
 
-<button
-class="active"
-onclick="filterGenre('all',this)">
+<button class="active" onclick="filterGenre('all',this)">
 Все
 </button>
 
@@ -969,31 +860,11 @@ onclick="filterGenre('all',this)">
 
 </div>
 
-
-<div
-id="playlist"
-class="playlist">
-</div>
-
-
-<div class="music-info">
-
-<b>Как добавить музыку:</b><br>
-Нажми «➕ Добавить музыку» и выбери аудиофайл на телефоне.
-После выбора файл сразу появится в плейлисте.
-<br><br>
-
-Поддержка зависит от браузера и кодека. Обычно лучше всего работают
-<b>MP3, WAV и OGG</b>.
-Если конкретный M4A/AAC/FLAC не запускается, это означает, что браузер
-не поддерживает используемый внутри файла кодек.
-
-</div>
+<div id="playlist" class="playlist"></div>
 
 </div>
 
 </section>
-
 
 <!-- NEWS -->
 
@@ -1008,7 +879,6 @@ class="playlist">
 <p class="muted">
 Тестовая система публикаций.
 </p>
-
 
 <div class="feed">
 
@@ -1033,35 +903,25 @@ ASHINA развивается.
 Проверь реакции ниже.
 </p>
 
-
 <div class="like-row">
 
-<button
-id="likeButton"
-onclick="vote('like')">
+<button id="likeButton" onclick="vote('like')">
 👍 <span id="likeCount">0</span>
 </button>
 
-<button
-id="dislikeButton"
-onclick="vote('dislike')">
+<button id="dislikeButton" onclick="vote('dislike')">
 👎 <span id="dislikeCount">0</span>
 </button>
 
 </div>
 
-
-<div
-id="voteStatus"
-class="status">
-</div>
+<div id="voteStatus" class="status"></div>
 
 </div>
 
 </div>
 
 </section>
-
 
 <!-- CHAT -->
 
@@ -1089,12 +949,7 @@ class="status">
 
 </div>
 
-
-<div
-id="chatBox"
-class="chat-box">
-</div>
-
+<div id="chatBox" class="chat-box"></div>
 
 <div class="chat-tools">
 
@@ -1128,13 +983,11 @@ class="chat-box">
 
 </div>
 
-
 <input
 id="fileInput"
 type="file"
 accept="*/*"
 multiple>
-
 
 <div class="chat-input">
 
@@ -1150,16 +1003,11 @@ placeholder="Напиши сообщение...">
 
 </div>
 
-
-<p
-id="chatStatus"
-class="status">
-</p>
+<p id="chatStatus" class="status"></p>
 
 </div>
 
 </section>
-
 
 <!-- AI -->
 
@@ -1176,7 +1024,7 @@ class="status">
 </h2>
 
 <p class="muted">
-Интеллектуальное локальное ядро · 2.1
+Интеллектуальное локальное ядро · 2.0
 </p>
 
 </div>
@@ -1187,12 +1035,7 @@ class="status">
 
 </div>
 
-
-<div
-id="aiCore"
-class="ai-core">
-</div>
-
+<div id="aiCore" class="ai-core"></div>
 
 <div class="ai-controls">
 
@@ -1234,7 +1077,6 @@ class="ai-core">
 
 </div>
 
-
 <div class="ai-input">
 
 <input
@@ -1249,24 +1091,17 @@ placeholder="Скажи ASHINA, что нужно сделать...">
 
 </div>
 
-
-<div
-id="aiStatus"
-class="ai-status">
+<div id="aiStatus" class="ai-status">
 🟢 AI готов.
 </div>
 
-
-<div
-id="aiMemory"
-class="ai-memory">
+<div id="aiMemory" class="ai-memory">
 Память: 0 сообщений
 </div>
 
 </div>
 
 </section>
-
 
 <!-- SETTINGS -->
 
@@ -1278,7 +1113,6 @@ class="ai-memory">
 ⚙️ Настройки
 </h2>
 
-
 <div class="security">
 
 <div class="security-title">
@@ -1287,12 +1121,9 @@ class="ai-memory">
 
 <div class="security-status">
 
-ASHINA работает в локальном режиме.
+ASHINA сейчас работает в локальном режиме.
 
-<br><br>
-
-AI умеет анализировать команды, определять намерение пользователя,
-управлять разделами приложения и музыкальным движком.
+Она умеет анализировать команды, определять намерение пользователя, учитывать предыдущие сообщения и выполнять несколько действий одной командой.
 
 <br><br>
 
@@ -1302,60 +1133,6 @@ AI умеет анализировать команды, определять н
 </div>
 
 </div>
-
-
-<div class="security">
-
-<div class="security-title">
-🎵 Музыкальный движок
-</div>
-
-<div class="security-status">
-
-Текущий браузер:
-
-<span id="browserName">
-определяется...
-</span>
-
-<br>
-
-Audio API:
-<span id="audioSupport">
-проверяется...
-</span>
-
-<br>
-
-MP3:
-<span id="mp3Support">
-проверяется...
-</span>
-
-<br>
-
-WAV:
-<span id="wavSupport">
-проверяется...
-</span>
-
-<br>
-
-OGG:
-<span id="oggSupport">
-проверяется...
-</span>
-
-</div>
-
-<button
-style="width:100%;margin-top:10px;padding:11px"
-onclick="testBrowserAudio">
-
-</button>
-
-</div>
-
 
 <div class="security">
 
@@ -1375,22 +1152,15 @@ onclick="runGuard()">
 
 </button>
 
-
-<div
-id="guardResult"
-class="guard-result">
+<div id="guardResult" class="guard-result">
 
 <div id="guardFiles"></div>
 
-<div
-id="guardTotal"
-class="guard-total">
-</div>
+<div id="guardTotal" class="guard-total"></div>
 
 </div>
 
 </div>
-
 
 <div class="security">
 
@@ -1400,11 +1170,10 @@ class="guard-total">
 
 <div class="security-status">
 
-Панель администратора является прототипом.
-PIN хранится в клиентском коде и НЕ является настоящей защитой.
+Панель администратора скрыта.
+Локальная защита является только прототипом и не заменяет серверную авторизацию.
 
 </div>
-
 
 <button
 style="width:100%;margin-top:10px;padding:11px"
@@ -1414,10 +1183,7 @@ onclick="openAdmin()">
 
 </button>
 
-
-<div
-id="adminPanel"
-class="admin-panel admin-hidden">
+<div id="adminPanel" class="admin-panel admin-hidden">
 
 <strong>
 🛡️ ASHINA ADMIN
@@ -1427,14 +1193,9 @@ class="admin-panel admin-hidden">
 Скрытая панель управления прототипом.
 </p>
 
-<div
-class="admin-log"
-id="adminLog">
-</div>
+<div class="admin-log" id="adminLog"></div>
 
-<button
-class="danger"
-onclick="closeAdmin()">
+<button class="danger" onclick="closeAdmin()">
 🔒 Закрыть админ-режим
 </button>
 
@@ -1442,13 +1203,8 @@ onclick="closeAdmin()">
 
 </div>
 
-
-<button
-class="danger"
-onclick="clearEverything()">
-
+<button class="danger" onclick="clearEverything()">
 🧹 Очистить локальные данные ASHINA
-
 </button>
 
 </div>
@@ -1457,14 +1213,13 @@ onclick="clearEverything()">
 
 </main>
 
-
 <script>
 
 /* =====================================================
-GLOBAL
+   GLOBAL
 ===================================================== */
 
-const APP_VERSION='2.1';
+const APP_VERSION='2.0';
 
 const NAV_IDS=[
 'home',
@@ -1475,7 +1230,6 @@ const NAV_IDS=[
 'settings'
 ];
 
-
 function show(id,btn){
 
 NAV_IDS.forEach(function(x){
@@ -1483,25 +1237,15 @@ NAV_IDS.forEach(function(x){
 const element=document.getElementById(x);
 
 if(element){
-
-element.classList.toggle(
-'hidden',
-x!==id
-);
-
+element.classList.toggle('hidden',x!==id);
 }
 
 });
 
-
-document
-.querySelectorAll('nav button')
+document.querySelectorAll('nav button')
 .forEach(function(x){
-
 x.classList.remove('active');
-
 });
-
 
 if(btn){
 
@@ -1509,17 +1253,13 @@ btn.classList.add('active');
 
 }else{
 
-document
-.querySelectorAll('nav button')
+document.querySelectorAll('nav button')
 .forEach(function(button){
 
-const code=
-button.getAttribute('onclick')||'';
+const code=button.getAttribute('onclick')||'';
 
 if(code.includes("'"+id+"'")){
-
 button.classList.add('active');
-
 }
 
 });
@@ -1535,3121 +1275,279 @@ behavior:'smooth'
 
 
 /* =====================================================
-MUSIC ENGINE 2.1
+   MUSIC ENGINE
 ===================================================== */
 
-/*
-IMPORTANT:
+const playlistData=[
 
-Теперь музыка НЕ требует заранее созданной папки music.
+{
+title:'Спокойная композиция',
+artist:'ASHINA',
+genre:'Спокойная',
+src:'music/calm.mp3'
+},
 
-Пользователь может загрузить аудиофайлы
-непосредственно через браузер.
+{
+title:'Энергичный трек',
+artist:'ASHINA',
+genre:'Энергичная',
+src:'music/energy.mp3'
+},
 
-Это намного надёжнее для телефона.
+{
+title:'Anime Style',
+artist:'ASHINA',
+genre:'Аниме',
+src:'music/anime.mp3'
+},
 
-Поддерживаемые контейнеры:
+{
+title:'Ночная атмосфера',
+artist:'ASHINA',
+genre:'Фоновая',
+src:'music/night.mp3'
+}
 
-MP3
-WAV
-OGG
-M4A
-AAC
-FLAC
+];
 
-Но фактическая поддержка зависит от кодека
-конкретного браузера.
-*/
-
-
-const audio=
-document.getElementById('audio');
-
-const seek=
-document.getElementById('seek');
-
-const volume=
-document.getElementById('volume');
-
-const playButton=
-document.getElementById('playButton');
-
-const musicStatus=
-document.getElementById('musicStatus');
-
-const musicFileInput=
-document.getElementById('musicFileInput');
-
-
-const MUSIC_VOLUME_KEY=
-'ashina21_music_volume';
-
-const MUSIC_TRACK_KEY=
-'ashina21_music_track';
-
-
-let playlistData=[];
-
-let currentTrack=-1;
-
+let currentTrack=0;
 let currentGenre='all';
 
-let objectUrls=[];
+const audio=document.getElementById('audio');
+const seek=document.getElementById('seek');
+const volume=document.getElementById('volume');
+const playButton=document.getElementById('playButton');
+const musicStatus=document.getElementById('musicStatus');
 
+const MUSIC_TRACK_KEY='ashina20_music_track';
+const MUSIC_TIME_KEY='ashina20_music_time';
+const MUSIC_VOLUME_KEY='ashina20_music_volume';
 
-/*
-   Сохранение информации о плейлисте.
-
-   ВАЖНО:
-   Сам аудиофайл в localStorage не сохраняется.
-
-   Браузер не должен хранить большие файлы
-   внутри localStorage.
-
-   После обновления страницы пользователь
-   может повторно выбрать музыку.
-*/
-
-
-function setMusicStatus(text,type=''){
-
-musicStatus.textContent=text;
-
-musicStatus.classList.remove(
-'ok',
-'error'
+const savedVolume=Number(
+localStorage.getItem(MUSIC_VOLUME_KEY)
 );
 
-if(type){
+if(
+Number.isFinite(savedVolume) &&
+savedVolume>=0 &&
+savedVolume<=1
+){
 
-musicStatus.classList.add(type);
+audio.volume=savedVolume;
+volume.value=savedVolume;
 
 }
-
-}
-
 
 function formatTime(seconds){
 
-seconds=Math.floor(
-Number(seconds)||0
-);
+seconds=Math.floor(Number(seconds)||0);
 
 return(
-Math.floor(seconds/60)
-+
-':'
-+
+Math.floor(seconds/60)+
+':'+
 String(seconds%60).padStart(2,'0')
 );
 
 }
 
-
-/*
-   Определяем MIME.
-*/
-
-function getMimeFromFile(file){
-
-if(file.type){
-
-return file.type;
-
-}
-
-const name=
-file.name.toLowerCase();
-
-if(name.endsWith('.mp3')){
-return 'audio/mpeg';
-}
-
-if(name.endsWith('.wav')){
-return 'audio/wav';
-}
-
-if(name.endsWith('.ogg')){
-return 'audio/ogg';
-}
-
-if(name.endsWith('.oga')){
-return 'audio/ogg';
-}
-
-if(name.endsWith('.m4a')){
-return 'audio/mp4';
-}
-
-if(name.endsWith('.aac')){
-return 'audio/aac';
-}
-
-if(name.endsWith('.flac')){
-return 'audio/flac';
-}
-
-return '';
-
-}
-
-
-/*
-   Проверка поддержки браузером.
-*/
-
-function canBrowserPlay(file){
-
-const mime=
-getMimeFromFile(file);
-
-const audioTest=
-document.createElement('audio');
-
-const result=
-audioTest.canPlayType(mime);
-
-return{
-mime:mime,
-supported:result!=='' ,
-strong:result==='probably',
-weak:result==='maybe'
-};
-
-}
-
-
-/*
-   Открытие выбора музыки.
-*/
-
-function openMusicPicker(){
-
-musicFileInput.click();
-
-}
-
-
-/*
-   Добавление файлов.
-*/
-
-musicFileInput.addEventListener(
-'change',
-function(event){
-
-const files=
-Array.from(
-event.target.files||[]
-);
-
-if(!files.length){
-
-return;
-
-}
-
-
-let added=0;
-
-files.forEach(function(file){
-
-if(!file.type.startsWith('audio/')
-&&
-!/\.(mp3|wav|ogg|oga|m4a|aac|flac)$/i.test(file.name)
-){
-
-setMusicStatus(
-'⚠️ Файл "'+
-file.name+
-'" не похож на аудиофайл.',
-'error'
-);
-
-return;
-
-}
-
-
-const check=
-canBrowserPlay(file);
-
-
-if(!check.supported){
-
-setMusicStatus(
-'⚠️ Браузер не сообщает о поддержке "'+
-file.name+
-'". Попробуй MP3, WAV или OGG.',
-'error'
-);
-
-return;
-
-}
-
-
-const url=
-URL.createObjectURL(file);
-
-objectUrls.push(url);
-
-
-const track={
-
-id:
-Date.now()+
-Math.random(),
-
-title:
-file.name.replace(
-/\.[^/.]+$/,
-''
-),
-
-artist:
-'Моя музыка',
-
-genre:
-'Фоновая',
-
-src:url,
-
-file:file,
-
-mime:check.mime,
-
-local:true
-
-};
-
-
-playlistData.push(track);
-
-added++;
-
-});
-
-
-event.target.value='';
-
-
-renderPlaylist();
-
-
-if(
-currentTrack===-1
-&&
-playlistData.length
-){
-
-loadTrack(
-0,
-false
-);
-
-}
-
-
-if(added){
-
-setMusicStatus(
-'🟢 Добавлено файлов: '+
-added+
-'. Выбери трек и нажми ▶️.',
-'ok'
-);
-
-}
-
-}
-);
-
-
-/*
-   Отображение плейлиста.
-*/
-
 function renderPlaylist(){
 
-const box=
-document.getElementById('playlist');
+const box=document.getElementById('playlist');
 
 box.innerHTML='';
 
+playlistData.forEach(function(track,index){
 
-const visible=
-playlistData
-.map(function(track,index){
-
-return{
-track:track,
-index:index
-};
-
-})
-.filter(function(item){
-
-return(
-currentGenre==='all'
-||
-item.track.genre===currentGenre
-);
-
-});
-
-
-if(!visible.length){
-
-const empty=
-document.createElement('div');
-
-empty.className='muted';
-
-empty.textContent=
-playlistData.length
-?
-'В этом жанре нет треков.'
-:
-'Плейлист пуст. Нажми «➕ Добавить музыку».';
-
-box.appendChild(empty);
-
+if(
+currentGenre!=='all' &&
+track.genre!==currentGenre
+){
 return;
-
 }
 
+const item=document.createElement('div');
 
-visible.forEach(function(item){
-
-const track=item.track;
-
-const index=item.index;
-
-
-const row=
-document.createElement('div');
-
-row.className=
+item.className=
 'track'+
-(
-index===currentTrack
-?
-' active'
-:
-''
-);
+(index===currentTrack?' active':'');
 
+const number=document.createElement('div');
 
-row.onclick=function(){
-
-loadTrack(index,true);
-
-};
-
-
-const number=
-document.createElement('div');
-
-number.className=
-'track-number';
+number.className='track-number';
 
 number.textContent=
 String(index+1).padStart(2,'0');
 
-
-const info=
-document.createElement('div');
+const info=document.createElement('div');
 
 info.className='track-info';
 
-
-const title=
-document.createElement('div');
+const title=document.createElement('div');
 
 title.className='track-name';
 
-title.textContent=
-track.title;
+title.textContent=track.title;
 
-
-const meta=
-document.createElement('div');
+const meta=document.createElement('div');
 
 meta.className='track-meta';
 
 meta.textContent=
-track.artist+
-' · '+
-track.genre;
-
+track.artist+' · '+track.genre;
 
 info.appendChild(title);
-
 info.appendChild(meta);
 
+item.appendChild(number);
+item.appendChild(info);
 
-const deleteButton=
-document.createElement('button');
-
-deleteButton.className='track-delete';
-
-deleteButton.textContent='🗑️';
-
-
-deleteButton.onclick=function(event){
-
-event.stopPropagation();
-
-removeTrack(index);
-
+item.onclick=function(){
+loadTrack(index,true);
 };
-
-
-row.appendChild(number);
-
-row.appendChild(info);
-
-row.appendChild(deleteButton);
-
-box.appendChild(row);
-
-});
-
-}
-
-
-/*
-   Удаление трека.
-*/
-
-function removeTrack(index){
-
-const track=
-playlistData[index];
-
-if(!track){
-
-return;
-
-}
-
-
-if(
-track.src
-&&
-track.local
-){
-
-try{
-
-URL.revokeObjectURL(
-track.src
-);
-
-}catch(error){}
-
-}
-
-
-playlistData.splice(
-index,
-1
-);
-
-
-if(!playlistData.length){
-
-currentTrack=-1;
-
-audio.removeAttribute('src');
-
-audio.load();
-
-document
-.getElementById('trackTitle')
-.textContent=
-'Музыка не выбрана';
-
-document
-.getElementById('trackArtist')
-.textContent=
-'Добавь аудиофайл';
-
-playButton.textContent='▶️';
-
-}else{
-
-if(index===currentTrack){
-
-if(currentTrack>=playlistData.length){
-
-currentTrack=
-playlistData.length-1;
-
-}
-
-loadTrack(
-currentTrack,
-false
-);
-
-}else if(index<currentTrack){
-
-currentTrack--;
-
-}
-
-}
-
-
-renderPlaylist();
-
-setMusicStatus(
-'🧹 Трек удалён.',
-'ok'
-);
-
-}
-
-
-/*
-   Загрузка трека.
-*/
-
-function loadTrack(index,autoPlay=false){
-
-if(!playlistData.length){
-
-setMusicStatus(
-'⚠️ Плейлист пуст.',
-'error'
-);
-
-return;
-
-}
-
-
-if(index<0){
-
-index=
-playlistData.length-1;
-
-}
-
-if(index>=playlistData.length){
-
-index=0;
-
-}
-
-
-currentTrack=index;
-
-
-const track=
-playlistData[currentTrack];
-
-
-if(!track.src){
-
-setMusicStatus(
-'⚠️ У трека отсутствует источник.',
-'error'
-);
-
-return;
-
-}
-
-
-/*
-   Сначала останавливаем старый источник.
-*/
-
-audio.pause();
-
-audio.removeAttribute('src');
-
-audio.load();
-
-
-/*
-   Новый источник.
-*/
-
-audio.src=
-track.src;
-
-
-document
-.getElementById('trackTitle')
-.textContent=
-track.title;
-
-
-document
-.getElementById('trackArtist')
-.textContent=
-track.artist+
-' · '+
-track.genre;
-
-
-renderPlaylist();
-
-
-setMusicStatus(
-'🎵 Выбран: '+
-track.title+
-'. Нажми ▶️.',
-'ok'
-);
-
-
-if(autoPlay){
-
-playCurrentTrack();
-
-}
-
-}
-
-
-/*
-   Запуск текущего трека.
-*/
-
-function playCurrentTrack(){
-
-if(currentTrack===-1){
-
-if(!playlistData.length){
-
-setMusicStatus(
-'⚠️ Сначала добавь аудиофайл.',
-'error'
-);
-
-return;
-
-}
-
-loadTrack(0,false);
-
-}
-
-
-if(!audio.src){
-
-loadTrack(
-currentTrack,
-false
-);
-
-}
-
-
-const promise=
-audio.play();
-
-
-if(promise!==undefined){
-
-promise
-.then(function(){
-
-setMusicStatus(
-'▶️ Играет: '+
-playlistData[currentTrack].title,
-'ok'
-);
-
-})
-.catch(function(error){
-
-console.error(
-'Audio play error:',
-error
-);
-
-setMusicStatus(
-'⚠️ Браузер заблокировал запуск. Нажми ▶️ ещё раз непосредственно после касания экрана.',
-'error'
-);
-
-});
-
-}
-
-}
-
-
-/*
-   Главная кнопка Play/Pause.
-*/
-
-function toggleMusic(){
-
-if(!playlistData.length){
-
-setMusicStatus(
-'⚠️ Плейлист пуст. Добавь музыку.',
-'error'
-);
-
-openMusicPicker();
-
-return;
-
-}
-
-
-if(currentTrack===-1){
-
-loadTrack(0,false);
-
-}
-
-
-if(audio.paused){
-
-playCurrentTrack();
-
-}else{
-
-audio.pause();
-
-setMusicStatus(
-'⏸️ Музыка остановлена.',
-'ok'
-);
-
-}
-
-}
-
-
-/*
-   Следующий трек.
-*/
-
-function nextTrack(){
-
-if(!playlistData.length){
-
-setMusicStatus(
-'⚠️ Плейлист пуст.',
-'error'
-);
-
-return;
-
-}
-
-loadTrack(
-currentTrack+1,
-true
-);
-
-}
-
-
-/*
-   Предыдущий трек.
-*/
-
-function previousTrack(){
-
-if(!playlistData.length){
-
-return;
-
-}
-
-loadTrack(
-currentTrack-1,
-true
-);
-
-}
-
-
-/*
-   События audio.
-*/
-
-audio.addEventListener(
-'play',
-function(){
-
-playButton.textContent='⏸️';
-
-});
-
-
-audio.addEventListener(
-'pause',
-function(){
-
-playButton.textContent='▶️';
-
-});
-
-
-audio.addEventListener(
-'ended',
-function(){
-
-if(playlistData.length){
-
-nextTrack();
-
-}
-
-});
-
-
-audio.addEventListener(
-'timeupdate',
-function(){
-
-updateMusicUI();
-
-});
-
-
-audio.addEventListener(
-'loadedmetadata',
-function(){
-
-updateMusicUI();
-
-});
-
-
-audio.addEventListener(
-'canplay',
-function(){
-
-if(
-playlistData[currentTrack]
-){
-
-setMusicStatus(
-'🟢 Трек готов к воспроизведению.',
-'ok'
-);
-
-}
-
-});
-
-
-audio.addEventListener(
-'error',
-function(){
-
-const track=
-playlistData[currentTrack];
-
-const name=
-track
-?
-track.title
-:
-'неизвестный файл';
-
-
-setMusicStatus(
-'⚠️ Формат или кодек "'+
-name+
-'" не поддерживается этим браузером.',
-'error'
-);
-
-});
-
-
-function updateMusicUI(){
-
-if(
-Number.isFinite(audio.duration)
-&&
-audio.duration>0
-){
-
-seek.value=
-(
-audio.currentTime/
-audio.duration
-)*100;
-
-}
-
-document
-.getElementById('time')
-.textContent=
-formatTime(audio.currentTime)
-+
-' / '
-+
-formatTime(audio.duration);
-
-}
-
-
-seek.addEventListener(
-'input',
-function(){
-
-if(
-Number.isFinite(audio.duration)
-&&
-audio.duration>0
-){
-
-audio.currentTime=
-(
-Number(seek.value)/100
-)*
-audio.duration;
-
-}
-
-});
-
-
-volume.addEventListener(
-'input',
-function(){
-
-const value=
-Number(volume.value);
-
-audio.volume=value;
-
-localStorage.setItem(
-MUSIC_VOLUME_KEY,
-String(value)
-);
-
-});
-
-
-/*
-   Восстановление громкости.
-*/
-
-const savedVolume=
-Number(
-localStorage.getItem(
-MUSIC_VOLUME_KEY
-)
-);
-
-if(
-Number.isFinite(savedVolume)
-&&
-savedVolume>=0
-&&
-savedVolume<=1
-){
-
-audio.volume=savedVolume;
-
-volume.value=savedVolume;
-
-}else{
-
-audio.volume=.8;
-
-}
-
-
-/*
-   Фильтр жанров.
-*/
-
-function filterGenre(genre,button){
-
-currentGenre=genre;
-
-
-document
-.querySelectorAll('.genre-row button')
-.forEach(function(x){
-
-x.classList.remove('active');
-
-});
-
-
-button.classList.add('active');
-
-renderPlaylist();
-
-}
-
-
-/*
-   Проверка возможностей браузера.
-*/
-
-function testBrowserAudio(){
-
-const test=
-document.createElement('audio');
-
-const mp3=
-test.canPlayType(
-'audio/mpeg'
-);
-
-const wav=
-test.canPlayType(
-'audio/wav'
-);
-
-const ogg=
-test.canPlayType(
-'audio/ogg'
-);
-
-
-document
-.getElementById('browserName')
-.textContent=
-navigator.userAgent.includes('Chrome')
-?
-'Chrome / Chromium'
-:
-navigator.userAgent;
-
-
-document
-.getElementById('audioSupport')
-.textContent=
-window.HTMLAudioElement
-?
-'🟢 доступен'
-:
-'🔴 недоступен';
-
-
-document
-.getElementById('mp3Support')
-.textContent=
-mp3
-?
-'🟢 '+
-mp3
-:
-'🔴 нет';
-
-
-document
-.getElementById('wavSupport')
-.textContent=
-wav
-?
-'🟢 '+
-wav
-:
-'🔴 нет';
-
-
-document
-.getElementById('oggSupport')
-.textContent=
-ogg
-?
-'🟢 '+
-ogg
-:
-'🔴 нет';
-
-
-setMusicStatus(
-'🔍 Проверка браузера выполнена.',
-'ok'
-);
-
-}
-
-
-testBrowserAudio();
-
-
-/* =====================================================
-NEWS
-===================================================== */
-
-const LIKE_KEY=
-'ashina21_like';
-
-const DISLIKE_KEY=
-'ashina21_dislike';
-
-let like=
-localStorage.getItem(LIKE_KEY)==='1';
-
-let dislike=
-localStorage.getItem(DISLIKE_KEY)==='1';
-
-
-function updateVoteUI(){
-
-const lb=
-document.getElementById('likeButton');
-
-const db=
-document.getElementById('dislikeButton');
-
-if(!lb||!db){
-
-return;
-
-}
-
-lb.classList.toggle(
-'selected',
-like
-);
-
-db.classList.toggle(
-'selected',
-dislike
-);
-
-document
-.getElementById('likeCount')
-.textContent=
-like?'1':'0';
-
-document
-.getElementById('dislikeCount')
-.textContent=
-dislike?'1':'0';
-
-
-const status=
-document.getElementById('voteStatus');
-
-status.textContent=
-like
-?
-'👍 Твой лайк учтён'
-:
-dislike
-?
-'👎 Твой дизлайк учтён'
-:
-'';
-
-}
-
-function vote(type){
-
-if(type==='like'){
-
-if(like){
-
-like=false;
-
-}else{
-
-like=true;
-dislike=false;
-
-}
-
-}else{
-
-if(dislike){
-
-dislike=false;
-
-}else{
-
-dislike=true;
-like=false;
-
-}
-
-}
-
-localStorage.setItem(
-LIKE_KEY,
-like?'1':'0'
-);
-
-localStorage.setItem(
-DISLIKE_KEY,
-dislike?'1':'0'
-);
-
-updateVoteUI();
-
-}
-
-updateVoteUI();
-
-
-/* =====================================================
-CHAT
-===================================================== */
-
-const CHAT_KEY=
-'ashina21_chat';
-
-let messages=[];
-
-
-try{
-
-const saved=
-localStorage.getItem(CHAT_KEY);
-
-if(saved){
-
-const parsed=
-JSON.parse(saved);
-
-if(Array.isArray(parsed)){
-
-messages=parsed;
-
-}
-
-}
-
-}catch(error){
-
-messages=[];
-
-}
-
-
-function saveMessages(){
-
-try{
-
-localStorage.setItem(
-CHAT_KEY,
-JSON.stringify(
-messages.slice(-150)
-)
-);
-
-return true;
-
-}catch(error){
-
-return false;
-
-}
-
-}
-
-
-function renderChat(){
-
-const box=
-document.getElementById('chatBox');
-
-box.innerHTML='';
-
-
-if(!messages.length){
-
-const empty=
-document.createElement('div');
-
-empty.className='muted';
-
-empty.textContent=
-'Пока сообщений нет.';
-
-box.appendChild(empty);
-
-return;
-
-}
-
-
-messages.forEach(function(message){
-
-const item=
-document.createElement('div');
-
-item.className=
-'message'+
-(message.me?' me':'');
-
-
-const name=
-document.createElement('div');
-
-name.className=
-'message-name';
-
-name.textContent=
-message.me
-?
-'Ты'
-:
-'ASHINA';
-
-item.appendChild(name);
-
-
-if(message.text){
-
-const text=
-document.createElement('div');
-
-text.className='message-text';
-
-text.textContent=
-message.text;
-
-item.appendChild(text);
-
-}
-
-
-const time=
-document.createElement('div');
-
-time.className='message-time';
-
-time.textContent=
-new Date(
-message.time
-).toLocaleTimeString(
-'ru-RU',
-{
-hour:'2-digit',
-minute:'2-digit'
-}
-);
-
-item.appendChild(time);
-
-
-if(message.me){
-
-const actions=
-document.createElement('div');
-
-actions.className=
-'message-actions';
-
-
-const del=
-document.createElement('button');
-
-del.textContent='🗑️';
-
-del.onclick=function(){
-
-messages=
-messages.filter(
-x=>x.id!==message.id
-);
-
-saveMessages();
-
-renderChat();
-
-};
-
-actions.appendChild(del);
-
-item.appendChild(actions);
-
-}
-
 
 box.appendChild(item);
 
 });
 
-
-box.scrollTop=
-box.scrollHeight;
-
 }
 
-
-function sendMessage(){
-
-const input=
-document.getElementById('chatInput');
-
-const text=
-input.value.trim();
-
-if(!text){
-
-return;
-
-}
-
-
-messages.push({
-
-id:
-Date.now()+
-Math.random(),
-
-text:text,
-
-me:true,
-
-time:Date.now()
-
-});
-
-
-messages=
-messages.slice(-150);
-
-saveMessages();
-
-input.value='';
-
-renderChat();
-
-}
-
-
-document
-.getElementById('chatInput')
-.addEventListener(
-'keydown',
-function(event){
-
-if(event.key==='Enter'){
-
-event.preventDefault();
-
-sendMessage();
-
-}
-
-});
-
-
-function insertEmoji(emoji){
-
-const input=
-document.getElementById('chatInput');
-
-input.value+=emoji;
-
-input.focus();
-
-}
-
-
-function clearChat(){
-
-if(
-!confirm(
-'Очистить локальный чат?'
-)
-){
-
-return;
-
-}
-
-messages=[];
-
-localStorage.removeItem(CHAT_KEY);
-
-renderChat();
-
-document
-.getElementById('chatStatus')
-.textContent=
-'🧹 Чат очищен.';
-
-}
-
-
-const fileInput=
-document.getElementById('fileInput');
-
-
-function openFilePicker(){
-
-fileInput.accept='*/*';
-
-fileInput.click();
-
-}
-
-function openImagePicker(){
-
-fileInput.accept='image/*';
-
-fileInput.click();
-
-}
-
-function openVideoPicker(){
-
-fileInput.accept='video/*';
-
-fileInput.click();
-
-}
-
-function openAudioPicker(){
-
-fileInput.accept='audio/*';
-
-fileInput.click();
-
-}
-
-
-fileInput.onchange=function(event){
-
-const files=
-Array.from(
-event.target.files||[]
-);
-
-files.forEach(function(file){
-
-if(file.size>8*1024*1024){
-
-document
-.getElementById('chatStatus')
-.textContent=
-'⚠️ Файл больше 8 МБ.';
-
-return;
-
-}
-
-
-messages.push({
-
-id:
-Date.now()+
-Math.random(),
-
-text:
-'📎 '+
-file.name,
-
-me:true,
-
-time:Date.now()
-
-});
-
-});
-
-saveMessages();
-
-renderChat();
-
-event.target.value='';
-
-};
-
-
-/* =====================================================
-AI CORE
-===================================================== */
-
-const AI_HISTORY_KEY=
-'ashina21_ai_history';
-
-const AI_MEMORY_KEY=
-'ashina21_memory';
-
-
-let aiHistory=[];
-
-let aiMemory={
-name:'',
-lastTopic:'',
-lastCommand:'',
-lastSection:'home',
-lastTrack:'',
-preferences:{}
-};
-
-let lastAIText='';
-
-
-try{
-
-const history=
-JSON.parse(
-localStorage.getItem(
-AI_HISTORY_KEY
-)||'[]'
-);
-
-if(Array.isArray(history)){
-
-aiHistory=
-history.slice(-50);
-
-}
-
-}catch(error){
-
-aiHistory=[];
-
-}
-
-
-try{
-
-const memory=
-JSON.parse(
-localStorage.getItem(
-AI_MEMORY_KEY
-)||'{}'
-);
-
-if(memory&&typeof memory==='object'){
-
-aiMemory={
-...aiMemory,
-...memory
-};
-
-}
-
-}catch(error){}
-
-
-function saveAIMemory(){
-
-localStorage.setItem(
-AI_MEMORY_KEY,
-JSON.stringify(aiMemory)
-);
-
-document
-.getElementById('aiMemory')
-.textContent=
-'Память: '+
-aiHistory.length+
-' сообщений';
-
-document
-.getElementById('homeMemory')
-.textContent=
-'активна';
-
-}
-
-
-function saveAIHistory(){
-
-aiHistory=
-aiHistory.slice(-50);
-
-localStorage.setItem(
-AI_HISTORY_KEY,
-JSON.stringify(aiHistory)
-);
-
-saveAIMemory();
-
-}
-
-
-function getTime(){
-
-return new Date()
-.toLocaleTimeString(
-'ru-RU',
-{
-hour:'2-digit',
-minute:'2-digit'
-}
-);
-
-}
-
-
-function addAIMessage(text,user){
-
-const box=
-document.getElementById('aiCore');
-
-const message=
-document.createElement('div');
-
-message.className=
-'ai-message'+
-(user?' user':'');
-
-
-const name=
-document.createElement('div');
-
-name.className='ai-name';
-
-name.textContent=
-user
-?
-'ТЫ'
-:
-'ASHINA AI';
-
-message.appendChild(name);
-
-
-const content=
-document.createElement('div');
-
-content.textContent=text;
-
-message.appendChild(content);
-
-
-const time=
-document.createElement('div');
-
-time.className='ai-time';
-
-time.textContent=
-getTime();
-
-message.appendChild(time);
-
-
-box.appendChild(message);
-
-box.scrollTop=
-box.scrollHeight;
-
-}
-
-
-function loadAIHistory(){
-
-const box=
-document.getElementById('aiCore');
-
-box.innerHTML='';
-
-
-if(!aiHistory.length){
-
-addAIMessage(
-'Привет. Я ASHINA AI 2.1. Я готова понимать команды и управлять приложением.',
-false
-);
-
-return;
-
-}
-
-
-aiHistory.forEach(function(item){
-
-addAIMessage(
-item.text,
-item.user
-);
-
-});
-
-
-saveAIMemory();
-
-}
-
-
-function setAIStatus(text,thinking=false){
-
-const status=
-document.getElementById('aiStatus');
-
-status.textContent=text;
-
-status.classList.toggle(
-'ai-thinking',
-thinking
-);
-
-}
-
-
-function normalize(text){
-
-return text
-.toLowerCase()
-.replace(/[!?.,;:()]/g,' ')
-.replace(/\s+/g,' ')
-.trim();
-
-}
-
-
-function containsAny(text,words){
-
-return words.some(function(word){
-
-return text.includes(word);
-
-});
-
-}
-
-
-function detectSection(text){
-
-if(
-containsAny(
-text,
-[
-'музык',
-'плеер',
-'песн',
-'трек'
-]
-)
-){
-
-return 'music';
-
-}
-
-if(
-containsAny(
-text,
-[
-'чат',
-'сообщен',
-'переписк'
-]
-)
-){
-
-return 'chat';
-
-}
-
-if(
-containsAny(
-text,
-[
-'лент',
-'новост',
-'публикац'
-]
-)
-){
-
-return 'news';
-
-}
-
-if(
-containsAny(
-text,
-[
-'настрой',
-'параметр'
-]
-)
-){
-
-return 'settings';
-
-}
-
-if(
-containsAny(
-text,
-[
-'главн',
-'домой'
-]
-)
-){
-
-return 'home';
-
-}
-
-return null;
-
-}
-
-
-function detectMusicAction(text){
-
-if(
-containsAny(
-text,
-[
-'следующ',
-'следом',
-'дальше'
-]
-)
-){
-
-return 'next';
-
-}
-
-if(
-containsAny(
-text,
-[
-'предыдущ',
-'прошлый трек',
-'назад трек'
-]
-)
-){
-
-return 'previous';
-
-}
-
-if(
-containsAny(
-text,
-[
-'останови',
-'остановить',
-'выключи музыку',
-'пауза',
-'поставь на паузу'
-]
-)
-){
-
-return 'pause';
-
-}
-
-if(
-containsAny(
-text,
-[
-'включи',
-'запусти',
-'начни',
-'играй',
-'воспроизвед'
-]
-)
-){
-
-return 'play';
-
-}
-
-if(
-containsAny(
-text,
-[
-'музыку',
-'музыка',
-'плеер',
-'трек'
-]
-)
-){
-
-return 'open';
-
-}
-
-return null;
-
-}
-
-
-function executeMusicAction(action){
-
-if(action==='next'){
-
-show('music');
-
-nextTrack();
-
-return 'Переключаю на следующий трек. 🎵';
-
-}
-
-if(action==='previous'){
-
-show('music');
-
-previousTrack();
-
-return 'Возвращаю предыдущий трек. 🎵';
-
-}
-
-if(action==='pause'){
-
-audio.pause();
-
-return 'Музыка поставлена на паузу. ⏸️';
-
-}
-
-if(action==='play'){
-
-show('music');
+function loadTrack(index,autoPlay=false){
 
 if(!playlistData.length){
-
-return 'У тебя пока нет добавленной музыки. Открой раздел музыки и добавь аудиофайл. 🎵';
-
-}
-
-playCurrentTrack();
-
-return 'Запускаю музыку. ▶️';
-
-}
-
-if(action==='open'){
-
-show('music');
-
-return 'Открываю ASHINA Music. 🎵';
-
-}
-
-return null;
-
-}
-
-
-function processAICommand(raw){
-
-const text=
-normalize(raw);
-
-
-if(!text){
-
-return 'Я не получила команду.';
-
-}
-
-
-/* NAME */
-
-const nameMatch=
-text.match(
-/меня зовут ([а-яёa-z0-9_-]+)/i
-);
-
-if(nameMatch){
-
-aiMemory.name=
-nameMatch[1];
-
-saveAIMemory();
-
-return 'Запомнила. Буду обращаться к тебе по имени '+
-aiMemory.name+
-'. 🧠';
-
-}
-
-
-/* GREETING */
-
-if(
-containsAny(
-text,
-[
-'привет',
-'здравствуй',
-'добрый день',
-'доброе утро',
-'добрый вечер',
-'хай',
-'hello'
-]
-)
-){
-
-return aiMemory.name
-?
-'Привет, '+aiMemory.name+'! ASHINA на связи. 🟢'
-:
-'Привет! ASHINA на связи. 🟢';
-
-}
-
-
-/* WHO */
-
-if(
-containsAny(
-text,
-[
-'кто ты',
-'что ты такое',
-'расскажи о себе'
-]
-)
-){
-
-return 'Я ASHINA AI 2.1 — локальное интеллектуальное ядро приложения. Сейчас я могу понимать команды, управлять разделами, музыкой, памятью и голосовым вводом.';
-
-}
-
-
-/* CAPABILITIES */
-
-if(
-containsAny(
-text,
-[
-'что ты умеешь',
-'твои возможности',
-'что умеешь',
-'помощь',
-'команды'
-]
-)
-){
-
-return 'Я умею открывать разделы, управлять музыкой, переключать треки, работать с голосом, запоминать информацию и выполнять команды внутри ASHINA.';
-
-}
-
-
-/* TIME */
-
-if(
-containsAny(
-text,
-[
-'который час',
-'сколько времени',
-'время сейчас'
-]
-)
-){
-
-return 'Сейчас '+getTime()+'. ⏰';
-
-}
-
-
-/* REPEAT */
-
-if(
-containsAny(
-text,
-[
-'повтори',
-'повтори ответ',
-'что ты сказала'
-]
-)
-){
-
-return lastAIText||
-'Мне пока нечего повторять.';
-
-}
-
-
-/* MEMORY */
-
-if(
-containsAny(
-text,
-[
-'что ты помнишь',
-'что помнишь обо мне',
-'покажи память'
-]
-)
-){
-
-let result=
-'В памяти ASHINA:';
-
-if(aiMemory.name){
-
-result+=
-'\nИмя: '+
-aiMemory.name;
-
-}
-
-if(aiMemory.lastSection){
-
-result+=
-'\nПоследний раздел: '+
-aiMemory.lastSection;
-
-}
-
-if(aiMemory.lastCommand){
-
-result+=
-'\nПоследняя команда: '+
-aiMemory.lastCommand;
-
-}
-
-return result;
-
-}
-
-
-/* CLEAR MEMORY */
-
-if(
-containsAny(
-text,
-[
-'забудь всё',
-'очисти память',
-'удали память'
-]
-)
-){
-
-aiMemory={
-name:'',
-lastTopic:'',
-lastCommand:'',
-lastSection:'home',
-lastTrack:'',
-preferences:{}
-};
-
-localStorage.removeItem(
-AI_MEMORY_KEY
-);
-
-return 'Память ASHINA очищена. 🧹';
-
-}
-
-
-/* STATUS */
-
-if(
-containsAny(
-text,
-[
-'статус',
-'состояние системы',
-'как система',
-'всё работает'
-]
-)
-){
-
-return 'ASHINA работает в штатном режиме. AI-ядро онлайн, локальная память доступна, музыкальный движок активен. 🟢';
-
-}
-
-
-/* GUARD */
-
-if(
-containsAny(
-text,
-[
-'проверь защиту',
-'проверить систему',
-'запусти guard',
-'guard'
-]
-)
-){
-
-show('settings');
-
-setTimeout(
-runGuard,
-200
-);
-
-return 'Запускаю ASHINA Guard. 🛡️';
-
-}
-
-
-/* MUSIC */
-
-const musicAction=
-detectMusicAction(text);
-
-if(musicAction){
-
-aiMemory.lastSection='music';
-
-aiMemory.lastCommand=raw;
-
-const result=
-executeMusicAction(
-musicAction
-);
-
-if(result){
-
-saveAIMemory();
-
-return result;
-
-}
-
-}
-
-
-/* NAVIGATION */
-
-const section=
-detectSection(text);
-
-if(section){
-
-show(section);
-
-aiMemory.lastSection=
-section;
-
-aiMemory.lastCommand=
-raw;
-
-saveAIMemory();
-
-
-const names={
-
-home:'главную',
-
-music:'музыку',
-
-chat:'чат',
-
-news:'ленту',
-
-settings:'настройки'
-
-};
-
-
-return 'Открываю '+names[section]+'.';
-
-}
-
-
-/* COMBINATION */
-
-const wantsMusic=
-containsAny(
-text,
-[
-'музык',
-'плеер',
-'песн',
-'трек'
-]
-);
-
-const wantsPlay=
-containsAny(
-text,
-[
-'включ',
-'запуст',
-'играй',
-'воспроизвед'
-]
-);
-
-if(
-wantsMusic
-&&
-wantsPlay
-){
-
-show('music');
-
-playCurrentTrack();
-
-return 'Открываю музыку и запускаю воспроизведение. 🎵▶️';
-
-}
-
-
-/* APP */
-
-if(
-containsAny(
-text,
-[
-'как работает',
-'что происходит',
-'приложение',
-'ашина'
-]
-)
-){
-
-return 'ASHINA состоит из интерфейса, музыкального движка, чата, памяти, AI-ядра и Guard.';
-
-}
-
-
-return 'Я поняла сообщение, но пока не знаю, какое действие выполнить. Попробуй: «Открой музыку», «Включи музыку», «Следующий трек», «Открой чат» или «Проверь защиту».';
-
-}
-
-
-/* SEND AI */
-
-function sendAI(){
-
-const input=
-document.getElementById('aiInput');
-
-const text=
-input.value.trim();
-
-if(!text){
-
 return;
-
 }
 
+if(index<0){
+index=playlistData.length-1;
+}
 
-addAIMessage(
-text,
-true
+if(index>=playlistData.length){
+index=0;
+}
+
+currentTrack=index;
+
+const track=playlistData[currentTrack];
+
+audio.src=track.src;
+
+document.getElementById('trackTitle').textContent=
+track.title;
+
+document.getElementById('trackArtist').textContent=
+track.artist+' · '+track.genre;
+
+localStorage.setItem(
+MUSIC_TRACK_KEY,
+String(currentTrack)
 );
 
-
-aiHistory.push({
-
-text:text,
-
-user:true
-
-});
-
-
-input.value='';
-
-
-setAIStatus(
-'🧠 Анализирую намерение...',
-true
+localStorage.setItem(
+MUSIC_TIME_KEY,
+'0'
 );
-
-
-aiMemory.lastCommand=
-text;
-
-
-setTimeout(function(){
-
-const answer=
-processAICommand(text);
-
-
-lastAIText=
-answer;
-
-
-addAIMessage(
-answer,
-false
-);
-
-
-aiHistory.push({
-
-text:answer,
-
-user:false
-
-});
-
-
-saveAIHistory();
-
-
-setAIStatus(
-'🟢 AI готов.'
-);
-
-},250);
-
-}
-
-
-function aiQuick(text){
-
-document
-.getElementById('aiInput')
-.value=text;
-
-sendAI();
-
-}
-
-
-/* VOICE */
-
-let recognition=null;
-
-
-function startVoiceInput(){
-
-const SpeechRecognition=
-window.SpeechRecognition
-||
-window.webkitSpeechRecognition;
-
-
-if(!SpeechRecognition){
-
-setAIStatus(
-'⚠️ Голосовой ввод не поддерживается браузером.'
-);
-
-return;
-
-}
-
-
-if(recognition){
-
-try{
-
-recognition.stop();
-
-}catch(e){}
-
-}
-
-
-recognition=
-new SpeechRecognition();
-
-recognition.lang='ru-RU';
-
-recognition.interimResults=false;
-
-recognition.maxAlternatives=1;
-
-
-recognition.onstart=function(){
-
-setAIStatus(
-'🎙️ Слушаю... Говори.',
-true
-);
-
-};
-
-
-recognition.onresult=function(event){
-
-const text=
-event.results[0][0].transcript;
-
-document
-.getElementById('aiInput')
-.value=text;
-
-sendAI();
-
-};
-
-
-recognition.onerror=function(event){
-
-setAIStatus(
-'⚠️ Ошибка микрофона: '+
-(event.error||'неизвестная')
-);
-
-};
-
-
-recognition.onend=function(){
-
-if(
-document
-.getElementById('aiStatus')
-.textContent
-.includes('Слушаю')
-){
-
-setAIStatus(
-'🟢 AI готов.'
-);
-
-}
-
-};
-
-
-try{
-
-recognition.start();
-
-}catch(error){
-
-setAIStatus(
-'⚠️ Не удалось запустить микрофон.'
-);
-
-}
-
-}
-
-
-/* SPEECH */
-
-function speakText(text){
-
-if(
-!('speechSynthesis' in window)
-){
-
-setAIStatus(
-'⚠️ Озвучивание недоступно.'
-);
-
-return;
-
-}
-
-
-speechSynthesis.cancel();
-
-
-const speech=
-new SpeechSynthesisUtterance(text);
-
-speech.lang='ru-RU';
-
-speech.rate=.95;
-
-speech.pitch=.9;
-
-speech.volume=1;
-
-
-speech.onstart=function(){
-
-setAIStatus(
-'🔊 ASHINA говорит...'
-);
-
-};
-
-
-speech.onend=function(){
-
-setAIStatus(
-'🟢 AI готов.'
-);
-
-};
-
-
-speechSynthesis.speak(
-speech
-);
-
-}
-
-
-function speakLastAI(){
-
-if(!lastAIText){
-
-setAIStatus(
-'⚠️ Пока нечего озвучивать.'
-);
-
-return;
-
-}
-
-speakText(lastAIText);
-
-}
-
-
-/* CLEAR AI */
-
-function clearAI(){
-
-if(
-!confirm(
-'Очистить историю AI?'
-)
-){
-
-return;
-
-}
-
-aiHistory=[];
-
-lastAIText='';
-
-localStorage.removeItem(
-AI_HISTORY_KEY
-);
-
-loadAIHistory();
-
-setAIStatus(
-'🧹 История AI очищена.'
-);
-
-}
-
-
-document
-.getElementById('aiInput')
-.addEventListener(
-'keydown',
-function(event){
-
-if(event.key==='Enter'){
-
-event.preventDefault();
-
-sendAI();
-
-}
-
-});
-
-
-/* =====================================================
-GUARD
-===================================================== */
-
-async function guardCheckFile(name){
-
-try{
-
-const response=
-await fetch(
-name,
-{
-method:'HEAD',
-cache:'no-store'
-}
-);
-
-return response.ok;
-
-}catch(error){
-
-return false;
-
-}
-
-}
-
-
-async function runGuard(){
-
-const result=
-document.getElementById('guardResult');
-
-const files=
-document.getElementById('guardFiles');
-
-const total=
-document.getElementById('guardTotal');
-
-
-result.classList.add('show');
-
-files.innerHTML=
-'<div class="status">🔍 Проверка ASHINA...</div>';
-
-total.textContent='';
-
-
-const checks=[
-
-{
-name:'manifest.webmanifest',
-promise:
-guardCheckFile(
-'manifest.webmanifest'
-)
-},
-
-{
-name:'IndexedDB',
-promise:
-Promise.resolve(
-'indexedDB' in window
-)
-},
-
-{
-name:'LocalStorage',
-promise:
-Promise.resolve(
-typeof localStorage!=='undefined'
-)
-},
-
-{
-name:'Service Worker API',
-promise:
-Promise.resolve(
-'serviceWorker' in navigator
-)
-},
-
-{
-name:'Speech API',
-promise:
-Promise.resolve(
-!!(
-window.SpeechRecognition
-||
-window.webkitSpeechRecognition
-)
-)
-},
-
-{
-name:'Audio API',
-promise:
-Promise.resolve(
-!!window.HTMLAudioElement
-)
-},
-
-{
-name:'Media API',
-promise:
-Promise.resolve(
-!!navigator.mediaDevices
-)
-}
-
-];
-
-
-files.innerHTML='';
-
-let good=0;
-
-
-for(
-const check of checks
-){
-
-const ok=
-await check.promise;
-
-if(ok){
-
-good++;
-
-}
-
-
-const row=
-document.createElement('div');
-
-row.className=
-'guard-item';
-
-
-const name=
-document.createElement('span');
-
-name.textContent=
-check.name;
-
-
-const state=
-document.createElement('span');
-
-state.className=
-ok
-?
-'guard-ok'
-:
-'guard-error';
-
-state.textContent=
-ok
-?
-'🟢 Доступен'
-:
-'🔴 Недоступен';
-
-
-row.appendChild(name);
-
-row.appendChild(state);
-
-files.appendChild(row);
-
-}
-
-
-total.textContent=
-'ASHINA Guard: '+
-good+
-'/'+
-checks.length+
-' компонентов доступны';
-
-}
-
-
-/* =====================================================
-ADMIN
-===================================================== */
-
-function openAdmin(){
-
-const pin=
-prompt(
-'Введите PIN администратора:'
-);
-
-if(pin===null){
-
-return;
-
-}
-
-
-if(pin!=='2468'){
-
-alert(
-'❌ Неверный PIN.'
-);
-
-return;
-
-}
-
-
-document
-.getElementById('adminPanel')
-.classList
-.remove('admin-hidden');
-
-
-const log=
-document.getElementById('adminLog');
-
-log.innerHTML=
-'<div>🟢 Администратор авторизован</div>'+
-'<div>AI Core: ONLINE</div>'+
-'<div>Memory: ACTIVE</div>'+
-'<div>Music Engine: READY</div>'+
-'<div>Guard: READY</div>';
-
-}
-
-
-function closeAdmin(){
-
-document
-.getElementById('adminPanel')
-.classList
-.add('admin-hidden');
-
-}
-
-
-/* =====================================================
-CLEAR
-===================================================== */
-
-function clearEverything(){
-
-if(
-!confirm(
-'Удалить всю локальную память ASHINA?'
-)
-){
-
-return;
-
-}
-
-localStorage.clear();
-
-messages=[];
-
-aiHistory=[];
-
-aiMemory={
-name:'',
-lastTopic:'',
-lastCommand:'',
-lastSection:'home',
-lastTrack:'',
-preferences:{}
-};
-
-loadAIHistory();
-
-renderChat();
-
-alert(
-'Локальные данные ASHINA очищены.'
-);
-
-}
-
-
-/* =====================================================
-START
-===================================================== */
-
-renderChat();
-
-loadAIHistory();
 
 renderPlaylist();
 
-console.log(
-'ASHINA AI Core '+APP_VERSION+' ONLINE'
+musicStatus.textContent=
+'Выбран трек: '+track.title;
+
+if(autoPlay){
+
+audio.play()
+.then(function(){
+
+musicStatus.textContent=
+'▶️ Играет: '+track.title;
+
+})
+.catch(function(){
+
+musicStatus.textContent=
+'⚠️ Браузер заблокировал запуск. Нажми ▶️ ещё раз.';
+
+});
+
+}
+
+}
+
+function toggleMusic(){
+
+if(!audio.src){
+
+loadTrack(currentTrack,false);
+
+}
+
+if(audio.paused){
+
+audio.play()
+.then(function(){
+
+musicStatus.textContent='▶️ Музыка играет';
+
+})
+.catch(function(){
+
+musicStatus.textContent=
+'⚠️ Браузер заблокировал запуск. Нажми ▶️ ещё раз.';
+
+});
+
+}else{
+
+audio.pause();
+
+}
+
+}
+
+function previousTrack(){
+loadTrack(currentTrack-1,true);
+}
+
+function nextTrack(){
+loadTrack(currentTrack+1,true);
+}
+
+audio.onplay=function(){
+playButton.textContent='⏸️';
+};
+
+audio.onpause=function(){
+playButton.textContent='▶️';
+saveMusicState();
+};
+
+audio.onended=function(){
+nextTrack();
+};
+
+audio.onerror=function(){
+
+musicStatus.textContent=
+'⚠️ Не найден или не поддерживается музыкальный файл: '+
+(playlistData[currentTrack]?.src||'');
+
+};
+
+audio.ontimeupdate=function(){
+
+updateMusicUI();
+saveMusicState();
+
+};
+
+audio.onloadedmetadata=function(){
+
+updateMusicUI();
+
+const savedTime=Number(
+localStorage.getItem(MUSIC_TIME_KEY)
 );
 
-</script>
-
-</body>
-</html>
-```
+if(
+Number.isFinite(savedTime) &&
+savedTime>0 &&
+sa
