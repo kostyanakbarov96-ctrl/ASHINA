@@ -1,7 +1,8 @@
 /* =========================================================
    ASHINA JARVIS CORE
-   Version 1.0
+   Version 1.1
    Local Intelligence Core
+   FIX BUILD
    ========================================================= */
 
 (() => {
@@ -14,7 +15,7 @@
     const CONFIG = {
         name: "JARVIS",
         project: "ASHINA",
-        version: "1.0",
+        version: "1.1",
         mode: "LOCAL",
 
         storage: {
@@ -24,7 +25,8 @@
         },
 
         maxHistory: 100,
-        maxMemories: 100
+        maxMemories: 100,
+        visibleHistory: 15
     };
 
 
@@ -34,6 +36,7 @@
 
     const state = {
         ready: false,
+
         thinking: false,
         speaking: false,
         listening: false,
@@ -57,8 +60,19 @@
 
 
     /* ---------------------------------------------------------
+       INTERNAL CONTROL
+       --------------------------------------------------------- */
+
+    let recognition = null;
+
+    let commandQueue = Promise.resolve();
+
+    let initialized = false;
+
+
+    /* ---------------------------------------------------------
        SAFE DOM
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function $(id) {
         return document.getElementById(id) || null;
@@ -74,27 +88,23 @@
     }
 
 
-    function addClass(id, className) {
-        const el = $(id);
+    /* ---------------------------------------------------------
+       SECURITY
+       --------------------------------------------------------- */
 
-        if (el) {
-            el.classList.add(className);
-        }
-    }
-
-
-    function removeClass(id, className) {
-        const el = $(id);
-
-        if (el) {
-            el.classList.remove(className);
-        }
+    function escapeHTML(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
 
     /* ---------------------------------------------------------
        STORAGE
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function loadJSON(key, fallback) {
         try {
@@ -104,9 +114,17 @@
                 return fallback;
             }
 
-            return JSON.parse(raw);
+            const parsed = JSON.parse(raw);
+
+            return parsed ?? fallback;
+
         } catch (error) {
-            console.warn("JARVIS storage read error:", error);
+            console.warn(
+                "JARVIS storage read error:",
+                key,
+                error
+            );
+
             return fallback;
         }
     }
@@ -114,10 +132,20 @@
 
     function saveJSON(key, value) {
         try {
-            localStorage.setItem(key, JSON.stringify(value));
+            localStorage.setItem(
+                key,
+                JSON.stringify(value)
+            );
+
             return true;
+
         } catch (error) {
-            console.warn("JARVIS storage write error:", error);
+            console.warn(
+                "JARVIS storage write error:",
+                key,
+                error
+            );
+
             return false;
         }
     }
@@ -125,60 +153,133 @@
 
     /* ---------------------------------------------------------
        MEMORY
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function loadMemory() {
-        const saved = loadJSON(CONFIG.storage.memory, null);
+        const saved =
+            loadJSON(
+                CONFIG.storage.memory,
+                null
+            );
 
-        if (saved && typeof saved === "object") {
-            state.memory = Array.isArray(saved.memories)
-                ? saved.memories
-                : [];
-
-            state.lastCommand = saved.lastCommand || "";
-            state.lastTopic = saved.lastTopic || "";
-            state.lastUserMessage = saved.lastUserMessage || "";
-            state.lastAIMessage = saved.lastAIMessage || "";
-            state.commandCount = Number(saved.commandCount || 0);
+        if (!saved || typeof saved !== "object") {
+            return;
         }
+
+        if (Array.isArray(saved.memories)) {
+            state.memory =
+                saved.memories
+                    .filter(item =>
+                        typeof item === "string"
+                    )
+                    .slice(
+                        0,
+                        CONFIG.maxMemories
+                    );
+        }
+
+        state.lastCommand =
+            String(
+                saved.lastCommand || ""
+            );
+
+        state.lastTopic =
+            String(
+                saved.lastTopic || ""
+            );
+
+        state.lastUserMessage =
+            String(
+                saved.lastUserMessage || ""
+            );
+
+        state.lastAIMessage =
+            String(
+                saved.lastAIMessage || ""
+            );
+
+        const count =
+            Number(
+                saved.commandCount || 0
+            );
+
+        state.commandCount =
+            Number.isFinite(count)
+                ? Math.max(0, count)
+                : 0;
     }
 
 
-    function saveMemory() {
-        saveJSON(CONFIG.storage.memory, {
-            memories: state.memory.slice(0, CONFIG.maxMemories),
-            lastCommand: state.lastCommand,
-            lastTopic: state.lastTopic,
-            lastUserMessage: state.lastUserMessage,
-            lastAIMessage: state.lastAIMessage,
-            commandCount: state.commandCount,
-            updated: Date.now()
-        });
+    function saveMemory(render = true) {
+        const data = {
+            memories:
+                state.memory
+                    .slice(
+                        0,
+                        CONFIG.maxMemories
+                    ),
 
-        renderMemory();
+            lastCommand:
+                state.lastCommand,
+
+            lastTopic:
+                state.lastTopic,
+
+            lastUserMessage:
+                state.lastUserMessage,
+
+            lastAIMessage:
+                state.lastAIMessage,
+
+            commandCount:
+                state.commandCount,
+
+            updated:
+                Date.now()
+        };
+
+        const result =
+            saveJSON(
+                CONFIG.storage.memory,
+                data
+            );
+
+        if (render) {
+            renderMemory();
+        }
+
+        return result;
     }
 
 
     function remember(text) {
-        if (!text) {
-            return false;
-        }
-
-        const clean = String(text).trim();
+        const clean =
+            String(text || "").trim();
 
         if (!clean) {
             return false;
         }
 
-        const exists = state.memory.some(
-            item => item.toLowerCase() === clean.toLowerCase()
-        );
+        const exists =
+            state.memory.some(
+                item =>
+                    item.toLowerCase() ===
+                    clean.toLowerCase()
+            );
 
-        if (!exists) {
-            state.memory.unshift(clean);
-            state.memory = state.memory.slice(0, CONFIG.maxMemories);
-            saveMemory();
+        if (exists) {
+            return true;
         }
+
+        state.memory.unshift(clean);
+
+        state.memory =
+            state.memory.slice(
+                0,
+                CONFIG.maxMemories
+            );
+
+        saveMemory();
 
         return true;
     }
@@ -202,59 +303,126 @@
 
 
     function renderMemory() {
-        const box = $("memoryBox");
+        const box =
+            $("memoryBox");
 
         if (!box) {
             return;
         }
 
         if (!state.memory.length) {
-            box.textContent = "Память пуста.";
+            box.textContent =
+                "Память пуста.";
+
             return;
         }
 
-        box.innerHTML = state.memory
-            .map((item, index) =>
-                `<div>${index + 1}. ${escapeHTML(item)}</div>`
-            )
-            .join("");
+        box.innerHTML =
+            state.memory
+                .map(
+                    (item, index) =>
+                        `<div>${index + 1}. ${escapeHTML(item)}</div>`
+                )
+                .join("");
     }
 
 
     /* ---------------------------------------------------------
        HISTORY
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function loadHistory() {
-        const saved = loadJSON(CONFIG.storage.history, []);
+        const saved =
+            loadJSON(
+                CONFIG.storage.history,
+                []
+            );
 
-        if (Array.isArray(saved)) {
-            state.history = saved.slice(-CONFIG.maxHistory);
+        if (!Array.isArray(saved)) {
+            return;
         }
+
+        state.history =
+            saved
+                .filter(item =>
+                    item &&
+                    typeof item === "object" &&
+                    typeof item.text === "string"
+                )
+                .map(item => ({
+                    role:
+                        item.role === "user"
+                            ? "user"
+                            : "assistant",
+
+                    text:
+                        String(item.text),
+
+                    time:
+                        Number(item.time) ||
+                        Date.now()
+                }))
+                .slice(
+                    -CONFIG.maxHistory
+                );
     }
 
 
     function saveHistory() {
-        state.history = state.history.slice(-CONFIG.maxHistory);
+        state.history =
+            state.history.slice(
+                -CONFIG.maxHistory
+            );
 
-        saveJSON(CONFIG.storage.history, state.history);
+        return saveJSON(
+            CONFIG.storage.history,
+            state.history
+        );
     }
 
 
     function addHistory(role, text) {
+        const clean =
+            String(text || "").trim();
+
+        if (!clean) {
+            return;
+        }
+
         state.history.push({
-            role,
-            text,
-            time: Date.now()
+            role:
+                role === "user"
+                    ? "user"
+                    : "assistant",
+
+            text:
+                clean,
+
+            time:
+                Date.now()
         });
+
+        state.history =
+            state.history.slice(
+                -CONFIG.maxHistory
+            );
 
         saveHistory();
     }
 
 
     function getContext(limit = 10) {
+        const safeLimit =
+            Math.max(
+                1,
+                Math.min(
+                    Number(limit) || 10,
+                    CONFIG.maxHistory
+                )
+            );
+
         return state.history
-            .slice(-limit)
+            .slice(-safeLimit)
             .map(item => ({
                 role: item.role,
                 text: item.text
@@ -264,25 +432,28 @@
 
     /* ---------------------------------------------------------
        SETTINGS
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function loadSettings() {
-        const saved = loadJSON(
-            CONFIG.storage.settings,
-            null
-        );
+        const saved =
+            loadJSON(
+                CONFIG.storage.settings,
+                null
+            );
 
-        if (saved && typeof saved === "object") {
-            state.settings = {
-                ...state.settings,
-                ...saved
-            };
+        if (!saved || typeof saved !== "object") {
+            return;
         }
+
+        state.settings = {
+            ...state.settings,
+            ...saved
+        };
     }
 
 
     function saveSettings() {
-        saveJSON(
+        return saveJSON(
             CONFIG.storage.settings,
             state.settings
         );
@@ -290,6 +461,15 @@
 
 
     function setSettings(settings = {}) {
+        if (
+            !settings ||
+            typeof settings !== "object"
+        ) {
+            return {
+                ...state.settings
+            };
+        }
+
         state.settings = {
             ...state.settings,
             ...settings
@@ -304,146 +484,228 @@
 
 
     /* ---------------------------------------------------------
-       SECURITY
-    --------------------------------------------------------- */
-
-    function escapeHTML(value) {
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-    }
-
-
-    /* ---------------------------------------------------------
-       UI OUTPUT
-    --------------------------------------------------------- */
+       UI
+       --------------------------------------------------------- */
 
     function setThinking(value) {
-        state.thinking = value;
+        state.thinking = !!value;
 
-        const core = $("core");
+        const core =
+            $("core");
 
         if (core) {
-            if (value) {
-                core.classList.add("thinking");
-            } else {
-                core.classList.remove("thinking");
-            }
+            core.classList.toggle(
+                "thinking",
+                state.thinking
+            );
         }
 
-        const status = $("aiStatus");
+        const status =
+            $("aiStatus");
 
-        if (status) {
-            status.textContent = value
+        if (!status) {
+            return;
+        }
+
+        if (state.listening) {
+            status.textContent =
+                "Слушаю...";
+
+            return;
+        }
+
+        status.textContent =
+            state.thinking
                 ? "JARVIS думает..."
                 : "JARVIS готов";
-        }
     }
 
 
-    function addMessage(text, type = "ai") {
-        const log = $("log");
+    function addMessage(
+        text,
+        type = "ai",
+        save = true
+    ) {
+        const clean =
+            String(text || "").trim();
+
+        if (!clean) {
+            return;
+        }
+
+        const log =
+            $("log");
 
         if (log) {
-            const message = document.createElement("div");
+            const message =
+                document.createElement("div");
 
-            message.className = `message ${type}`;
-            message.textContent = text;
+            message.className =
+                `message ${
+                    type === "user"
+                        ? "user"
+                        : "ai"
+                }`;
+
+            message.textContent =
+                clean;
 
             log.appendChild(message);
 
-            log.scrollTop = log.scrollHeight;
+            log.scrollTop =
+                log.scrollHeight;
         }
 
-        addHistory(
-            type === "user" ? "user" : "assistant",
-            text
-        );
+        if (save) {
+            addHistory(
+                type === "user"
+                    ? "user"
+                    : "assistant",
+                clean
+            );
+        }
     }
 
 
     /* ---------------------------------------------------------
-       VOICE
-    --------------------------------------------------------- */
+       VOICE OUTPUT
+       --------------------------------------------------------- */
 
     function speak(text) {
         if (!state.settings.voice) {
-            return;
+            return false;
         }
 
         if (!state.settings.speech) {
-            return;
+            return false;
         }
 
-        if (!("speechSynthesis" in window)) {
-            return;
+        if (
+            !(
+                "speechSynthesis" in
+                window
+            )
+        ) {
+            return false;
+        }
+
+        const clean =
+            String(text || "").trim();
+
+        if (!clean) {
+            return false;
         }
 
         try {
             window.speechSynthesis.cancel();
 
             const utterance =
-                new SpeechSynthesisUtterance(text);
+                new SpeechSynthesisUtterance(
+                    clean
+                );
 
-            utterance.lang = "ru-RU";
-            utterance.rate = 0.95;
-            utterance.pitch = 0.95;
-            utterance.volume = 1;
+            utterance.lang =
+                "ru-RU";
 
-            state.speaking = true;
+            /*
+             * FastMode slightly speeds up
+             * speech without affecting command
+             * processing.
+             */
 
-            utterance.onend = () => {
-                state.speaking = false;
-            };
+            utterance.rate =
+                state.settings.fastMode
+                    ? 1.05
+                    : 0.95;
 
-            utterance.onerror = () => {
-                state.speaking = false;
-            };
+            utterance.pitch =
+                0.95;
 
-            window.speechSynthesis.speak(utterance);
+            utterance.volume =
+                1;
+
+            state.speaking =
+                true;
+
+            utterance.onend =
+                () => {
+                    state.speaking =
+                        false;
+                };
+
+            utterance.onerror =
+                () => {
+                    state.speaking =
+                        false;
+                };
+
+            window.speechSynthesis
+                .speak(utterance);
+
+            return true;
 
         } catch (error) {
-            console.warn("JARVIS speech error:", error);
-            state.speaking = false;
+            console.warn(
+                "JARVIS speech error:",
+                error
+            );
+
+            state.speaking =
+                false;
+
+            return false;
         }
     }
 
 
     function stopSpeaking() {
-        if ("speechSynthesis" in window) {
-            window.speechSynthesis.cancel();
+        if (
+            "speechSynthesis" in
+            window
+        ) {
+            try {
+                window.speechSynthesis
+                    .cancel();
+            } catch {
+                // ignore
+            }
         }
 
-        state.speaking = false;
+        state.speaking =
+            false;
     }
 
 
     /* ---------------------------------------------------------
        NORMALIZATION
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function normalize(text) {
         return String(text || "")
             .toLowerCase()
-            .replace(/[!?.,:;()[\]{}"'`]/g, " ")
-            .replace(/\s+/g, " ")
+            .replace(
+                /[!?.,:;()[\]{}"'`]/g,
+                " "
+            )
+            .replace(
+                /\s+/g,
+                " "
+            )
             .trim();
     }
 
 
     function contains(text, words) {
-        return words.some(word =>
-            text.includes(word)
+        return words.some(
+            word =>
+                text.includes(word)
         );
     }
 
 
     /* ---------------------------------------------------------
        MUSIC
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function getMusicElement() {
         return (
@@ -454,41 +716,55 @@
 
 
     async function playMusic() {
-        const audio = getMusicElement();
+        const audio =
+            getMusicElement();
 
         if (!audio) {
             return {
                 ok: false,
-                message: "Музыкальный модуль сейчас недоступен."
+                message:
+                    "Музыкальный модуль сейчас недоступен."
             };
         }
 
         try {
+            /*
+             * Calling play() directly keeps
+             * command execution fast.
+             */
+
             await audio.play();
 
             return {
                 ok: true,
-                message: "Музыка запущена."
+                message:
+                    "Музыка запущена."
             };
 
         } catch (error) {
-            console.warn("Music play error:", error);
+            console.warn(
+                "Music play error:",
+                error
+            );
 
             return {
                 ok: false,
-                message: "Не удалось запустить музыку. Возможно, браузер ждёт нажатия пользователя."
+                message:
+                    "Не удалось запустить музыку. Возможно, браузер ждёт нажатия пользователя."
             };
         }
     }
 
 
     function stopMusic() {
-        const audio = getMusicElement();
+        const audio =
+            getMusicElement();
 
         if (!audio) {
             return {
                 ok: false,
-                message: "Музыкальный модуль недоступен."
+                message:
+                    "Музыкальный модуль недоступен."
             };
         }
 
@@ -496,18 +772,21 @@
 
         return {
             ok: true,
-            message: "Музыка остановлена."
+            message:
+                "Музыка остановлена."
         };
     }
 
 
-    function toggleMusic() {
-        const audio = getMusicElement();
+    async function toggleMusic() {
+        const audio =
+            getMusicElement();
 
         if (!audio) {
             return {
                 ok: false,
-                message: "Музыкальный модуль недоступен."
+                message:
+                    "Музыкальный модуль недоступен."
             };
         }
 
@@ -519,14 +798,15 @@
 
         return {
             ok: true,
-            message: "Музыка поставлена на паузу."
+            message:
+                "Музыка поставлена на паузу."
         };
     }
 
 
     /* ---------------------------------------------------------
        NAVIGATION
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     function openSection(section) {
         if (!section) {
@@ -535,28 +815,71 @@
 
         const cleanSection =
             String(section)
-                .replace("#", "")
+                .replace(/^#/, "")
                 .trim();
 
         const target =
-            document.getElementById(cleanSection);
+            document.getElementById(
+                cleanSection
+            );
 
-        if (target) {
-            document.querySelectorAll("section").forEach(
+        if (!target) {
+            return false;
+        }
+
+        /*
+         * Important:
+         * don't force inline display styles.
+         * The ASHINA UI controls visibility
+         * through its active classes.
+         */
+
+        document
+            .querySelectorAll(
+                "section"
+            )
+            .forEach(
                 sectionElement => {
-                    sectionElement.style.display =
-                        sectionElement.id === cleanSection
-                            ? ""
-                            : "none";
+                    sectionElement.classList.toggle(
+                        "active",
+                        sectionElement.id ===
+                            cleanSection
+                    );
                 }
             );
 
-            window.location.hash = cleanSection;
+        /*
+         * Compatibility fallback for
+         * layouts without .active rules.
+         */
 
-            return true;
+        document
+            .querySelectorAll(
+                "section"
+            )
+            .forEach(
+                sectionElement => {
+                    if (
+                        sectionElement.id ===
+                        cleanSection
+                    ) {
+                        sectionElement.removeAttribute(
+                            "hidden"
+                        );
+                    } else {
+                        sectionElement.removeAttribute(
+                            "hidden"
+                        );
+                    }
+                }
+            );
+
+        try {
+            window.location.hash =
+                cleanSection;
+        } catch {
+            // ignore
         }
-
-        window.location.hash = cleanSection;
 
         return true;
     }
@@ -564,7 +887,7 @@
 
     /* ---------------------------------------------------------
        DIAGNOSTICS
-    --------------------------------------------------------- */
+       --------------------------------------------------------- */
 
     async function diagnose() {
         const results = {};
@@ -572,12 +895,20 @@
         results.localStorage =
             (() => {
                 try {
-                    const test = "__ashina_test__";
+                    const key =
+                        "__ashina_jarvis_test__";
 
-                    localStorage.setItem(test, "1");
-                    localStorage.removeItem(test);
+                    localStorage.setItem(
+                        key,
+                        "1"
+                    );
+
+                    localStorage.removeItem(
+                        key
+                    );
 
                     return true;
+
                 } catch {
                     return false;
                 }
@@ -587,7 +918,8 @@
             !!getMusicElement();
 
         results.speechSynthesis =
-            "speechSynthesis" in window;
+            "speechSynthesis" in
+            window;
 
         results.speechRecognition =
             !!(
@@ -596,10 +928,12 @@
             );
 
         results.serviceWorker =
-            "serviceWorker" in navigator;
+            "serviceWorker" in
+            navigator;
 
         results.indexedDB =
-            "indexedDB" in window;
+            "indexedDB" in
+            window;
 
         results.jarvis =
             true;
@@ -613,22 +947,32 @@
                 .length;
 
         const total =
-            Object.keys(results).length;
+            Object.keys(results)
+                .length;
 
         return {
             ...results,
+
             available,
+
             total,
+
             percentage:
-                Math.round(
-                    (available / total) * 100
-                )
+                total
+                    ? Math.round(
+                        (
+                            available /
+                            total
+                        ) * 100
+                    )
+                    : 0
         };
     }
 
 
     async function diagnosticsText() {
-        const result = await diagnose();
+        const result =
+            await diagnose();
 
         const lines = [
             "Диагностика ASHINA:",
@@ -653,23 +997,45 @@
 
     async function processCommand(command) {
         const original =
-            String(command || "").trim();
+            String(command || "")
+                .trim();
 
         if (!original) {
             return "";
         }
 
-        const text = normalize(original);
+        const text =
+            normalize(original);
 
-        state.lastCommand = original;
-        state.lastUserMessage = original;
+        state.lastCommand =
+            original;
+
+        state.lastUserMessage =
+            original;
+
         state.commandCount++;
 
-        addHistory("user", original);
+        /*
+         * Only one history entry is created
+         * here. The old version also added the
+         * same user message from the UI.
+         */
 
-        saveMemory();
+        addHistory(
+            "user",
+            original
+        );
 
-        /* GREETING */
+        /*
+         * Save important state once.
+         */
+
+        saveMemory(false);
+
+
+        /* -----------------------------------------------------
+           GREETING
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -680,11 +1046,16 @@
                 "добрый вечер"
             ])
         ) {
-            return "Привет. JARVIS на связи. ASHINA готова к работе.";
+            return (
+                "Привет. JARVIS на связи. " +
+                "ASHINA готова к работе."
+            );
         }
 
 
-        /* IDENTITY */
+        /* -----------------------------------------------------
+           IDENTITY
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -693,11 +1064,18 @@
                 "представься"
             ])
         ) {
-            return `Я ${CONFIG.name}, локальное AI-ядро проекта ${CONFIG.project}. Версия ${CONFIG.version}.`;
+            return (
+                `Я ${CONFIG.name}, ` +
+                `локальное AI-ядро проекта ` +
+                `${CONFIG.project}. ` +
+                `Версия ${CONFIG.version}.`
+            );
         }
 
 
-        /* STATUS */
+        /* -----------------------------------------------------
+           STATUS
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -706,11 +1084,17 @@
                 "как дела"
             ])
         ) {
-            return `JARVIS работает. Команд обработано: ${state.commandCount}.`;
+            return (
+                `JARVIS работает. ` +
+                `Команд обработано: ` +
+                `${state.commandCount}.`
+            );
         }
 
 
-        /* CAPABILITIES */
+        /* -----------------------------------------------------
+           CAPABILITIES
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -719,11 +1103,18 @@
                 "что умеешь"
             ])
         ) {
-            return "Я могу управлять разделами ASHINA, музыкой, памятью, голосом и диагностикой. Архитектура готова для расширения AI-модуля.";
+            return (
+                "Я могу управлять разделами ASHINA, " +
+                "музыкой, памятью, голосом и " +
+                "диагностикой. Архитектура готова " +
+                "для расширения AI-модуля."
+            );
         }
 
 
-        /* TIME */
+        /* -----------------------------------------------------
+           TIME
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -732,17 +1123,22 @@
                 "время"
             ])
         ) {
-            return `Сейчас ${new Date().toLocaleTimeString(
-                "ru-RU",
-                {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            )}.`;
+            return (
+                `Сейчас ${new Date()
+                    .toLocaleTimeString(
+                        "ru-RU",
+                        {
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    )}.`
+            );
         }
 
 
-        /* DATE */
+        /* -----------------------------------------------------
+           DATE
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -751,50 +1147,70 @@
                 "какое сегодня число"
             ])
         ) {
-            return `Сегодня ${new Date().toLocaleDateString(
-                "ru-RU",
-                {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric"
-                }
-            )}.`;
+            return (
+                `Сегодня ${new Date()
+                    .toLocaleDateString(
+                        "ru-RU",
+                        {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric"
+                        }
+                    )}.`
+            );
         }
 
 
-        /* MEMORY ADD */
+        /* -----------------------------------------------------
+           MEMORY ADD
+           ----------------------------------------------------- */
 
         if (
-            text.startsWith("запомни ") ||
-            text.startsWith("запиши в память ") ||
-            text.startsWith("сохрани в память ")
+            text.startsWith(
+                "запомни "
+            ) ||
+            text.startsWith(
+                "запиши в память "
+            ) ||
+            text.startsWith(
+                "сохрани в память "
+            )
         ) {
-            let memoryText = original
-                .replace(
-                    /^запомни\s+/i,
-                    ""
-                )
-                .replace(
-                    /^запиши в память\s+/i,
-                    ""
-                )
-                .replace(
-                    /^сохрани в память\s+/i,
-                    ""
-                )
-                .trim();
+            let memoryText =
+                original
+                    .replace(
+                        /^запомни\s+/i,
+                        ""
+                    )
+                    .replace(
+                        /^запиши в память\s+/i,
+                        ""
+                    )
+                    .replace(
+                        /^сохрани в память\s+/i,
+                        ""
+                    )
+                    .trim();
 
             if (memoryText) {
-                remember(memoryText);
+                remember(
+                    memoryText
+                );
 
-                return "Записал это в память ASHINA.";
+                return (
+                    "Записал это в память ASHINA."
+                );
             }
 
-            return "Что именно нужно запомнить?";
+            return (
+                "Что именно нужно запомнить?"
+            );
         }
 
 
-        /* MEMORY SHOW */
+        /* -----------------------------------------------------
+           MEMORY SHOW
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -804,7 +1220,9 @@
             ])
         ) {
             if (!state.memory.length) {
-                return "Память пока пуста.";
+                return (
+                    "Память пока пуста."
+                );
             }
 
             return [
@@ -817,7 +1235,9 @@
         }
 
 
-        /* MEMORY CLEAR */
+        /* -----------------------------------------------------
+           MEMORY CLEAR
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -828,11 +1248,15 @@
         ) {
             clearMemory();
 
-            return "Память очищена.";
+            return (
+                "Память очищена."
+            );
         }
 
 
-        /* DIAGNOSTICS */
+        /* -----------------------------------------------------
+           DIAGNOSTICS
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -842,11 +1266,15 @@
                 "проверка системы"
             ])
         ) {
-            return await diagnosticsText();
+            return (
+                await diagnosticsText()
+            );
         }
 
 
-        /* MUSIC PLAY */
+        /* -----------------------------------------------------
+           MUSIC PLAY
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -856,13 +1284,16 @@
                 "включи трек"
             ])
         ) {
-            const result = await playMusic();
+            const result =
+                await playMusic();
 
             return result.message;
         }
 
 
-        /* MUSIC STOP */
+        /* -----------------------------------------------------
+           MUSIC STOP
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -872,24 +1303,30 @@
                 "пауза"
             ])
         ) {
-            const result = stopMusic();
+            const result =
+                stopMusic();
 
             return result.message;
         }
 
 
-        /* MUSIC TOGGLE */
+        /* -----------------------------------------------------
+           MUSIC TOGGLE
+           ----------------------------------------------------- */
 
         if (
             text === "музыка"
         ) {
-            const result = await toggleMusic();
+            const result =
+                await toggleMusic();
 
             return result.message;
         }
 
 
-        /* OPEN CHAT */
+        /* -----------------------------------------------------
+           OPEN CHAT
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -897,13 +1334,23 @@
                 "перейди в чат"
             ])
         ) {
-            openSection("chat");
+            if (
+                openSection("chat")
+            ) {
+                return (
+                    "Открываю чат."
+                );
+            }
 
-            return "Открываю чат.";
+            return (
+                "Раздел чата сейчас недоступен."
+            );
         }
 
 
-        /* OPEN MUSIC */
+        /* -----------------------------------------------------
+           OPEN MUSIC
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -911,13 +1358,23 @@
                 "перейди в музыку"
             ])
         ) {
-            openSection("music");
+            if (
+                openSection("music")
+            ) {
+                return (
+                    "Открываю музыку."
+                );
+            }
 
-            return "Открываю музыку.";
+            return (
+                "Музыкальный раздел сейчас недоступен."
+            );
         }
 
 
-        /* OPEN NEWS */
+        /* -----------------------------------------------------
+           OPEN NEWS
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -926,13 +1383,23 @@
                 "открой ленту"
             ])
         ) {
-            openSection("news");
+            if (
+                openSection("news")
+            ) {
+                return (
+                    "Открываю ленту."
+                );
+            }
 
-            return "Открываю ленту.";
+            return (
+                "Раздел ленты сейчас недоступен."
+            );
         }
 
 
-        /* OPEN HOME */
+        /* -----------------------------------------------------
+           OPEN HOME
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -940,13 +1407,23 @@
                 "на главную"
             ])
         ) {
-            openSection("home");
+            if (
+                openSection("home")
+            ) {
+                return (
+                    "Возвращаюсь на главную."
+                );
+            }
 
-            return "Возвращаюсь на главную.";
+            return (
+                "Главный раздел сейчас недоступен."
+            );
         }
 
 
-        /* OPEN AI */
+        /* -----------------------------------------------------
+           OPEN AI
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -955,13 +1432,23 @@
                 "открой искусственный интеллект"
             ])
         ) {
-            openSection("ai");
+            if (
+                openSection("ai")
+            ) {
+                return (
+                    "Открываю AI-центр."
+                );
+            }
 
-            return "Открываю AI-центр.";
+            return (
+                "AI-центр сейчас недоступен."
+            );
         }
 
 
-        /* STOP VOICE */
+        /* -----------------------------------------------------
+           STOP VOICE
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -972,11 +1459,15 @@
         ) {
             stopSpeaking();
 
-            return "Голосовой вывод остановлен.";
+            return (
+                "Голосовой вывод остановлен."
+            );
         }
 
 
-        /* HELP */
+        /* -----------------------------------------------------
+           HELP
+           ----------------------------------------------------- */
 
         if (
             contains(text, [
@@ -997,6 +1488,7 @@
                 "• Открой чат",
                 "• Открой музыку",
                 "• Открой новости",
+                "• Открой главную",
                 "• Покажи память",
                 "• Запомни ...",
                 "• Очисти память"
@@ -1004,9 +1496,15 @@
         }
 
 
-        /* FALLBACK */
+        /* -----------------------------------------------------
+           FALLBACK
+           ----------------------------------------------------- */
 
-        return "Команда получена. Сейчас я ещё не знаю, как выполнить её полностью, но архитектура JARVIS готова для подключения новых навыков.";
+        return (
+            "Команда получена. Сейчас я ещё не знаю, " +
+            "как выполнить её полностью, но ядро " +
+            "JARVIS работает и готово к расширению."
+        );
     }
 
 
@@ -1014,55 +1512,105 @@
        ASK
        --------------------------------------------------------- */
 
-    async function ask(command, options = {}) {
+    function ask(command, options = {}) {
         const text =
-            String(command || "").trim();
+            String(command || "")
+                .trim();
 
         if (!text) {
-            return "";
+            return Promise.resolve("");
         }
 
-        setThinking(true);
+        /*
+         * Commands are queued.
+         *
+         * This prevents two commands from
+         * simultaneously changing state,
+         * music, navigation and speech.
+         */
 
-        let response;
+        const task =
+            commandQueue.then(
+                async () => {
+                    setThinking(true);
 
-        try {
-            response = await processCommand(text);
-        } catch (error) {
-            console.error("JARVIS command error:", error);
+                    let response = "";
 
-            response =
-                "Произошла ошибка при обработке команды.";
-        }
+                    try {
+                        response =
+                            await processCommand(
+                                text
+                            );
 
-        state.lastAIMessage = response;
+                    } catch (error) {
+                        console.error(
+                            "JARVIS command error:",
+                            error
+                        );
 
-        saveMemory();
+                        response =
+                            "Произошла ошибка при обработке команды.";
+                    }
 
-        if (options.render !== false) {
-            addMessage(response, "ai");
-        }
+                    state.lastAIMessage =
+                        response;
 
-        if (
-            options.speak !== false &&
-            state.settings.voice &&
-            state.settings.speech
-        ) {
-            speak(response);
-        }
+                    saveMemory(false);
 
-        setThinking(false);
+                    if (
+                        options.render !== false
+                    ) {
+                        addMessage(
+                            response,
+                            "ai",
+                            true
+                        );
+                    }
 
-        return response;
+                    /*
+                     * Voice runs after the response
+                     * has already been generated.
+                     *
+                     * It does not delay the command
+                     * processor itself.
+                     */
+
+                    if (
+                        options.speak !== false &&
+                        state.settings.voice &&
+                        state.settings.speech
+                    ) {
+                        speak(response);
+                    }
+
+                    setThinking(false);
+
+                    return response;
+                }
+            );
+
+        /*
+         * Keep queue alive even if one command
+         * unexpectedly rejects.
+         */
+
+        commandQueue =
+            task.catch(
+                error => {
+                    console.error(
+                        "JARVIS queue error:",
+                        error
+                    );
+                }
+            );
+
+        return task;
     }
 
 
     /* ---------------------------------------------------------
        VOICE INPUT
        --------------------------------------------------------- */
-
-    let recognition = null;
-
 
     function createRecognition() {
         const Recognition =
@@ -1073,64 +1621,89 @@
             return null;
         }
 
-        const instance = new Recognition();
+        const instance =
+            new Recognition();
 
-        instance.lang = "ru-RU";
-        instance.continuous = false;
-        instance.interimResults = false;
+        instance.lang =
+            "ru-RU";
 
-        instance.onstart = () => {
-            state.listening = true;
+        instance.continuous =
+            false;
 
-            setText(
-                "aiStatus",
-                "Слушаю..."
-            );
-        };
+        instance.interimResults =
+            false;
 
-        instance.onend = () => {
-            state.listening = false;
+        instance.onstart =
+            () => {
+                state.listening =
+                    true;
 
-            if (!state.thinking) {
                 setText(
                     "aiStatus",
-                    "JARVIS готов"
+                    "Слушаю..."
                 );
-            }
-        };
+            };
 
-        instance.onerror = error => {
-            console.warn(
-                "JARVIS voice recognition error:",
-                error
-            );
 
-            state.listening = false;
+        instance.onend =
+            () => {
+                state.listening =
+                    false;
 
-            setText(
-                "aiStatus",
-                "Ошибка голосового ввода"
-            );
-        };
+                if (!state.thinking) {
+                    setText(
+                        "aiStatus",
+                        "JARVIS готов"
+                    );
+                }
+            };
 
-        instance.onresult = event => {
-            const transcript =
-                event.results?.[0]?.[0]?.transcript || "";
 
-            if (!transcript) {
-                return;
-            }
+        instance.onerror =
+            error => {
+                console.warn(
+                    "JARVIS voice recognition error:",
+                    error
+                );
 
-            const input =
-                $("command") ||
-                $("input");
+                state.listening =
+                    false;
 
-            if (input) {
-                input.value = transcript;
-            }
+                setText(
+                    "aiStatus",
+                    "Ошибка голосового ввода"
+                );
+            };
 
-            ask(transcript);
-        };
+
+        instance.onresult =
+            event => {
+                const transcript =
+                    event
+                        .results?.[0]?.[0]
+                        ?.transcript || "";
+
+                if (!transcript) {
+                    return;
+                }
+
+                const input =
+                    $("command") ||
+                    $("input");
+
+                if (input) {
+                    input.value =
+                        transcript;
+                }
+
+                /*
+                 * Do not manually add the user
+                 * message here.
+                 * ask() handles the complete flow.
+                 */
+
+                ask(transcript);
+            };
 
         return instance;
     }
@@ -1142,7 +1715,8 @@
         }
 
         if (!recognition) {
-            recognition = createRecognition();
+            recognition =
+                createRecognition();
         }
 
         if (!recognition) {
@@ -1151,7 +1725,9 @@
 
         try {
             recognition.start();
+
             return true;
+
         } catch (error) {
             console.warn(
                 "Voice start error:",
@@ -1174,7 +1750,8 @@
             // already stopped
         }
 
-        state.listening = false;
+        state.listening =
+            false;
     }
 
 
@@ -1191,10 +1768,29 @@
             return;
         }
 
+        /*
+         * Prevent duplicate listeners
+         * if initialize is accidentally called
+         * more than once.
+         */
+
+        if (
+            input.dataset.jarvisConnected ===
+            "true"
+        ) {
+            return;
+        }
+
+        input.dataset.jarvisConnected =
+            "true";
+
         input.addEventListener(
             "keydown",
             event => {
-                if (event.key !== "Enter") {
+                if (
+                    event.key !==
+                    "Enter"
+                ) {
                     return;
                 }
 
@@ -1207,9 +1803,12 @@
                     return;
                 }
 
-                addMessage(text, "user");
-
                 input.value = "";
+
+                /*
+                 * ask() now creates both user
+                 * and assistant history entries.
+                 */
 
                 ask(text);
             }
@@ -1222,7 +1821,8 @@
        --------------------------------------------------------- */
 
     function restoreHistory() {
-        const log = $("log");
+        const log =
+            $("log");
 
         if (!log) {
             return;
@@ -1231,35 +1831,61 @@
         log.innerHTML = "";
 
         const items =
-            state.history.slice(-15);
+            state.history.slice(
+                -CONFIG.visibleHistory
+            );
+
+        /*
+         * IMPORTANT:
+         * Do not call addMessage() here.
+         * That would write restored messages
+         * back into history.
+         */
 
         if (!items.length) {
-            addMessage(
-                "JARVIS онлайн. Ядро ASHINA готово.",
-                "ai"
+            const message =
+                document.createElement(
+                    "div"
+                );
+
+            message.className =
+                "message ai";
+
+            message.textContent =
+                "JARVIS онлайн. Ядро ASHINA готово.";
+
+            log.appendChild(
+                message
             );
 
             return;
         }
 
-        items.forEach(item => {
-            const message =
-                document.createElement("div");
+        items.forEach(
+            item => {
+                const message =
+                    document.createElement(
+                        "div"
+                    );
 
-            message.className =
-                `message ${
-                    item.role === "user"
-                        ? "user"
-                        : "ai"
-                }`;
+                message.className =
+                    `message ${
+                        item.role === "user"
+                            ? "user"
+                            : "ai"
+                    }`;
 
-            message.textContent =
-                item.text;
+                message.textContent =
+                    item.text;
 
-            log.appendChild(message);
-        });
+                log.appendChild(
+                    message
+                );
+            }
+        );
 
-        log.scrollTop = log.scrollHeight;
+        log.scrollTop =
+            log.scrollHeight;
     }
 
 
@@ -1268,10 +1894,17 @@
        --------------------------------------------------------- */
 
     const API = {
-        name: CONFIG.name,
-        project: CONFIG.project,
-        version: CONFIG.version,
-        mode: CONFIG.mode,
+        name:
+            CONFIG.name,
+
+        project:
+            CONFIG.project,
+
+        version:
+            CONFIG.version,
+
+        mode:
+            CONFIG.mode,
 
         get ready() {
             return state.ready;
@@ -1316,8 +1949,18 @@
         getState() {
             return {
                 ...state,
-                memory: [...state.memory],
-                history: [...state.history]
+
+                memory: [
+                    ...state.memory
+                ],
+
+                history: [
+                    ...state.history
+                ],
+
+                settings: {
+                    ...state.settings
+                }
             };
         }
     };
@@ -1327,10 +1970,14 @@
        GLOBAL REGISTRATION
        --------------------------------------------------------- */
 
-    window.JARVIS = API;
-    window.JARVIS_API = API;
+    window.JARVIS =
+        API;
 
-    window.ASHINA_JARVIS = API;
+    window.JARVIS_API =
+        API;
+
+    window.ASHINA_JARVIS =
+        API;
 
 
     /* ---------------------------------------------------------
@@ -1338,16 +1985,27 @@
        --------------------------------------------------------- */
 
     function initialize() {
+        if (initialized) {
+            return;
+        }
+
+        initialized = true;
+
         try {
             loadSettings();
+
             loadMemory();
+
             loadHistory();
 
             renderMemory();
+
             restoreHistory();
+
             connectInput();
 
-            state.ready = true;
+            state.ready =
+                true;
 
             setText(
                 "aiStatus",
@@ -1363,7 +2021,9 @@
             }
 
             console.log(
-                `ASHINA ${CONFIG.project} — ${CONFIG.name} Core ${CONFIG.version} ONLINE`
+                `ASHINA ${CONFIG.project} — ` +
+                `${CONFIG.name} Core ` +
+                `${CONFIG.version} ONLINE`
             );
 
         } catch (error) {
@@ -1371,18 +2031,34 @@
                 "JARVIS initialization error:",
                 error
             );
+
+            state.ready =
+                false;
+
+            setText(
+                "aiStatus",
+                "Ошибка запуска JARVIS"
+            );
         }
     }
 
 
+    /* ---------------------------------------------------------
+       DOM READY
+       --------------------------------------------------------- */
+
     if (
-        document.readyState === "loading"
+        document.readyState ===
+        "loading"
     ) {
         document.addEventListener(
             "DOMContentLoaded",
             initialize,
-            { once: true }
+            {
+                once: true
+            }
         );
+
     } else {
         initialize();
     }
