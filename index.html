@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -22,7 +23,7 @@ color:#fff;
 font-family:system-ui,-apple-system,sans-serif;
 }
 
-button,input{font:inherit}
+button,input,select{font:inherit}
 
 button{
 border:1px solid #292e38;
@@ -148,9 +149,7 @@ padding:13px;
 font-size:14px;
 }
 
-/* =====================================================
-   MUSIC
-===================================================== */
+/* MUSIC */
 
 .music-player{
 background:#0d1118;
@@ -281,9 +280,7 @@ font-size:11px;
 background:#5b1519;
 }
 
-/* =====================================================
-   NEWS
-===================================================== */
+/* NEWS */
 
 .feed{
 border:1px solid #292e38;
@@ -323,9 +320,7 @@ color:#9da2ac;
 min-height:16px;
 }
 
-/* =====================================================
-   CHAT
-===================================================== */
+/* CHAT */
 
 .chat-box{
 height:460px;
@@ -402,7 +397,8 @@ margin-top:10px;
 }
 
 .chat-input input,
-.ai-input input{
+.ai-input input,
+.setting-input{
 flex:1;
 min-width:0;
 border:1px solid #292e38;
@@ -414,7 +410,8 @@ outline:none;
 }
 
 .chat-input input:focus,
-.ai-input input:focus{
+.ai-input input:focus,
+.setting-input:focus{
 border-color:#7a2026;
 }
 
@@ -424,9 +421,7 @@ background:#5b1519;
 padding:12px 15px;
 }
 
-/* =====================================================
-   ATTACHMENTS
-===================================================== */
+/* ATTACHMENTS */
 
 .attachment{
 margin-top:9px;
@@ -494,9 +489,7 @@ text-align:center;
 padding:10px;
 }
 
-/* =====================================================
-   AI
-===================================================== */
+/* AI */
 
 .ai-core{
 height:460px;
@@ -578,27 +571,7 @@ font-size:11px;
 color:#777e89;
 }
 
-/* =====================================================
-   JARVIS STATUS
-===================================================== */
-
-.jarvis-status{
-margin-top:10px;
-padding:10px;
-border:1px solid #292e38;
-border-radius:10px;
-background:#0d1118;
-font-size:11px;
-color:#777e89;
-}
-
-.jarvis-status.online{
-color:#9fd49f;
-}
-
-/* =====================================================
-   SECURITY
-===================================================== */
+/* SECURITY */
 
 .security{
 padding:14px;
@@ -645,9 +618,123 @@ margin-top:10px;
 font-weight:700;
 }
 
-/* =====================================================
-   ADMIN
-===================================================== */
+/* SETTINGS */
+
+.setting-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+padding:12px 0;
+border-bottom:1px solid #292e38;
+}
+
+.setting-row:last-child{
+border-bottom:0;
+}
+
+.setting-info{
+flex:1;
+}
+
+.setting-name{
+font-size:13px;
+font-weight:700;
+}
+
+.setting-description{
+font-size:11px;
+color:#777e89;
+margin-top:3px;
+line-height:1.4;
+}
+
+.toggle{
+position:relative;
+width:48px;
+height:26px;
+flex:none;
+}
+
+.toggle input{
+opacity:0;
+width:0;
+height:0;
+}
+
+.slider{
+position:absolute;
+inset:0;
+background:#252b35;
+border:1px solid #3a404b;
+border-radius:99px;
+cursor:pointer;
+transition:.2s;
+}
+
+.slider:before{
+content:"";
+position:absolute;
+width:18px;
+height:18px;
+left:3px;
+top:3px;
+background:#aaa;
+border-radius:50%;
+transition:.2s;
+}
+
+.toggle input:checked+.slider{
+background:#5b1519;
+border-color:#7a2026;
+}
+
+.toggle input:checked+.slider:before{
+transform:translateX(21px);
+background:#fff;
+}
+
+.setting-select{
+width:100%;
+padding:11px;
+margin-top:7px;
+border-radius:11px;
+border:1px solid #292e38;
+background:#131720;
+color:#fff;
+outline:none;
+}
+
+.setting-button{
+width:100%;
+padding:11px;
+margin-top:8px;
+}
+
+.system-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-top:10px;
+}
+
+.system-item{
+padding:11px;
+border:1px solid #292e38;
+border-radius:12px;
+background:#131720;
+}
+
+.system-item-title{
+font-size:11px;
+color:#8f96a1;
+}
+
+.system-item-status{
+font-size:13px;
+font-weight:700;
+margin-top:4px;
+}
 
 .admin-panel{
 margin-top:12px;
@@ -680,9 +767,19 @@ background:#1c1114;
 padding:11px;
 }
 
-/* =====================================================
-   MOBILE
-===================================================== */
+.danger:hover{
+background:#29151a;
+}
+
+.success{
+color:#9fd49f;
+}
+
+.warning{
+color:#e9c99b;
+}
+
+/* MOBILE */
 
 @media(max-width:420px){
 
@@ -702,8 +799,17 @@ height:390px;
 max-width:94%;
 }
 
+.system-grid{
+grid-template-columns:1fr;
+}
+
+.setting-row{
+align-items:flex-start;
+}
+
 }
 </style>
+
 </head>
 
 <body>
@@ -714,7 +820,7 @@ max-width:94%;
 <div class="logo">ASHINA</div>
 
 <div class="version">
-AI CORE · 2.0
+AI CORE · 2.0 · JARVIS READY
 </div>
 </div>
 
@@ -782,17 +888,13 @@ ASHINA · 2.0 AI
 
 <div class="security-status">
 
-AI-ядро:
-<span class="ai-online">
-● ONLINE
-</span>
+AI-ядро: <span class="ai-online">
+● ONLINE </span>
 
 <br>
 
-JARVIS Core:
-<span id="jarvisHomeStatus">
-● ОЖИДАНИЕ
-</span>
+JARVIS Core: <span id="homeJarvisStatus" class="warning">
+● ОЖИДАНИЕ </span>
 
 <br>
 
@@ -801,10 +903,8 @@ JARVIS Core:
 
 <br>
 
-Память:
-<span id="homeMemory">
-активна
-</span>
+Память: <span id="homeMemory">
+активна </span>
 
 </div>
 
@@ -859,24 +959,17 @@ ASHINA Music
 <audio
 id="audio"
 preload="metadata"
-controls>
-</audio>
+controls> </audio>
 
 <div class="controls">
 
-<button onclick="previousTrack()">
-⏮
-</button>
+<button onclick="previousTrack()">⏮</button>
 
-<button
-id="playButton"
-onclick="toggleMusic()">
+<button id="playButton" onclick="toggleMusic()">
 ▶️
 </button>
 
-<button onclick="nextTrack()">
-⏭
-</button>
+<button onclick="nextTrack()">⏭</button>
 
 </div>
 
@@ -889,9 +982,7 @@ value="0">
 
 <div class="row">
 
-<span
-id="time"
-class="muted">
+<span id="time" class="muted">
 0:00 / 0:00
 </span>
 
@@ -907,9 +998,7 @@ max="1"
 step="0.01"
 value="0.8">
 
-<div
-id="musicStatus"
-class="music-status">
+<div id="musicStatus" class="music-status">
 Плеер готов.
 </div>
 
@@ -943,43 +1032,33 @@ class="music-status">
 
 <div class="genre-row">
 
-<button
-class="active"
-onclick="filterGenre('all',this)">
+<button class="active" onclick="filterGenre('all',this)">
 Все
 </button>
 
-<button
-onclick="filterGenre('Спокойная',this)">
+<button onclick="filterGenre('Спокойная',this)">
 🌙 Спокойная
 </button>
 
-<button
-onclick="filterGenre('Энергичная',this)">
+<button onclick="filterGenre('Энергичная',this)">
 🔥 Энергичная
 </button>
 
-<button
-onclick="filterGenre('Аниме',this)">
+<button onclick="filterGenre('Аниме',this)">
 ⚔️ Аниме
 </button>
 
-<button
-onclick="filterGenre('Фоновая',this)">
+<button onclick="filterGenre('Фоновая',this)">
 🌌 Фоновая
 </button>
 
-<button
-onclick="filterGenre('Моя музыка',this)">
+<button onclick="filterGenre('Моя музыка',this)">
 🎧 Моя музыка
 </button>
 
 </div>
 
-<div
-id="playlist"
-class="playlist">
-</div>
+<div id="playlist" class="playlist"></div>
 
 </div>
 
@@ -991,9 +1070,7 @@ class="playlist">
 
 <div class="card">
 
-<h2>
-📰 Трендовая лента
-</h2>
+<h2>📰 Трендовая лента</h2>
 
 <p class="muted">
 Тестовая система публикаций.
@@ -1007,9 +1084,7 @@ class="playlist">
 🔥 Первая публикация ASHINA
 </strong>
 
-<span class="badge">
-0+
-</span>
+<span class="badge">0+</span>
 
 </div>
 
@@ -1024,28 +1099,17 @@ ASHINA развивается.
 
 <div class="like-row">
 
-<button
-id="likeButton"
-onclick="vote('like')">
-
+<button id="likeButton" onclick="vote('like')">
 👍 <span id="likeCount">0</span>
-
 </button>
 
-<button
-id="dislikeButton"
-onclick="vote('dislike')">
-
+<button id="dislikeButton" onclick="vote('dislike')">
 👎 <span id="dislikeCount">0</span>
-
 </button>
 
 </div>
 
-<div
-id="voteStatus"
-class="status">
-</div>
+<div id="voteStatus" class="status"></div>
 
 </div>
 
@@ -1063,9 +1127,7 @@ class="status">
 
 <div>
 
-<h2>
-💬 ASHINA Chat
-</h2>
+<h2>💬 ASHINA Chat</h2>
 
 <p class="muted">
 Сообщения, фотографии, видео, музыка и файлы.
@@ -1073,46 +1135,15 @@ class="status">
 
 </div>
 
-<button onclick="clearChat()">
-🧹
-</button>
+<button onclick="clearChat()">🧹</button>
 
 </div>
 
-<div
-id="chatBox"
-class="chat-box">
-</div>
+<div id="chatBox" class="chat-box"></div>
 
 <div class="chat-tools">
 
-<button onclick="openFilePicker()">
-📎 Файл
-</button>
-
-<button onclick="openImagePicker()">
-📷 Фото
-</button>
-
-<button onclick="openVideoPicker()">
-🎥 Видео
-</button>
-
-<button onclick="openAudioPicker()">
-🎵 Музыка
-</button>
-
-<button onclick="insertEmoji('😀')">
-😀
-</button>
-
-<button onclick="insertEmoji('❤️')">
-❤️
-</button>
-
-<button onclick="insertEmoji('🔥')">
-🔥
-</button>
+<button onclick="openFilePicker()">📎 Файл</button> <button onclick="openImagePicker()">📷 Фото</button> <button onclick="openVideoPicker()">🎥 Видео</button> <button onclick="openAudioPicker()">🎵 Музыка</button> <button onclick="insertEmoji('😀')">😀</button> <button onclick="insertEmoji('❤️')">❤️</button> <button onclick="insertEmoji('🔥')">🔥</button>
 
 </div>
 
@@ -1130,16 +1161,11 @@ type="text"
 maxlength="2000"
 placeholder="Напиши сообщение...">
 
-<button onclick="sendMessage()">
-➤
-</button>
+<button onclick="sendMessage()">➤</button>
 
 </div>
 
-<p
-id="chatStatus"
-class="status">
-</p>
+<p id="chatStatus" class="status"></p>
 
 </div>
 
@@ -1155,12 +1181,10 @@ class="status">
 
 <div>
 
-<h2>
-🧠 ASHINA AI
-</h2>
+<h2>🧠 ASHINA AI</h2>
 
 <p class="muted">
-Интеллектуальное локальное ядро · 2.0
+Интеллектуальное ядро · JARVIS Core
 </p>
 
 </div>
@@ -1171,10 +1195,7 @@ class="status">
 
 </div>
 
-<div
-id="aiCore"
-class="ai-core">
-</div>
+<div id="aiCore" class="ai-core"></div>
 
 <div class="ai-controls">
 
@@ -1224,28 +1245,16 @@ type="text"
 maxlength="2000"
 placeholder="Скажи ASHINA, что нужно сделать...">
 
-<button onclick="sendAI()">
-➤
-</button>
+<button onclick="sendAI()">➤</button>
 
 </div>
 
-<div
-id="aiStatus"
-class="ai-status">
+<div id="aiStatus" class="ai-status">
 🟢 AI готов.
 </div>
 
-<div
-id="aiMemory"
-class="ai-memory">
+<div id="aiMemory" class="ai-memory">
 Память: 0 сообщений
-</div>
-
-<div
-id="jarvisStatus"
-class="jarvis-status">
-JARVIS Core: ожидание подключения...
 </div>
 
 </div>
@@ -1258,30 +1267,13 @@ JARVIS Core: ожидание подключения...
 
 <div class="card">
 
-<h2>
-⚙️ Настройки
-</h2>
+<h2>⚙️ Настройки ASHINA</h2>
 
-<div class="security">
+<p class="muted">
+Центр управления AI, JARVIS Core, безопасностью и локальными функциями.
+</p>
 
-<div class="security-title">
-🧠 AI Core
-</div>
-
-<div class="security-status">
-
-ASHINA сейчас работает в локальном режиме.
-
-Она умеет анализировать команды, определять намерение пользователя, учитывать предыдущие сообщения и выполнять несколько действий одной командой.
-
-<br><br>
-
-Следующий уровень:
-подключение настоящей AI-модели через защищённый сервер.
-
-</div>
-
-</div>
+<!-- JARVIS -->
 
 <div class="security">
 
@@ -1291,21 +1283,344 @@ ASHINA сейчас работает в локальном режиме.
 
 <div class="security-status">
 
-Отдельное локальное ядро управления ASHINA.
-
-Оно подключается к интерфейсу приложения через
-<code>jarvis-core.js</code>.
+Модуль интеллектуального ядра ASHINA.
 
 <br><br>
 
-Статус:
-<span id="jarvisSettingsStatus">
-ожидание
-</span>
+Статус: <span id="jarvisStatus" class="warning">
+● Проверка... </span>
+
+<br>
+
+Версия: <span id="jarvisVersion">
+ожидание </span>
+
+<br>
+
+Состояние: <span id="jarvisMode">
+локальное ядро </span>
+
+</div>
+
+<div class="system-grid">
+
+<div class="system-item">
+
+<div class="system-item-title">
+AI Core
+</div>
+
+<div
+id="systemAI"
+class="system-item-status success">
+ONLINE
+</div>
+
+</div>
+
+<div class="system-item">
+
+<div class="system-item-title">
+JARVIS
+</div>
+
+<div
+id="systemJarvis"
+class="system-item-status warning">
+WAITING
+</div>
+
+</div>
+
+<div class="system-item">
+
+<div class="system-item-title">
+Memory
+</div>
+
+<div
+id="systemMemory"
+class="system-item-status success">
+ACTIVE
+</div>
+
+</div>
+
+<div class="system-item">
+
+<div class="system-item-title">
+Guard
+</div>
+
+<div
+id="systemGuard"
+class="system-item-status warning">
+READY
+</div>
+
+</div>
+
+</div>
+
+<button
+class="setting-button"
+onclick="checkJarvisCore()">
+
+🔄 Проверить JARVIS Core
+
+</button>
+
+</div>
+
+<!-- AI SETTINGS -->
+
+<div class="security">
+
+<div class="security-title">
+🧠 Настройки AI
+
+</div>
+
+<div class="setting-row">
+
+<div class="setting-info">
+
+<div class="setting-name">
+Память AI
+</div>
+
+<div class="setting-description">
+Разрешить ASHINA сохранять локальную историю и предпочтения.
+</div>
+
+</div>
+
+<label class="toggle">
+
+<input
+id="settingMemory"
+type="checkbox"
+checked
+onchange="saveAISettings()">
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="setting-row">
+
+<div class="setting-info">
+
+<div class="setting-name">
+🎙️ Голосовой ввод
+</div>
+
+<div class="setting-description">
+Разрешить использование голосового управления через браузер.
+</div>
+
+</div>
+
+<label class="toggle">
+
+<input
+id="settingVoice"
+type="checkbox"
+checked
+onchange="saveAISettings()">
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="setting-row">
+
+<div class="setting-info">
+
+<div class="setting-name">
+🔊 Автоозвучивание AI
+</div>
+
+<div class="setting-description">
+Автоматически озвучивать ответы ASHINA.
+</div>
+
+</div>
+
+<label class="toggle">
+
+<input
+id="settingSpeech"
+type="checkbox"
+onchange="saveAISettings()">
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="setting-row">
+
+<div class="setting-info">
+
+<div class="setting-name">
+⚡ Быстрый режим AI
+</div>
+
+<div class="setting-description">
+Уменьшает задержку обработки локальных команд.
+</div>
+
+</div>
+
+<label class="toggle">
+
+<input
+id="settingFastMode"
+type="checkbox"
+checked
+onchange="saveAISettings()">
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="setting-info">
+
+<div class="setting-name">
+Режим интеллектуального ядра
+</div>
+
+<div class="setting-description">
+Текущий режим обработки команд.
+</div>
+
+</div>
+
+<select
+id="aiMode"
+class="setting-select"
+onchange="saveAISettings()">
+
+<option value="local">
+Локальный AI
+</option>
+
+<option value="jarvis">
+JARVIS Core
+</option>
+
+<option value="hybrid">
+Гибридный режим
+</option>
+
+</select>
+
+</div>
+
+<!-- JARVIS PERMISSIONS -->
+
+<div class="security">
+
+<div class="security-title">
+🧩 Возможности JARVIS
+
+</div>
+
+<div class="setting-row">
+
+<div class="setting-info">
+
+<div class="setting-name">
+Управление музыкой
+</div>
+
+<div class="setting-description">
+JARVIS может запускать, останавливать и переключать треки.
+</div>
+
+</div>
+
+<label class="toggle">
+
+<input
+id="permissionMusic"
+type="checkbox"
+checked
+onchange="saveAISettings()">
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="setting-row">
+
+<div class="setting-info">
+
+<div class="setting-name">
+Навигация по ASHINA
+</div>
+
+<div class="setting-description">
+JARVIS может открывать разделы приложения по команде.
+</div>
+
+</div>
+
+<label class="toggle">
+
+<input
+id="permissionNavigation"
+type="checkbox"
+checked
+onchange="saveAISettings()">
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="setting-row">
+
+<div class="setting-info">
+
+<div class="setting-name">
+Работа с памятью
+</div>
+
+<div class="setting-description">
+Разрешить JARVIS читать и изменять локальную память AI.
+</div>
+
+</div>
+
+<label class="toggle">
+
+<input
+id="permissionMemory"
+type="checkbox"
+checked
+onchange="saveAISettings()">
+
+<span class="slider"></span>
+
+</label>
 
 </div>
 
 </div>
+
+<!-- GUARD -->
 
 <div class="security">
 
@@ -1318,27 +1633,24 @@ ASHINA сейчас работает в локальном режиме.
 </div>
 
 <button
-style="width:100%;margin-top:10px;padding:11px"
+class="setting-button"
 onclick="runGuard()">
 
 🔍 Проверить ASHINA
 
 </button>
 
-<div
-id="guardResult"
-class="guard-result">
+<div id="guardResult" class="guard-result">
 
 <div id="guardFiles"></div>
 
-<div
-id="guardTotal"
-class="guard-total">
-</div>
+<div id="guardTotal" class="guard-total"></div>
 
 </div>
 
 </div>
+
+<!-- ADMIN -->
 
 <div class="security">
 
@@ -1349,12 +1661,16 @@ class="guard-total">
 <div class="security-status">
 
 Панель администратора скрыта.
-Локальная защита является только прототипом и не заменяет серверную авторизацию.
+
+<br><br>
+
+Локальная защита является прототипом.
+Настоящая административная авторизация должна выполняться на сервере.
 
 </div>
 
 <button
-style="width:100%;margin-top:10px;padding:11px"
+class="setting-button"
 onclick="openAdmin()">
 
 🔑 Войти как администратор
@@ -1373,10 +1689,7 @@ class="admin-panel admin-hidden">
 Скрытая панель управления прототипом.
 </p>
 
-<div
-class="admin-log"
-id="adminLog">
-</div>
+<div id="adminLog" class="admin-log"></div>
 
 <button
 class="danger"
@@ -1390,13 +1703,97 @@ onclick="closeAdmin()">
 
 </div>
 
+<!-- DATA -->
+
+<div class="security">
+
+<div class="security-title">
+💾 Локальные данные
+
+</div>
+
+<div class="security-status">
+
+Здесь хранятся настройки, история AI, память, чат и локальные данные музыки.
+
+</div>
+
+<button
+class="setting-button"
+onclick="clearAI()">
+
+🧠 Очистить память AI
+
+</button>
+
+<button
+class="setting-button"
+onclick="clearChat()">
+
+💬 Очистить чат
+
+</button>
+
 <button
 class="danger"
 onclick="clearEverything()">
 
-🧹 Очистить локальные данные ASHINA
+🧹 Полностью очистить данные ASHINA
 
 </button>
+
+</div>
+
+<!-- ABOUT -->
+
+<div class="security">
+
+<div class="security-title">
+ℹ️ О приложении
+
+</div>
+
+<div class="security-status">
+
+<strong>ASHINA 2.0 AI</strong>
+
+<br>
+
+AI Core:
+2.0
+
+<br>
+
+JARVIS Core:
+подготовлен
+
+<br>
+
+Music Engine:
+IndexedDB
+
+<br>
+
+Chat:
+Local Storage
+
+<br>
+
+Guard:
+активен
+
+<br>
+
+Административный режим:
+прототип
+
+<br><br>
+
+ASHINA создаётся как единая интеллектуальная система для общения, музыки, файлов, ленты и управления приложением.
+
+</div>
+
+</div>
 
 </div>
 
@@ -1425,8 +1822,7 @@ function show(id,btn){
 
 NAV_IDS.forEach(function(x){
 
-const element=
-document.getElementById(x);
+const element=document.getElementById(x);
 
 if(element){
 
@@ -1460,9 +1856,7 @@ document
 const code=
 button.getAttribute('onclick')||'';
 
-if(
-code.includes("'"+id+"'")
-){
+if(code.includes("'"+id+"'")){
 
 button.classList.add('active');
 
@@ -1481,18 +1875,314 @@ behavior:'smooth'
 
 
 /* =====================================================
+   JARVIS SETTINGS
+===================================================== */
+
+const JARVIS_SETTINGS_KEY=
+'ashina20_jarvis_settings';
+
+let aiSettings={
+
+memory:true,
+
+voice:true,
+
+speech:false,
+
+fastMode:true,
+
+mode:'local',
+
+music:true,
+
+navigation:true,
+
+memoryPermission:true
+
+};
+
+
+function loadAISettings(){
+
+try{
+
+const saved=
+JSON.parse(
+localStorage.getItem(
+JARVIS_SETTINGS_KEY
+)||'{}'
+);
+
+if(saved&&typeof saved==='object'){
+
+aiSettings={
+...aiSettings,
+...saved
+};
+
+}
+
+}catch(error){}
+
+
+const map={
+
+settingMemory:aiSettings.memory,
+
+settingVoice:aiSettings.voice,
+
+settingSpeech:aiSettings.speech,
+
+settingFastMode:aiSettings.fastMode,
+
+permissionMusic:aiSettings.music,
+
+permissionNavigation:aiSettings.navigation,
+
+permissionMemory:aiSettings.memoryPermission
+
+};
+
+Object.keys(map).forEach(function(id){
+
+const element=
+document.getElementById(id);
+
+if(element){
+
+element.checked=
+!!map[id];
+
+}
+
+});
+
+const mode=
+document.getElementById('aiMode');
+
+if(mode){
+
+mode.value=
+aiSettings.mode||'local';
+
+}
+
+AUTO_SPEECH=
+!!aiSettings.speech;
+
+}
+
+
+function saveAISettings(){
+
+const getChecked=
+function(id){
+
+const element=
+document.getElementById(id);
+
+return element?
+element.checked:
+false;
+
+};
+
+aiSettings.memory=
+getChecked('settingMemory');
+
+aiSettings.voice=
+getChecked('settingVoice');
+
+aiSettings.speech=
+getChecked('settingSpeech');
+
+aiSettings.fastMode=
+getChecked('settingFastMode');
+
+aiSettings.music=
+getChecked('permissionMusic');
+
+aiSettings.navigation=
+getChecked('permissionNavigation');
+
+aiSettings.memoryPermission=
+getChecked('permissionMemory');
+
+const mode=
+document.getElementById('aiMode');
+
+if(mode){
+
+aiSettings.mode=
+mode.value;
+
+}
+
+AUTO_SPEECH=
+aiSettings.speech;
+
+localStorage.setItem(
+JARVIS_SETTINGS_KEY,
+JSON.stringify(aiSettings)
+);
+
+setAIStatus(
+'⚙️ Настройки AI сохранены.'
+);
+
+}
+
+
+/* =====================================================
+   JARVIS CORE DETECTION
+===================================================== */
+
+let JARVIS_CORE_LOADED=false;
+
+function checkJarvisCore(){
+
+const status=
+document.getElementById('jarvisStatus');
+
+const home=
+document.getElementById('homeJarvisStatus');
+
+const system=
+document.getElementById('systemJarvis');
+
+const version=
+document.getElementById('jarvisVersion');
+
+const mode=
+document.getElementById('jarvisMode');
+
+if(
+typeof window.JARVIS_CORE!=='undefined' ||
+typeof window.JARVIS!=='undefined'
+){
+
+JARVIS_CORE_LOADED=true;
+
+if(status){
+
+status.textContent='● ONLINE';
+
+status.className=
+'ai-online';
+
+}
+
+if(home){
+
+home.textContent='● ONLINE';
+
+home.className='ai-online';
+
+}
+
+if(system){
+
+system.textContent='ONLINE';
+
+system.className=
+'system-item-status success';
+
+}
+
+if(version){
+
+version.textContent=
+(
+window.JARVIS_CORE_VERSION||
+'1.0'
+);
+
+}
+
+if(mode){
+
+mode.textContent=
+'JARVIS Core активен';
+
+}
+
+}else{
+
+JARVIS_CORE_LOADED=false;
+
+if(status){
+
+status.textContent=
+'● НЕ ПОДКЛЮЧЁН';
+
+status.className=
+'warning';
+
+}
+
+if(home){
+
+home.textContent=
+'● ОЖИДАНИЕ';
+
+home.className=
+'warning';
+
+}
+
+if(system){
+
+system.textContent=
+'WAITING';
+
+system.className=
+'system-item-status warning';
+
+}
+
+if(version){
+
+version.textContent=
+'файл ожидается';
+
+}
+
+if(mode){
+
+mode.textContent=
+'встроенное AI-ядро';
+
+}
+
+}
+
+}
+
+
+loadAISettings();
+
+
+/* =====================================================
    MUSIC ENGINE
 ===================================================== */
 
 const MUSIC_DB_NAME='ASHINA_MUSIC_DB';
+
 const MUSIC_DB_VERSION=1;
+
 const MUSIC_STORE='tracks';
-const MAX_MUSIC_SIZE=50*1024*1024;
+
+const MAX_MUSIC_SIZE=
+50*1024*1024;
 
 let musicDB=null;
+
 let userTracks=[];
+
 let currentTrack=0;
+
 let currentGenre='all';
+
 let currentObjectURL=null;
 
 const builtinTracks=[
@@ -1598,15 +2288,12 @@ const db=
 event.target.result;
 
 if(
-!db.objectStoreNames
-.contains(MUSIC_STORE)
+!db.objectStoreNames.contains(MUSIC_STORE)
 ){
 
 db.createObjectStore(
 MUSIC_STORE,
-{
-keyPath:'id'
-}
+{keyPath:'id'}
 );
 
 }
@@ -1638,11 +2325,13 @@ reject(request.error);
 async function saveMusicFile(file){
 
 if(!file){
+
 return false;
+
 }
 
 if(
-!file.type ||
+!file.type||
 !file.type.startsWith('audio/')
 ){
 
@@ -1685,8 +2374,7 @@ const track={
 
 id:id,
 
-title:
-file.name.replace(
+title:file.name.replace(
 /\.[^/.]+$/,
 ''
 ),
@@ -1734,11 +2422,6 @@ resolve(true);
 request.onerror=
 function(){
 
-console.error(
-'Music save error:',
-request.error
-);
-
 resolve(false);
 
 };
@@ -1747,10 +2430,7 @@ resolve(false);
 
 }catch(error){
 
-console.error(
-'Music storage error:',
-error
-);
+console.error(error);
 
 setMusicAddStatus(
 '⚠️ Не удалось сохранить «'+
@@ -1781,13 +2461,10 @@ db.transaction(
 'readonly'
 );
 
-const store=
-transaction.objectStore(
-MUSIC_STORE
-);
-
 const request=
-store.getAll();
+transaction
+.objectStore(MUSIC_STORE)
+.getAll();
 
 request.onsuccess=
 function(){
@@ -1812,11 +2489,6 @@ resolve([]);
 });
 
 }catch(error){
-
-console.error(
-'Music load error:',
-error
-);
 
 return [];
 
@@ -1848,7 +2520,9 @@ document.getElementById(
 );
 
 if(input){
+
 input.click();
+
 }
 
 }
@@ -1862,7 +2536,9 @@ document.getElementById(
 );
 
 if(element){
+
 element.textContent=text;
+
 }
 
 }
@@ -1884,7 +2560,9 @@ event.target.files||[]
 );
 
 if(!files.length){
+
 return;
+
 }
 
 setMusicAddStatus(
@@ -1895,36 +2573,21 @@ let added=0;
 
 for(const file of files){
 
-const success=
-await saveMusicFile(file);
+if(await saveMusicFile(file)){
 
-if(success){
 added++;
+
 }
 
 }
 
 await refreshMusicLibrary();
 
-if(added===files.length){
-
 setMusicAddStatus(
 '✅ Добавлено треков: '+
 added+
 '.'
 );
-
-}else{
-
-setMusicAddStatus(
-'⚠️ Добавлено '+
-added+
-' из '+
-files.length+
-'.'
-);
-
-}
 
 event.target.value='';
 
@@ -1938,25 +2601,26 @@ async function deleteUserTrack(id){
 const track=
 playlistData.find(
 function(item){
+
 return item.id===id;
+
 }
 );
 
-if(
-!track ||
-track.builtin
-){
+if(!track||track.builtin){
+
 return;
+
 }
 
-if(
-!confirm(
+if(!confirm(
 'Удалить «'+
 track.title+
 '» из плейлиста?'
-)
-){
+)){
+
 return;
+
 }
 
 try{
@@ -1973,21 +2637,22 @@ db.transaction(
 'readwrite'
 );
 
-const store=
-transaction.objectStore(
-MUSIC_STORE
-);
-
-store.delete(id);
+transaction
+.objectStore(MUSIC_STORE)
+.delete(id);
 
 transaction.oncomplete=
 function(){
+
 resolve();
+
 };
 
 transaction.onerror=
 function(){
+
 reject(transaction.error);
+
 };
 
 });
@@ -1998,7 +2663,9 @@ playlistData[currentTrack].id===id
 ){
 
 audio.pause();
+
 audio.removeAttribute('src');
+
 audio.load();
 
 }
@@ -2008,7 +2675,9 @@ await refreshMusicLibrary();
 if(
 currentTrack>=playlistData.length
 ){
+
 currentTrack=0;
+
 }
 
 setMusicAddStatus(
@@ -2016,8 +2685,6 @@ setMusicAddStatus(
 );
 
 }catch(error){
-
-console.error(error);
 
 setMusicAddStatus(
 '⚠️ Не удалось удалить трек.'
@@ -2031,7 +2698,9 @@ setMusicAddStatus(
 function formatTime(seconds){
 
 seconds=
-Math.floor(Number(seconds)||0);
+Math.floor(
+Number(seconds)||0
+);
 
 return(
 Math.floor(seconds/60)+
@@ -2045,12 +2714,12 @@ String(seconds%60).padStart(2,'0')
 function renderPlaylist(){
 
 const box=
-document.getElementById(
-'playlist'
-);
+document.getElementById('playlist');
 
 if(!box){
+
 return;
+
 }
 
 box.innerHTML='';
@@ -2064,7 +2733,9 @@ if(
 currentGenre!=='all' &&
 track.genre!==currentGenre
 ){
+
 return;
+
 }
 
 visibleCount++;
@@ -2074,18 +2745,13 @@ document.createElement('div');
 
 item.className=
 'track'+
-(
-index===currentTrack
-?
-' active'
-:
-''
-);
+(index===currentTrack?' active':'');
 
 const number=
 document.createElement('div');
 
 number.className='track-number';
+
 number.textContent=
 String(index+1).padStart(2,'0');
 
@@ -2098,6 +2764,7 @@ const title=
 document.createElement('div');
 
 title.className='track-name';
+
 title.textContent=track.title;
 
 const meta=
@@ -2122,8 +2789,8 @@ const remove=
 document.createElement('button');
 
 remove.className='track-delete';
+
 remove.textContent='🗑️';
-remove.title='Удалить трек';
 
 remove.onclick=
 function(event){
@@ -2169,11 +2836,15 @@ box.appendChild(empty);
 function getTrackSource(track){
 
 if(!track){
+
 return null;
+
 }
 
 if(track.builtin){
+
 return track.src;
+
 }
 
 if(track.file){
@@ -2184,12 +2855,12 @@ URL.revokeObjectURL(
 currentObjectURL
 );
 
-currentObjectURL=null;
-
 }
 
 currentObjectURL=
-URL.createObjectURL(track.file);
+URL.createObjectURL(
+track.file
+);
 
 return currentObjectURL;
 
@@ -2212,11 +2883,16 @@ return;
 }
 
 if(index<0){
-index=playlistData.length-1;
+
+index=
+playlistData.length-1;
+
 }
 
 if(index>=playlistData.length){
+
 index=0;
+
 }
 
 currentTrack=index;
@@ -2239,15 +2915,16 @@ return;
 audio.pause();
 
 audio.src=source;
+
 audio.load();
 
-document
-.getElementById('trackTitle')
-.textContent=track.title;
+document.getElementById(
+'trackTitle'
+).textContent=track.title;
 
-document
-.getElementById('trackArtist')
-.textContent=
+document.getElementById(
+'trackArtist'
+).textContent=
 track.artist+
 ' · '+
 track.genre;
@@ -2294,35 +2971,23 @@ function toggleMusic(){
 
 if(!playlistData.length){
 
-musicStatus.textContent=
-'⚠️ В плейлисте нет музыки.';
-
 return;
 
 }
 
 if(!audio.src){
 
-loadTrack(
-currentTrack,
-false
-);
+loadTrack(currentTrack,false);
 
 }
 
 if(audio.paused){
 
 audio.play()
-.then(function(){
-
-musicStatus.textContent=
-'▶️ Музыка играет';
-
-})
 .catch(function(){
 
 musicStatus.textContent=
-'⚠️ Браузер заблокировал запуск.';
+'⚠️ Нажми ▶️ ещё раз.';
 
 });
 
@@ -2337,9 +3002,7 @@ audio.pause();
 
 function nextTrack(){
 
-if(!playlistData.length){
-return;
-}
+if(!playlistData.length)return;
 
 loadTrack(
 currentTrack+1,
@@ -2351,9 +3014,7 @@ true
 
 function previousTrack(){
 
-if(!playlistData.length){
-return;
-}
+if(!playlistData.length)return;
 
 loadTrack(
 currentTrack-1,
@@ -2394,13 +3055,7 @@ playlistData[currentTrack];
 
 musicStatus.textContent=
 '⚠️ Не удалось воспроизвести: '+
-(
-track
-?
-track.title
-:
-'неизвестный файл'
-);
+(track?track.title:'неизвестный файл');
 
 };
 
@@ -2408,6 +3063,7 @@ audio.ontimeupdate=
 function(){
 
 updateMusicUI();
+
 saveMusicState();
 
 };
@@ -2425,14 +3081,16 @@ MUSIC_TIME_KEY
 );
 
 if(
-Number.isFinite(savedTime) &&
-savedTime>0 &&
-Number.isFinite(audio.duration) &&
+Number.isFinite(savedTime)&&
+savedTime>0&&
+Number.isFinite(audio.duration)&&
 savedTime<audio.duration
 ){
 
 try{
+
 audio.currentTime=savedTime;
+
 }catch(error){}
 
 }
@@ -2443,21 +3101,18 @@ audio.currentTime=savedTime;
 function updateMusicUI(){
 
 if(
-Number.isFinite(audio.duration) &&
+Number.isFinite(audio.duration)&&
 audio.duration>0
 ){
 
 seek.value=
-(
-audio.currentTime/
-audio.duration
-)*100;
+(audio.currentTime/audio.duration)*100;
 
 }
 
-document
-.getElementById('time')
-.textContent=
+document.getElementById(
+'time'
+).textContent=
 formatTime(audio.currentTime)+
 ' / '+
 formatTime(audio.duration);
@@ -2483,14 +3138,12 @@ seek.oninput=
 function(){
 
 if(
-audio.duration &&
+audio.duration&&
 Number.isFinite(audio.duration)
 ){
 
 audio.currentTime=
-(
-Number(seek.value)/100
-)*
+(Number(seek.value)/100)*
 audio.duration;
 
 }
@@ -2506,8 +3159,8 @@ MUSIC_VOLUME_KEY
 );
 
 if(
-Number.isFinite(savedVolume) &&
-savedVolume>=0 &&
+Number.isFinite(savedVolume)&&
+savedVolume>=0&&
 savedVolume<=1
 ){
 
@@ -2543,15 +3196,16 @@ currentGenre=genre;
 
 document
 .querySelectorAll('.genre-row button')
-.forEach(
-function(element){
+.forEach(function(element){
 
 element.classList.remove('active');
 
 });
 
 if(button){
+
 button.classList.add('active');
+
 }
 
 renderPlaylist();
@@ -2567,7 +3221,7 @@ MUSIC_TRACK_KEY
 );
 
 if(
-Number.isInteger(savedTrack) &&
+Number.isInteger(savedTrack)&&
 savedTrack>=0
 ){
 
@@ -2575,21 +3229,17 @@ currentTrack=savedTrack;
 
 }
 
-
 (async function(){
 
 await refreshMusicLibrary();
 
-if(
-currentTrack>=playlistData.length
-){
+if(currentTrack>=playlistData.length){
+
 currentTrack=0;
+
 }
 
-loadTrack(
-currentTrack,
-false
-);
+loadTrack(currentTrack,false);
 
 })();
 
@@ -2599,6 +3249,7 @@ false
 ===================================================== */
 
 const LIKE_KEY='ashina20_like';
+
 const DISLIKE_KEY='ashina20_dislike';
 
 let like=
@@ -2616,11 +3267,10 @@ document.getElementById('likeButton');
 const db=
 document.getElementById('dislikeButton');
 
-if(!lb||!db){
-return;
-}
+if(!lb||!db)return;
 
 lb.classList.toggle('selected',like);
+
 db.classList.toggle('selected',dislike);
 
 document.getElementById(
@@ -2633,12 +3283,9 @@ document.getElementById(
 ).textContent=
 dislike?'1':'0';
 
-const status=
 document.getElementById(
 'voteStatus'
-);
-
-status.textContent=
+).textContent=
 like
 ?
 '👍 Твой лайк учтён'
@@ -2657,19 +3304,27 @@ function vote(type){
 if(type==='like'){
 
 if(like){
+
 like=false;
+
 }else{
+
 like=true;
 dislike=false;
+
 }
 
 }else{
 
 if(dislike){
+
 dislike=false;
+
 }else{
+
 dislike=true;
 like=false;
+
 }
 
 }
@@ -2710,7 +3365,9 @@ const parsed=
 JSON.parse(saved);
 
 if(Array.isArray(parsed)){
+
 messages=parsed;
+
 }
 
 }
@@ -2720,6 +3377,7 @@ messages=parsed;
 messages=[];
 
 }
+
 
 const MAX_FILE_SIZE=
 5*1024*1024;
@@ -2740,12 +3398,10 @@ return true;
 
 }catch(error){
 
-console.error(error);
-
-document
-.getElementById('chatStatus')
-.textContent=
-'⚠️ Не удалось сохранить файл. Локальное хранилище переполнено.';
+document.getElementById(
+'chatStatus'
+).textContent=
+'⚠️ Локальное хранилище переполнено.';
 
 return false;
 
@@ -2756,13 +3412,9 @@ return false;
 
 function formatFileSize(bytes){
 
-if(!Number.isFinite(bytes)){
-return '';
-}
+if(!Number.isFinite(bytes))return '';
 
-if(bytes<1024){
-return bytes+' Б';
-}
+if(bytes<1024)return bytes+' Б';
 
 if(bytes<1024*1024){
 
@@ -2847,21 +3499,6 @@ wrapper.appendChild(audioElement);
 
 }
 
-else if(type==='application/pdf'){
-
-const link=
-document.createElement('a');
-
-link.className='file-open';
-link.href=attachment.data;
-link.target='_blank';
-link.rel='noopener';
-link.textContent='📄 Открыть PDF';
-
-wrapper.appendChild(link);
-
-}
-
 else{
 
 const icon=
@@ -2880,7 +3517,9 @@ link.href=attachment.data;
 link.target='_blank';
 link.rel='noopener';
 link.download=attachment.name;
-link.textContent='⬇️ Открыть / скачать файл';
+
+link.textContent=
+'⬇️ Открыть / скачать файл';
 
 wrapper.appendChild(link);
 
@@ -2892,9 +3531,7 @@ document.createElement('div');
 size.className='file-size';
 
 size.textContent=
-formatFileSize(
-attachment.size
-);
+formatFileSize(attachment.size);
 
 wrapper.appendChild(size);
 
@@ -2916,7 +3553,9 @@ const empty=
 document.createElement('div');
 
 empty.className='muted';
-empty.textContent='Пока сообщений нет.';
+
+empty.textContent=
+'Пока сообщений нет.';
 
 box.appendChild(empty);
 
@@ -2924,21 +3563,14 @@ return;
 
 }
 
-messages.forEach(
-function(message){
+messages.forEach(function(message){
 
 const item=
 document.createElement('div');
 
 item.className=
 'message'+
-(
-message.me
-?
-' me'
-:
-''
-);
+(message.me?' me':'');
 
 const name=
 document.createElement('div');
@@ -2946,11 +3578,7 @@ document.createElement('div');
 name.className='message-name';
 
 name.textContent=
-message.me
-?
-'Ты'
-:
-'ASHINA';
+message.me?'Ты':'ASHINA';
 
 item.appendChild(name);
 
@@ -2972,24 +3600,10 @@ if(message.attachment){
 try{
 
 item.appendChild(
-renderAttachment(
-message.attachment
-)
+renderAttachment(message.attachment)
 );
 
-}catch(error){
-
-const errorText=
-document.createElement('div');
-
-errorText.className='status';
-
-errorText.textContent=
-'⚠️ Не удалось отобразить вложение.';
-
-item.appendChild(errorText);
-
-}
+}catch(error){}
 
 }
 
@@ -2999,9 +3613,7 @@ document.createElement('div');
 time.className='message-time';
 
 time.textContent=
-new Date(
-message.time
-)
+new Date(message.time)
 .toLocaleTimeString(
 'ru-RU',
 {
@@ -3023,7 +3635,6 @@ const del=
 document.createElement('button');
 
 del.textContent='🗑️';
-del.title='Удалить сообщение';
 
 del.onclick=
 function(){
@@ -3031,7 +3642,9 @@ function(){
 messages=
 messages.filter(
 function(x){
+
 return x.id!==message.id;
+
 }
 );
 
@@ -3041,6 +3654,7 @@ renderChat();
 };
 
 actions.appendChild(del);
+
 item.appendChild(actions);
 
 }
@@ -3049,8 +3663,7 @@ box.appendChild(item);
 
 });
 
-box.scrollTop=
-box.scrollHeight;
+box.scrollTop=box.scrollHeight;
 
 }
 
@@ -3063,17 +3676,16 @@ document.getElementById('chatInput');
 const text=
 input.value.trim();
 
-if(!text){
-return;
-}
+if(!text)return;
 
 messages.push({
 
-id:
-Date.now()+Math.random(),
+id:Date.now()+Math.random(),
 
 text:text,
+
 me:true,
+
 time:Date.now()
 
 });
@@ -3084,6 +3696,7 @@ messages.slice(-100);
 if(saveMessages()){
 
 input.value='';
+
 renderChat();
 
 }
@@ -3091,9 +3704,9 @@ renderChat();
 }
 
 
-document
-.getElementById('chatInput')
-.addEventListener(
+document.getElementById(
+'chatInput'
+).addEventListener(
 'keydown',
 function(event){
 
@@ -3120,13 +3733,9 @@ input.focus();
 
 function clearChat(){
 
-if(
-!confirm(
+if(!confirm(
 'Очистить локальный чат и все его вложения?'
-)
-){
-return;
-}
+))return;
 
 messages=[];
 
@@ -3134,9 +3743,9 @@ localStorage.removeItem(CHAT_KEY);
 
 renderChat();
 
-document
-.getElementById('chatStatus')
-.textContent=
+document.getElementById(
+'chatStatus'
+).textContent=
 '🧹 Чат очищен.';
 
 }
@@ -3177,22 +3786,16 @@ fileInput.click();
 
 function addFileToChat(file){
 
-return new Promise(
-function(resolve,reject){
+return new Promise(function(resolve,reject){
 
 if(file.size>MAX_FILE_SIZE){
 
-document
-.getElementById('chatStatus')
-.textContent=
-'⚠️ Файл «'+
-file.name+
-'» слишком большой. Максимум 5 МБ.';
+document.getElementById(
+'chatStatus'
+).textContent=
+'⚠️ Файл слишком большой. Максимум 5 МБ.';
 
-reject(
-new Error('file too large')
-);
-
+reject(new Error('file too large'));
 return;
 
 }
@@ -3217,43 +3820,38 @@ data:reader.result
 
 };
 
-const message={
+messages.push({
 
-id:
-Date.now()+Math.random(),
+id:Date.now()+Math.random(),
 
 text:'',
+
 me:true,
+
 time:Date.now(),
+
 attachment:attachment
 
-};
-
-messages.push(message);
+});
 
 messages=
 messages.slice(-100);
 
 if(!saveMessages()){
 
-reject(
-new Error('storage full')
-);
-
+reject(new Error('storage full'));
 return;
 
 }
 
-resolve(message);
+resolve();
 
 };
 
 reader.onerror=
 function(){
 
-reject(
-new Error('read error')
-);
+reject(new Error('read error'));
 
 };
 
@@ -3272,9 +3870,7 @@ Array.from(
 event.target.files||[]
 );
 
-if(!files.length){
-return;
-}
+if(!files.length)return;
 
 const status=
 document.getElementById('chatStatus');
@@ -3291,35 +3887,14 @@ try{
 await addFileToChat(file);
 success++;
 
-}catch(error){
-
-console.error(
-'Ошибка файла:',
-file.name,
-error
-);
-
-}
+}catch(error){}
 
 }
 
 renderChat();
 
-if(success===files.length){
-
 status.textContent=
-'✅ Добавлено файлов: '+
-success;
-
-}else{
-
-status.textContent=
-'⚠️ Добавлено: '+
-success+
-' из '+
-files.length;
-
-}
+'✅ Добавлено файлов: '+success;
 
 event.target.value='';
 
@@ -3327,7 +3902,7 @@ event.target.value='';
 
 
 /* =====================================================
-   AI CORE — LEGACY / FALLBACK
+   AI CORE
 ===================================================== */
 
 const AI_HISTORY_KEY=
@@ -3341,16 +3916,20 @@ let aiHistory=[];
 let aiMemory={
 
 name:'',
+
 lastTopic:'',
+
 lastCommand:'',
+
 lastSection:'home',
+
 lastTrack:'',
+
 preferences:{}
 
 };
 
 let lastAIText='';
-
 
 try{
 
@@ -3362,7 +3941,9 @@ AI_HISTORY_KEY
 );
 
 if(Array.isArray(history)){
+
 aiHistory=history.slice(-50);
+
 }
 
 }catch(error){
@@ -3381,10 +3962,7 @@ AI_MEMORY_KEY
 )||'{}'
 );
 
-if(
-memory &&
-typeof memory==='object'
-){
+if(memory&&typeof memory==='object'){
 
 aiMemory={
 ...aiMemory,
@@ -3398,34 +3976,39 @@ aiMemory={
 
 function saveAIMemory(){
 
+if(!aiSettings.memory){
+
+return;
+
+}
+
 localStorage.setItem(
 AI_MEMORY_KEY,
 JSON.stringify(aiMemory)
 );
 
-const memoryElement=
-document.getElementById('aiMemory');
-
-if(memoryElement){
-
-memoryElement.textContent=
+document.getElementById(
+'aiMemory'
+).textContent=
 'Память: '+
 aiHistory.length+
 ' сообщений';
 
-}
-
-const homeMemory=
-document.getElementById('homeMemory');
-
-if(homeMemory){
-homeMemory.textContent='активна';
-}
+document.getElementById(
+'homeMemory'
+).textContent=
+'активна';
 
 }
 
 
 function saveAIHistory(){
+
+if(!aiSettings.memory){
+
+return;
+
+}
 
 aiHistory=
 aiHistory.slice(-50);
@@ -3464,13 +4047,7 @@ document.createElement('div');
 
 message.className=
 'ai-message'+
-(
-user
-?
-' user'
-:
-''
-);
+(user?' user':'');
 
 const name=
 document.createElement('div');
@@ -3478,11 +4055,7 @@ document.createElement('div');
 name.className='ai-name';
 
 name.textContent=
-user
-?
-'ТЫ'
-:
-'ASHINA AI';
+user?'ТЫ':'ASHINA AI';
 
 message.appendChild(name);
 
@@ -3497,14 +4070,14 @@ const time=
 document.createElement('div');
 
 time.className='ai-time';
+
 time.textContent=getTime();
 
 message.appendChild(time);
 
 box.appendChild(message);
 
-box.scrollTop=
-box.scrollHeight;
+box.scrollTop=box.scrollHeight;
 
 }
 
@@ -3527,8 +4100,7 @@ return;
 
 }
 
-aiHistory.forEach(
-function(item){
+aiHistory.forEach(function(item){
 
 addAIMessage(
 item.text,
@@ -3561,14 +4133,8 @@ function normalize(text){
 
 return text
 .toLowerCase()
-.replace(
-/[!?.,;:()]/g,
-' '
-)
-.replace(
-/\s+/g,
-' '
-)
+.replace(/[!?.,;:()]/g,' ')
+.replace(/\s+/g,' ')
 .trim();
 
 }
@@ -3576,62 +4142,45 @@ return text
 
 function containsAny(text,words){
 
-return words.some(
-function(word){
+return words.some(function(word){
 
 return text.includes(word);
 
-}
-);
+});
 
 }
 
 
 function detectSection(text){
 
-if(
-containsAny(
-text,
-['музык','плеер','песн','трек']
-)
-){
+if(containsAny(text,['музык','плеер','песн','трек'])){
+
 return 'music';
+
 }
 
-if(
-containsAny(
-text,
-['чат','сообщен','переписк']
-)
-){
+if(containsAny(text,['чат','сообщен','переписк'])){
+
 return 'chat';
+
 }
 
-if(
-containsAny(
-text,
-['лент','новост','публикац']
-)
-){
+if(containsAny(text,['лент','новост','публикац'])){
+
 return 'news';
+
 }
 
-if(
-containsAny(
-text,
-['настрой','параметр']
-)
-){
+if(containsAny(text,['настрой','параметр'])){
+
 return 'settings';
+
 }
 
-if(
-containsAny(
-text,
-['главн','домой']
-)
-){
+if(containsAny(text,['главн','домой'])){
+
 return 'home';
+
 }
 
 return null;
@@ -3641,49 +4190,34 @@ return null;
 
 function detectMusicAction(text){
 
-if(
-containsAny(
-text,
-['следующ','следом','дальше','следующий трек']
-)
-){
+if(containsAny(text,['следующ','следом','дальше'])){
+
 return 'next';
+
 }
 
-if(
-containsAny(
-text,
-['предыдущ','прошлый трек','назад трек']
-)
-){
+if(containsAny(text,['предыдущ','прошлый трек','назад трек'])){
+
 return 'previous';
+
 }
 
-if(
-containsAny(
-text,
-['останови','остановить','выключи музыку','пауза','поставь на паузу']
-)
-){
+if(containsAny(text,['останови','остановить','выключи музыку','пауза','поставь на паузу'])){
+
 return 'pause';
+
 }
 
-if(
-containsAny(
-text,
-['включи','запусти','начни','играй','воспроизвед']
-)
-){
+if(containsAny(text,['включи','запусти','начни','играй','воспроизвед'])){
+
 return 'play';
+
 }
 
-if(
-containsAny(
-text,
-['музыку','музыка','плеер','трек']
-)
-){
+if(containsAny(text,['музыку','музыка','плеер','трек'])){
+
 return 'open';
+
 }
 
 return null;
@@ -3693,9 +4227,16 @@ return null;
 
 function executeMusicAction(action){
 
+if(!aiSettings.music){
+
+return 'Управление музыкой отключено в настройках JARVIS.';
+
+}
+
 if(action==='next'){
 
 show('music');
+
 nextTrack();
 
 return 'Переключаю на следующий трек. 🎵';
@@ -3705,6 +4246,7 @@ return 'Переключаю на следующий трек. 🎵';
 if(action==='previous'){
 
 show('music');
+
 previousTrack();
 
 return 'Возвращаю предыдущий трек. 🎵';
@@ -3725,16 +4267,11 @@ show('music');
 
 if(!audio.src){
 
-loadTrack(
-currentTrack,
-false
-);
+loadTrack(currentTrack,false);
 
 }
 
-audio.play().catch(
-function(){}
-);
+audio.play().catch(function(){});
 
 return 'Запускаю музыку. ▶️';
 
@@ -3753,10 +4290,13 @@ return null;
 }
 
 
+/* =====================================================
+   AI COMMAND PROCESSOR
+===================================================== */
+
 function processAICommand(raw){
 
-const text=
-normalize(raw);
+const text=normalize(raw);
 
 if(!text){
 
@@ -3771,7 +4311,14 @@ text.match(
 
 if(nameMatch){
 
-aiMemory.name=nameMatch[1];
+if(!aiSettings.memory){
+
+return 'Память AI отключена в настройках.';
+
+}
+
+aiMemory.name=
+nameMatch[1];
 
 saveAIMemory();
 
@@ -3784,10 +4331,7 @@ aiMemory.name+
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'привет',
 'здравствуй',
 'добрый день',
@@ -3795,89 +4339,61 @@ text,
 'добрый вечер',
 'хай',
 'hello'
-]
-)
-){
+])){
 
 return aiMemory.name
 ?
-'Привет, '+
-aiMemory.name+
-'! ASHINA на связи. 🟢'
+'Привет, '+aiMemory.name+'! ASHINA на связи. 🟢'
 :
 'Привет! ASHINA на связи. 🟢';
 
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'кто ты',
 'что ты такое',
 'расскажи о себе'
-]
-)
-){
+])){
 
 return(
-'Я ASHINA AI 2.0 — локальное интеллектуальное ядро приложения. Сейчас я могу понимать команды, управлять разделами, музыкой, памятью и голосовым вводом.'
+'Я ASHINA AI 2.0 — локальное интеллектуальное ядро приложения. JARVIS Core подготовлен для следующего уровня управления системой.'
 );
 
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'что ты умеешь',
 'твои возможности',
 'что умеешь',
 'помощь',
 'команды'
-]
-)
-){
+])){
 
 return(
-'Я умею открывать разделы, управлять музыкой, переключать треки, работать с голосом и запоминать информацию.'
+'Я умею открывать разделы, управлять музыкой, работать с памятью, голосом и JARVIS Core. Например: «Открой музыку и включи её».'
 );
 
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'который час',
 'сколько времени',
 'время сейчас'
-]
-)
-){
+])){
 
-return(
-'Сейчас '+
-getTime()+
-'. ⏰'
-);
+return 'Сейчас '+getTime()+'. ⏰';
 
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'повтори',
 'повтори ответ',
 'что ты сказала'
-]
-)
-){
+])){
 
 return(
 lastAIText||
@@ -3887,41 +4403,35 @@ lastAIText||
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'что ты помнишь',
 'что помнишь обо мне',
 'покажи память'
-]
-)
-){
+])){
 
-let result=
-'В памяти ASHINA:';
+if(!aiSettings.memory){
+
+return 'Память AI отключена в настройках.';
+
+}
+
+let result='В памяти ASHINA:';
 
 if(aiMemory.name){
 
-result+=
-'\nИмя: '+
-aiMemory.name;
+result+='\nИмя: '+aiMemory.name;
 
 }
 
 if(aiMemory.lastSection){
 
-result+=
-'\nПоследний раздел: '+
-aiMemory.lastSection;
+result+='\nПоследний раздел: '+aiMemory.lastSection;
 
 }
 
 if(aiMemory.lastCommand){
 
-result+=
-'\nПоследняя команда: '+
-aiMemory.lastCommand;
+result+='\nПоследняя команда: '+aiMemory.lastCommand;
 
 }
 
@@ -3930,24 +4440,24 @@ return result;
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'забудь всё',
 'очисти память',
 'удали память'
-]
-)
-){
+])){
 
 aiMemory={
 
 name:'',
+
 lastTopic:'',
+
 lastCommand:'',
+
 lastSection:'home',
+
 lastTrack:'',
+
 preferences:{}
 
 };
@@ -3956,54 +4466,37 @@ localStorage.removeItem(
 AI_MEMORY_KEY
 );
 
-return(
-'Память ASHINA очищена. 🧹'
-);
+return 'Память ASHINA очищена. 🧹';
 
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'статус',
 'состояние системы',
 'как система',
 'всё работает'
-]
-)
-){
+])){
 
 return(
-'ASHINA работает в штатном режиме. AI-ядро онлайн, локальная память доступна, музыкальный движок активен, чат работает. 🟢'
+'ASHINA работает в штатном режиме. AI-ядро онлайн, память доступна, музыкальный движок активен, чат работает, Guard готов.'
 );
 
 }
 
 
-if(
-containsAny(
-text,
-[
+if(containsAny(text,[
 'проверь защиту',
 'проверить систему',
 'запусти guard',
 'guard'
-]
-)
-){
+])){
 
 show('settings');
 
-setTimeout(
-runGuard,
-200
-);
+setTimeout(runGuard,200);
 
-return(
-'Запускаю ASHINA Guard. 🛡️'
-);
+return 'Запускаю ASHINA Guard. 🛡️';
 
 }
 
@@ -4017,13 +4510,12 @@ aiMemory.lastSection='music';
 aiMemory.lastCommand=raw;
 
 const result=
-executeMusicAction(
-musicAction
-);
+executeMusicAction(musicAction);
 
 if(result){
 
 saveAIMemory();
+
 return result;
 
 }
@@ -4035,6 +4527,14 @@ const section=
 detectSection(text);
 
 if(section){
+
+if(
+!aiSettings.navigation
+){
+
+return 'Навигация по приложению отключена в настройках JARVIS.';
+
+}
 
 show(section);
 
@@ -4053,21 +4553,35 @@ settings:'настройки'
 
 };
 
+return 'Открываю '+names[section]+'.';
+
+}
+
+
+if(containsAny(text,[
+'как работает',
+'что происходит',
+'приложение',
+'ашина'
+])){
+
 return(
-'Открываю '+
-names[section]+
-'.'
+'ASHINA состоит из интерфейса, музыкального движка, чата, памяти, AI Core, ASHINA Guard и подготовленного JARVIS Core.'
 );
 
 }
 
 
 return(
-'Я поняла сообщение, но пока не знаю, какое действие выполнить.'
+'Я поняла сообщение, но пока не знаю, какое действие выполнить. Попробуй: «Открой музыку», «Включи музыку», «Следующий трек», «Открой чат» или «Проверь защиту».'
 );
 
 }
 
+
+/* =====================================================
+   SEND AI
+===================================================== */
 
 function sendAI(){
 
@@ -4077,19 +4591,18 @@ document.getElementById('aiInput');
 const text=
 input.value.trim();
 
-if(!text){
-return;
-}
+if(!text)return;
 
-addAIMessage(
-text,
-true
-);
+addAIMessage(text,true);
+
+if(aiSettings.memory){
 
 aiHistory.push({
 text:text,
 user:true
 });
+
+}
 
 input.value='';
 
@@ -4100,18 +4613,21 @@ true
 
 aiMemory.lastCommand=text;
 
-setTimeout(
-function(){
+const delay=
+aiSettings.fastMode?
+100:
+300;
+
+setTimeout(function(){
 
 const answer=
 processAICommand(text);
 
 lastAIText=answer;
 
-addAIMessage(
-answer,
-false
-);
+addAIMessage(answer,false);
+
+if(aiSettings.memory){
 
 aiHistory.push({
 text:answer,
@@ -4120,26 +4636,26 @@ user:false
 
 saveAIHistory();
 
-setAIStatus(
-'🟢 AI готов.'
-);
-
-if(AUTO_SPEECH){
-speakText(answer);
 }
 
-},
-250
-);
+setAIStatus('🟢 AI готов.');
+
+if(AUTO_SPEECH){
+
+speakText(answer);
+
+}
+
+},delay);
 
 }
 
 
 function aiQuick(text){
 
-document
-.getElementById('aiInput')
-.value=text;
+document.getElementById(
+'aiInput'
+).value=text;
 
 sendAI();
 
@@ -4153,6 +4669,16 @@ sendAI();
 let recognition=null;
 
 function startVoiceInput(){
+
+if(!aiSettings.voice){
+
+setAIStatus(
+'⚠️ Голосовой ввод отключён в настройках.'
+);
+
+return;
+
+}
 
 const SpeechRecognition=
 window.SpeechRecognition||
@@ -4180,7 +4706,9 @@ recognition=
 new SpeechRecognition();
 
 recognition.lang='ru-RU';
+
 recognition.interimResults=false;
+
 recognition.maxAlternatives=1;
 
 recognition.onstart=
@@ -4197,12 +4725,11 @@ recognition.onresult=
 function(event){
 
 const text=
-event.results[0][0]
-.transcript;
+event.results[0][0].transcript;
 
-document
-.getElementById('aiInput')
-.value=text;
+document.getElementById(
+'aiInput'
+).value=text;
 
 sendAI();
 
@@ -4213,10 +4740,7 @@ function(event){
 
 setAIStatus(
 '⚠️ Ошибка микрофона: '+
-(
-event.error||
-'неизвестная'
-)
+(event.error||'неизвестная')
 );
 
 };
@@ -4225,15 +4749,14 @@ recognition.onend=
 function(){
 
 if(
-document
-.getElementById('aiStatus')
-.textContent
-.includes('Слушаю')
+document.getElementById(
+'aiStatus'
+).textContent.includes(
+'Слушаю'
+)
 ){
 
-setAIStatus(
-'🟢 AI готов.'
-);
+setAIStatus('🟢 AI готов.');
 
 }
 
@@ -4278,8 +4801,11 @@ const speech=
 new SpeechSynthesisUtterance(text);
 
 speech.lang='ru-RU';
+
 speech.rate=.95;
+
 speech.pitch=.9;
+
 speech.volume=1;
 
 speech.onstart=
@@ -4304,6 +4830,7 @@ speechSynthesis.speak(speech);
 
 }
 
+
 let AUTO_SPEECH=false;
 
 
@@ -4324,21 +4851,14 @@ speakText(lastAIText);
 }
 
 
-/* =====================================================
-   CLEAR AI
-===================================================== */
-
 function clearAI(){
 
-if(
-!confirm(
+if(!confirm(
 'Очистить историю AI?'
-)
-){
-return;
-}
+))return;
 
 aiHistory=[];
+
 lastAIText='';
 
 localStorage.removeItem(
@@ -4358,15 +4878,16 @@ setAIStatus(
    ENTER AI
 ===================================================== */
 
-document
-.getElementById('aiInput')
-.addEventListener(
+document.getElementById(
+'aiInput'
+).addEventListener(
 'keydown',
 function(event){
 
 if(event.key==='Enter'){
 
 event.preventDefault();
+
 sendAI();
 
 }
@@ -4424,40 +4945,35 @@ const checks=[
 
 {
 name:'manifest.webmanifest',
-promise:
-guardCheckFile(
+promise:guardCheckFile(
 'manifest.webmanifest'
 )
 },
 
 {
 name:'IndexedDB',
-promise:
-Promise.resolve(
+promise:Promise.resolve(
 'indexedDB' in window
 )
 },
 
 {
 name:'LocalStorage',
-promise:
-Promise.resolve(
+promise:Promise.resolve(
 typeof localStorage!=='undefined'
 )
 },
 
 {
 name:'Service Worker API',
-promise:
-Promise.resolve(
+promise:Promise.resolve(
 'serviceWorker' in navigator
 )
 },
 
 {
 name:'Speech API',
-promise:
-Promise.resolve(
+promise:Promise.resolve(
 !!(
 window.SpeechRecognition||
 window.webkitSpeechRecognition
@@ -4467,35 +4983,35 @@ window.webkitSpeechRecognition
 
 {
 name:'Audio API',
-promise:
-Promise.resolve(
+promise:Promise.resolve(
 !!window.HTMLAudioElement
 )
 },
 
 {
 name:'Media API',
-promise:
-Promise.resolve(
+promise:Promise.resolve(
 !!navigator.mediaDevices
 )
 },
 
 {
 name:'Music IndexedDB',
-promise:
-openMusicDB()
-.then(
-function(){
+promise:openMusicDB()
+.then(function(){
 return true;
-}
-)
-.catch(
-function(){
+})
+.catch(function(){
 return false;
-}
-)
+})
+},
 
+{
+name:'JARVIS Core',
+promise:Promise.resolve(
+typeof window.JARVIS_CORE!=='undefined'||
+typeof window.JARVIS!=='undefined'
+)
 }
 
 ];
@@ -4510,7 +5026,9 @@ const ok=
 await check.promise;
 
 if(ok){
+
 good++;
+
 }
 
 const row=
@@ -4527,11 +5045,7 @@ const state=
 document.createElement('span');
 
 state.className=
-ok
-?
-'guard-ok'
-:
-'guard-error';
+ok?'guard-ok':'guard-error';
 
 state.textContent=
 ok
@@ -4554,12 +5068,19 @@ good+
 checks.length+
 ' компонентов доступны';
 
+document.getElementById(
+'systemGuard'
+).textContent=
+good+
+'/'+
+checks.length;
+
 }
 
 
-/* =====================================================
-   ADMIN
-===================================================== */
+ /* =====================================================
+    ADMIN
+ ===================================================== */
 
 function openAdmin(){
 
@@ -4569,7 +5090,9 @@ prompt(
 );
 
 if(pin===null){
+
 return;
+
 }
 
 if(pin!=='2468'){
@@ -4582,10 +5105,11 @@ return;
 
 }
 
-document
-.getElementById('adminPanel')
-.classList
-.remove('admin-hidden');
+document.getElementById(
+'adminPanel'
+).classList.remove(
+'admin-hidden'
+);
 
 const log=
 document.getElementById('adminLog');
@@ -4593,8 +5117,12 @@ document.getElementById('adminLog');
 log.innerHTML=
 '<div>🟢 Администратор авторизован</div>'+
 '<div>AI Core: ONLINE</div>'+
-'<div>JARVIS Core: '+getJarvisStateForLog()+'</div>'+
-'<div>Memory: ACTIVE</div>'+
+'<div>JARVIS Core: '+
+(JARVIS_CORE_LOADED?'ONLINE':'WAITING')+
+'</div>'+
+'<div>Memory: '+
+(aiSettings.memory?'ACTIVE':'OFF')+
+'</div>'+
 '<div>Music Engine: INDEXEDDB</div>'+
 '<div>Chat Attachments: READY</div>'+
 '<div>Guard: READY</div>';
@@ -4602,29 +5130,13 @@ log.innerHTML=
 }
 
 
-function getJarvisStateForLog(){
-
-if(
-window.JARVIS_CORE||
-window.JarvisCore||
-window.jarvisCore
-){
-
-return 'ONLINE';
-
-}
-
-return 'WAITING';
-
-}
-
-
 function closeAdmin(){
 
-document
-.getElementById('adminPanel')
-.classList
-.add('admin-hidden');
+document.getElementById(
+'adminPanel'
+).classList.add(
+'admin-hidden'
+);
 
 }
 
@@ -4635,12 +5147,12 @@ document
 
 async function clearEverything(){
 
-if(
-!confirm(
-'Удалить всю локальную память ASHINA, включая чат, вложения и добавленную музыку?'
-)
-){
+if(!confirm(
+'Удалить всю локальную память ASHINA, включая чат, вложения, настройки и добавленную музыку?'
+)){
+
 return;
+
 }
 
 localStorage.clear();
@@ -4651,10 +5163,15 @@ aiHistory=[];
 aiMemory={
 
 name:'',
+
 lastTopic:'',
+
 lastCommand:'',
+
 lastSection:'home',
+
 lastTrack:'',
+
 preferences:{}
 
 };
@@ -4673,35 +5190,47 @@ db.transaction(
 'readwrite'
 );
 
-const store=
-transaction.objectStore(
-MUSIC_STORE
-);
-
-store.clear();
+transaction
+.objectStore(MUSIC_STORE)
+.clear();
 
 transaction.oncomplete=
 function(){
+
 resolve();
+
 };
 
 transaction.onerror=
 function(){
+
 reject(transaction.error);
+
 };
 
 });
 
 }catch(error){
 
-console.error(
-'Music clear error:',
-error
-);
+console.error(error);
 
 }
 
+aiSettings={
+
+memory:true,
+voice:true,
+speech:false,
+fastMode:true,
+mode:'local',
+music:true,
+navigation:true,
+memoryPermission:true
+
+};
+
 loadAIHistory();
+
 renderChat();
 
 userTracks=[];
@@ -4712,12 +5241,11 @@ playlistData=[
 
 currentTrack=0;
 
-loadTrack(
-0,
-false
-);
+loadTrack(0,false);
 
 renderPlaylist();
+
+loadAISettings();
 
 alert(
 'Локальные данные ASHINA очищены.'
@@ -4734,6 +5262,8 @@ renderChat();
 
 loadAIHistory();
 
+checkJarvisCore();
+
 console.log(
 'ASHINA AI Core '+
 APP_VERSION+
@@ -4742,123 +5272,25 @@ APP_VERSION+
 
 </script>
 
-
 <!-- =====================================================
      JARVIS CORE
-     6-Й ФАЙЛ ASHINA
+     6-Й ФАЙЛ ПРОЕКТА
 ===================================================== -->
 
 <script src="jarvis-core.js"></script>
 
 <script>
 
-/* =====================================================
-   JARVIS UI HANDSHAKE
-===================================================== */
-
-(function(){
-
-function updateJarvisUI(){
-
-const home=
-document.getElementById(
-'jarvisHomeStatus'
-);
-
-const settings=
-document.getElementById(
-'jarvisSettingsStatus'
-);
-
-const status=
-document.getElementById(
-'jarvisStatus'
-);
-
-const available=
-!!(
-window.JARVIS_CORE||
-window.JarvisCore||
-window.jarvisCore
-);
-
-if(available){
-
-if(home){
-home.textContent='● ONLINE';
-home.classList.add('ai-online');
-}
-
-if(settings){
-settings.textContent='● ONLINE';
-}
-
-if(status){
-
-status.textContent=
-'🟢 JARVIS Core подключён и готов к работе.';
-
-status.classList.add('online');
-
-}
-
-console.log(
-'[ASHINA] JARVIS Core detected.'
-);
-
-}else{
-
-if(home){
-home.textContent='● ОЖИДАНИЕ';
-}
-
-if(settings){
-settings.textContent='ожидание';
-}
-
-if(status){
-
-status.textContent=
-'🟡 JARVIS Core пока не подключён.';
-
-}
-
-console.warn(
-'[ASHINA] JARVIS Core не обнаружен.'
-);
-
-}
-
-}
-
-if(
-document.readyState==='loading'
-){
-
-document.addEventListener(
-'DOMContentLoaded',
-updateJarvisUI
-);
-
-}else{
-
-updateJarvisUI();
-
-}
-
 window.addEventListener(
 'load',
 function(){
 
 setTimeout(
-updateJarvisUI,
+checkJarvisCore,
 100
 );
 
-}
-);
-
-})();
+});
 
 </script>
 
