@@ -1,7 +1,8 @@
+```json
 {
   "name": "ASHINA",
   "short_name": "ASHINA",
-  "description": "Музыка, общение, файлы и другие возможности ASHINA.",
+  "description": "Музыка, общение, файлы и другие возможности ASHINA с ядром JARVIS.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -9,5 +10,11 @@
   "background_color": "#090b10",
   "theme_color": "#090b10",
   "lang": "ru",
-  "dir": "ltr"
+  "dir": "ltr",
+  "categories": [
+    "productivity",
+    "social",
+    "entertainment"
+  ]
 }
+```
