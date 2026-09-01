@@ -107,7 +107,7 @@ h1{font-size:32px;margin:10px 0}h2{margin-top:0}.muted{color:#9da2ac;font-size:1
 <div class="setting-row"><div class="setting-info"><div class="setting-name">🎙️ Голосовой ввод</div><div class="setting-description">Разрешить использование голосового управления через браузер.</div></div><label class="toggle"><input id="settingVoice" type="checkbox" checked onchange="saveAISettings()"><span class="slider"></span></label></div>
 <div class="setting-row"><div class="setting-info"><div class="setting-name">🔊 Автоозвучивание AI</div><div class="setting-description">Автоматически озвучивать ответы ASHINA.</div></div><label class="toggle"><input id="settingSpeech" type="checkbox" onchange="saveAISettings()"><span class="slider"></span></label></div>
 <div class="setting-row"><div class="setting-info"><div class="setting-name">⚡ Быстрый режим AI</div><div class="setting-description">Уменьшает задержку обработки локальных команд.</div></div><label class="toggle"><input id="settingFastMode" type="checkbox" checked onchange="saveAISettings()"><span class="slider"></span></label></div>
-<div class="setting-info"><div class="setting-name">Режим интеллектуального ядра</div><div class="setting-description">Текущий режим обработки команд.</div></div>
+<div class="setting-row"><div class="setting-info"><div class="setting-name">Режим интеллектуального ядра</div><div class="setting-description">Текущий режим обработки команд.</div></div></div>
 <select id="aiMode" class="setting-select" onchange="saveAISettings()"><option value="local">Локальный AI</option><option value="jarvis">JARVIS Core</option><option value="hybrid">Гибридный режим</option></select>
 </div>
 
@@ -278,7 +278,23 @@ function saveAIMemory(){if(!aiSettings.memory)return;try{localStorage.setItem(AI
 function saveAIHistory(){if(!aiSettings.memory)return;aiHistory=aiHistory.slice(-50);try{localStorage.setItem(AI_HISTORY_KEY,JSON.stringify(aiHistory))}catch(e){}saveAIMemory()}
 function getTime(){return new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
 function addAIMessage(text,user){const box=document.getElementById('aiCore'),m=document.createElement('div');m.className='ai-message'+(user?' user':'');const n=document.createElement('div');n.className='ai-name';n.textContent=user?'ТЫ':'ASHINA AI';m.appendChild(n);const c=document.createElement('div');c.textContent=text;m.appendChild(c);const t=document.createElement('div');t.className='ai-time';t.textContent=getTime();m.appendChild(t);box.appendChild(m);box.scrollTop=box.scrollHeight}
-function loadAIHistory(){const box=document.getElementById('aiCore');box.innerHTML='';if(!aiHistory.length){addAIMessage('Привет. Я ASHINA AI 2.0. Я готова понимать команды и помогать управлять приложением.',false);updateMemoryUI();return}aiHistory.forEach(i=>addAIMessage(i.text,i.user));updateMemoryUI()}
+function loadAIHistory(){
+const box=document.getElementById('aiCore');
+if(!box)return;
+box.innerHTML='';
+if(!aiSettings.memory){
+addAIMessage('Привет. Я ASHINA AI 2.0. Память отключена, но команды приложения доступны.',false);
+updateMemoryUI();
+return;
+}
+if(!aiHistory.length){
+addAIMessage('Привет. Я ASHINA AI 2.0. Я готова понимать команды и помогать управлять приложением.',false);
+updateMemoryUI();
+return;
+}
+aiHistory.forEach(i=>addAIMessage(i.text,i.user));
+updateMemoryUI();
+}
 function setAIStatus(text,thinking=false){const status=document.getElementById('aiStatus');if(status){status.textContent=text;status.classList.toggle('ai-thinking',thinking)}}
 function normalize(text){return text.toLowerCase().replace(/[!?.,;:()]/g,' ').replace(/\s+/g,' ').trim()}
 function containsAny(text,words){return words.some(word=>text.includes(word))}
@@ -340,7 +356,11 @@ files.innerHTML='';let good=0;for(const check of checks){const ok=await check.pr
 ===================================================== */
 function openAdmin(){const pin=prompt('Введите PIN администратора:');if(pin===null)return;if(pin!=='2468'){alert('❌ Неверный PIN.');return}document.getElementById('adminPanel').classList.remove('admin-hidden');document.getElementById('adminLog').innerHTML='<div>🟢 Администратор авторизован</div><div>AI Core: ONLINE</div><div>JARVIS Core: '+(JARVIS_CORE_LOADED?'ONLINE':'WAITING')+'</div><div>Memory: '+(aiSettings.memory?'ACTIVE':'OFF')+'</div><div>Music Engine: INDEXEDDB</div><div>Chat Attachments: READY</div><div>Guard: READY</div>}
 function closeAdmin(){document.getElementById('adminPanel').classList.add('admin-hidden')}
-async function clearEverything(){if(!confirm('Удалить всю локальную память ASHINA, включая чат, вложения, настройки и добавленную музыку?'))return;localStorage.clear();messages=[];aiHistory=[];aiMemory={name:'',lastTopic:'',lastCommand:'',lastSection:'home',lastTrack:'',preferences:{}};try{const db=await openMusicDB();await new Promise((resolve,reject)=>{const t=db.transaction([MUSIC_STORE],'readwrite');t.objectStore(MUSIC_STORE).clear();t.oncomplete=resolve;t.onerror=()=>reject(t.error)})}catch(e){}aiSettings={memory:true,voice:true,speech:false,fastMode:true,mode:'local',music:true,navigation:true,memoryPermission:true};loadAIHistory();renderChat();userTracks=[];playlistData=[...builtinTracks];currentTrack=0;loadTrack(0,false);renderPlaylist();loadAISettings();updateVoteUI();alert('Локальные данные ASHINA очищены.')}
+async function clearEverything(){if(!confirm('Удалить всю локальную память ASHINA, включая чат, вложения, настройки и добавленную музыку?'))return;localStorage.clear();messages=[];aiHistory=[];aiMemory={name:'',lastTopic:'',lastCommand:'',lastSection:'home',lastTrack:'',preferences:{}};try{const db=await openMusicDB();await new Promise((resolve,reject)=>{const t=db.transaction([MUSIC_STORE],'readwrite');t.objectStore(MUSIC_STORE).clear();t.oncomplete=resolve;t.onerror=()=>reject(t.error)})}catch(e){}aiSettings={memory:true,voice:true,speech:false,fastMode:true,mode:'local',music:true,navigation:true,memoryPermission:true};
+try{localStorage.setItem(JARVIS_SETTINGS_KEY,JSON.stringify(aiSettings))}catch(e){}
+loadAISettings();
+loadAIHistory();
+renderChat();userTracks=[];playlistData=[...builtinTracks];currentTrack=0;loadTrack(0,false);renderPlaylist();loadAISettings();updateVoteUI();alert('Локальные данные ASHINA очищены.')}
 
 /* =====================================================
    START
