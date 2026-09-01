@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -148,7 +149,9 @@ padding:13px;
 font-size:14px;
 }
 
-/* MUSIC */
+/* =====================================================
+   MUSIC
+===================================================== */
 
 .music-player{
 background:#0d1118;
@@ -200,6 +203,14 @@ font-size:12px;
 color:#9da2ac;
 }
 
+.music-add{
+margin-top:12px;
+}
+
+.music-add button{
+background:#171d27;
+}
+
 .playlist{
 display:grid;
 gap:7px;
@@ -247,6 +258,12 @@ color:#818894;
 margin-top:2px;
 }
 
+.track-delete{
+padding:7px 9px;
+font-size:13px;
+flex:none;
+}
+
 .genre-row{
 display:flex;
 gap:6px;
@@ -265,7 +282,9 @@ font-size:11px;
 background:#5b1519;
 }
 
-/* NEWS */
+/* =====================================================
+   NEWS
+===================================================== */
 
 .feed{
 border:1px solid #292e38;
@@ -305,7 +324,9 @@ color:#9da2ac;
 min-height:16px;
 }
 
-/* CHAT */
+/* =====================================================
+   CHAT
+===================================================== */
 
 .chat-box{
 height:460px;
@@ -370,7 +391,10 @@ padding:8px 10px;
 font-size:12px;
 }
 
-#fileInput{display:none}
+#fileInput,
+#musicFileInput{
+display:none;
+}
 
 .chat-input{
 display:flex;
@@ -401,7 +425,9 @@ background:#5b1519;
 padding:12px 15px;
 }
 
-/* REAL ATTACHMENTS */
+/* =====================================================
+   ATTACHMENTS
+===================================================== */
 
 .attachment{
 margin-top:9px;
@@ -469,7 +495,9 @@ text-align:center;
 padding:10px;
 }
 
-/* AI */
+/* =====================================================
+   AI
+===================================================== */
 
 .ai-core{
 height:460px;
@@ -551,7 +579,9 @@ font-size:11px;
 color:#777e89;
 }
 
-/* SECURITY */
+/* =====================================================
+   SECURITY
+===================================================== */
 
 .security{
 padding:14px;
@@ -598,7 +628,9 @@ margin-top:10px;
 font-weight:700;
 }
 
-/* ADMIN */
+/* =====================================================
+   ADMIN
+===================================================== */
 
 .admin-panel{
 margin-top:12px;
@@ -631,7 +663,9 @@ background:#1c1114;
 padding:11px;
 }
 
-/* MOBILE */
+/* =====================================================
+   MOBILE
+===================================================== */
 
 @media(max-width:420px){
 
@@ -653,6 +687,7 @@ max-width:94%;
 
 }
 </style>
+
 </head>
 
 <body>
@@ -731,10 +766,8 @@ ASHINA · 2.0 AI
 
 <div class="security-status">
 
-AI-ядро:
-<span class="ai-online">
-● ONLINE
-</span>
+AI-ядро: <span class="ai-online">
+● ONLINE </span>
 
 <br>
 
@@ -743,10 +776,8 @@ AI-ядро:
 
 <br>
 
-Память:
-<span id="homeMemory">
-активна
-</span>
+Память: <span id="homeMemory">
+активна </span>
 
 </div>
 
@@ -798,7 +829,12 @@ AI-ядро:
 ASHINA Music
 </div>
 
-<audio id="audio" preload="metadata" controls></audio>
+<audio
+id="audio"
+preload="metadata"
+controls
+
+> </audio>
 
 <div class="controls">
 
@@ -806,9 +842,10 @@ ASHINA Music
 ⏮
 </button>
 
-<button id="playButton" onclick="toggleMusic()">
-▶️
-</button>
+<button
+id="playButton"
+onclick="toggleMusic()">
+▶️ </button>
 
 <button onclick="nextTrack()">
 ⏭
@@ -816,51 +853,125 @@ ASHINA Music
 
 </div>
 
-<input id="seek" type="range" min="0" max="100" value="0">
+<input
+id="seek"
+type="range"
+min="0"
+max="100"
+value="0"
+
+>
 
 <div class="row">
 
-<span id="time" class="muted">
-0:00 / 0:00
-</span>
+<span
+id="time"
+class="muted">
+0:00 / 0:00 </span>
 
 <span>🔊</span>
 
 </div>
 
-<input id="volume" type="range" min="0" max="1" step="0.01" value="0.8">
+<input
+id="volume"
+type="range"
+min="0"
+max="1"
+step="0.01"
+value="0.8"
 
-<div id="musicStatus" class="music-status">
+>
+
+<div
+id="musicStatus"
+class="music-status">
 Плеер готов.
+</div>
+
+</div>
+
+<!-- ДОБАВЛЕНИЕ МУЗЫКИ -->
+
+<div class="music-add">
+
+<input
+id="musicFileInput"
+type="file"
+accept="audio/*"
+multiple
+
+>
+
+<button
+style="width:100%;padding:12px"
+onclick="openMusicFilePicker()">
+
+➕ Добавить музыку в плейлист
+
+</button>
+
+<div
+id="musicAddStatus"
+class="music-status">
+
+Можно добавлять свои аудиофайлы. Максимум 50 МБ на один файл.
+
 </div>
 
 </div>
 
 <div class="genre-row">
 
-<button class="active" onclick="filterGenre('all',this)">
+<button
+class="active"
+onclick="filterGenre('all',this)">
+
 Все
+
 </button>
 
-<button onclick="filterGenre('Спокойная',this)">
+<button
+onclick="filterGenre('Спокойная',this)">
+
 🌙 Спокойная
+
 </button>
 
-<button onclick="filterGenre('Энергичная',this)">
+<button
+onclick="filterGenre('Энергичная',this)">
+
 🔥 Энергичная
+
 </button>
 
-<button onclick="filterGenre('Аниме',this)">
+<button
+onclick="filterGenre('Аниме',this)">
+
 ⚔️ Аниме
+
 </button>
 
-<button onclick="filterGenre('Фоновая',this)">
+<button
+onclick="filterGenre('Фоновая',this)">
+
 🌌 Фоновая
+
+</button>
+
+<button
+onclick="filterGenre('Моя музыка',this)">
+
+🎧 Моя музыка
+
 </button>
 
 </div>
 
-<div id="playlist" class="playlist"></div>
+<div
+id="playlist"
+class="playlist">
+</div>
 
 </div>
 
@@ -905,17 +1016,28 @@ ASHINA развивается.
 
 <div class="like-row">
 
-<button id="likeButton" onclick="vote('like')">
+<button
+id="likeButton"
+onclick="vote('like')">
+
 👍 <span id="likeCount">0</span>
+
 </button>
 
-<button id="dislikeButton" onclick="vote('dislike')">
+<button
+id="dislikeButton"
+onclick="vote('dislike')">
+
 👎 <span id="dislikeCount">0</span>
+
 </button>
 
 </div>
 
-<div id="voteStatus" class="status"></div>
+<div
+id="voteStatus"
+class="status">
+</div>
 
 </div>
 
@@ -949,7 +1071,10 @@ ASHINA развивается.
 
 </div>
 
-<div id="chatBox" class="chat-box"></div>
+<div
+id="chatBox"
+class="chat-box">
+</div>
 
 <div class="chat-tools">
 
@@ -987,7 +1112,9 @@ ASHINA развивается.
 id="fileInput"
 type="file"
 accept="*/*"
-multiple>
+multiple
+
+>
 
 <div class="chat-input">
 
@@ -995,7 +1122,9 @@ multiple>
 id="chatInput"
 type="text"
 maxlength="2000"
-placeholder="Напиши сообщение...">
+placeholder="Напиши сообщение..."
+
+>
 
 <button onclick="sendMessage()">
 ➤
@@ -1003,7 +1132,10 @@ placeholder="Напиши сообщение...">
 
 </div>
 
-<p id="chatStatus" class="status"></p>
+<p
+id="chatStatus"
+class="status">
+</p>
 
 </div>
 
@@ -1035,7 +1167,10 @@ placeholder="Напиши сообщение...">
 
 </div>
 
-<div id="aiCore" class="ai-core"></div>
+<div
+id="aiCore"
+class="ai-core">
+</div>
 
 <div class="ai-controls">
 
@@ -1083,7 +1218,9 @@ placeholder="Напиши сообщение...">
 id="aiInput"
 type="text"
 maxlength="2000"
-placeholder="Скажи ASHINA, что нужно сделать...">
+placeholder="Скажи ASHINA, что нужно сделать..."
+
+>
 
 <button onclick="sendAI()">
 ➤
@@ -1091,11 +1228,15 @@ placeholder="Скажи ASHINA, что нужно сделать...">
 
 </div>
 
-<div id="aiStatus" class="ai-status">
+<div
+id="aiStatus"
+class="ai-status">
 🟢 AI готов.
 </div>
 
-<div id="aiMemory" class="ai-memory">
+<div
+id="aiMemory"
+class="ai-memory">
 Память: 0 сообщений
 </div>
 
@@ -1152,11 +1293,16 @@ onclick="runGuard()">
 
 </button>
 
-<div id="guardResult" class="guard-result">
+<div
+id="guardResult"
+class="guard-result">
 
 <div id="guardFiles"></div>
 
-<div id="guardTotal" class="guard-total"></div>
+<div
+id="guardTotal"
+class="guard-total">
+</div>
 
 </div>
 
@@ -1183,7 +1329,9 @@ onclick="openAdmin()">
 
 </button>
 
-<div id="adminPanel" class="admin-panel admin-hidden">
+<div
+id="adminPanel"
+class="admin-panel admin-hidden">
 
 <strong>
 🛡️ ASHINA ADMIN
@@ -1193,18 +1341,29 @@ onclick="openAdmin()">
 Скрытая панель управления прототипом.
 </p>
 
-<div class="admin-log" id="adminLog"></div>
+<div
+class="admin-log"
+id="adminLog">
+</div>
 
-<button class="danger" onclick="closeAdmin()">
+<button
+class="danger"
+onclick="closeAdmin()">
+
 🔒 Закрыть админ-режим
+
 </button>
 
 </div>
 
 </div>
 
-<button class="danger" onclick="clearEverything()">
+<button
+class="danger"
+onclick="clearEverything()">
+
 🧹 Очистить локальные данные ASHINA
+
 </button>
 
 </div>
@@ -1234,17 +1393,26 @@ function show(id,btn){
 
 NAV_IDS.forEach(function(x){
 
-const element=document.getElementById(x);
+const element=
+document.getElementById(x);
 
 if(element){
-element.classList.toggle('hidden',x!==id);
+
+element.classList.toggle(
+'hidden',
+x!==id
+);
+
 }
 
 });
 
-document.querySelectorAll('nav button')
+document
+.querySelectorAll('nav button')
 .forEach(function(x){
+
 x.classList.remove('active');
+
 });
 
 if(btn){
@@ -1253,13 +1421,19 @@ btn.classList.add('active');
 
 }else{
 
-document.querySelectorAll('nav button')
+document
+.querySelectorAll('nav button')
 .forEach(function(button){
 
-const code=button.getAttribute('onclick')||'';
+const code=
+button.getAttribute('onclick')||'';
 
-if(code.includes("'"+id+"'")){
+if(
+code.includes("'"+id+"'")
+){
+
 button.classList.add('active');
+
 }
 
 });
@@ -1276,166 +1450,939 @@ behavior:'smooth'
 
 /* =====================================================
    MUSIC ENGINE
+   INDEXEDDB
 ===================================================== */
 
-const playlistData=[
+const MUSIC_DB_NAME='ASHINA_MUSIC_DB';
+
+const MUSIC_DB_VERSION=1;
+
+const MUSIC_STORE='tracks';
+
+const MAX_MUSIC_SIZE=
+50*1024*1024;
+
+let musicDB=null;
+
+let userTracks=[];
+
+let currentTrack=0;
+
+let currentGenre='all';
+
+let currentObjectURL=null;
+
+
+/* =====================================================
+   ВСТРОЕННЫЕ ТРЕКИ
+===================================================== */
+
+const builtinTracks=[
 
 {
+id:'builtin_calm',
 title:'Спокойная композиция',
 artist:'ASHINA',
 genre:'Спокойная',
-src:'music/calm.mp3'
+src:'music/calm.mp3',
+builtin:true
 },
 
 {
+id:'builtin_energy',
 title:'Энергичный трек',
 artist:'ASHINA',
 genre:'Энергичная',
-src:'music/energy.mp3'
+src:'music/energy.mp3',
+builtin:true
 },
 
 {
+id:'builtin_anime',
 title:'Anime Style',
 artist:'ASHINA',
 genre:'Аниме',
-src:'music/anime.mp3'
+src:'music/anime.mp3',
+builtin:true
 },
 
 {
+id:'builtin_night',
 title:'Ночная атмосфера',
 artist:'ASHINA',
 genre:'Фоновая',
-src:'music/night.mp3'
+src:'music/night.mp3',
+builtin:true
 }
 
 ];
 
-let currentTrack=0;
-let currentGenre='all';
+let playlistData=[
+...builtinTracks
+];
 
-const audio=document.getElementById('audio');
-const seek=document.getElementById('seek');
-const volume=document.getElementById('volume');
-const playButton=document.getElementById('playButton');
-const musicStatus=document.getElementById('musicStatus');
 
-const MUSIC_TRACK_KEY='ashina20_music_track';
-const MUSIC_TIME_KEY='ashina20_music_time';
-const MUSIC_VOLUME_KEY='ashina20_music_volume';
+const audio=
+document.getElementById('audio');
 
-const savedVolume=Number(
-localStorage.getItem(MUSIC_VOLUME_KEY)
-);
+const seek=
+document.getElementById('seek');
 
-if(
-Number.isFinite(savedVolume) &&
-savedVolume>=0 &&
-savedVolume<=1
-){
+const volume=
+document.getElementById('volume');
 
-audio.volume=savedVolume;
-volume.value=savedVolume;
+const playButton=
+document.getElementById('playButton');
+
+const musicStatus=
+document.getElementById('musicStatus');
+
+const MUSIC_TRACK_KEY=
+'ashina20_music_track';
+
+const MUSIC_TIME_KEY=
+'ashina20_music_time';
+
+const MUSIC_VOLUME_KEY=
+'ashina20_music_volume';
+
+
+/* =====================================================
+   INDEXEDDB OPEN
+===================================================== */
+
+function openMusicDB(){
+
+return new Promise(function(resolve,reject){
+
+if(musicDB){
+
+resolve(musicDB);
+
+return;
 
 }
 
+if(!('indexedDB' in window)){
+
+reject(
+new Error(
+'IndexedDB unavailable'
+)
+);
+
+return;
+
+}
+
+const request=
+indexedDB.open(
+MUSIC_DB_NAME,
+MUSIC_DB_VERSION
+);
+
+request.onupgradeneeded=
+function(event){
+
+const db=
+event.target.result;
+
+if(
+!db.objectStoreNames
+.contains(MUSIC_STORE)
+){
+
+db.createObjectStore(
+MUSIC_STORE,
+{
+keyPath:'id'
+}
+);
+
+}
+
+};
+
+request.onsuccess=
+function(event){
+
+musicDB=
+event.target.result;
+
+resolve(musicDB);
+
+};
+
+request.onerror=
+function(){
+
+reject(
+request.error
+);
+
+};
+
+});
+
+}
+
+
+/* =====================================================
+   СОХРАНЕНИЕ МУЗЫКИ
+===================================================== */
+
+async function saveMusicFile(file){
+
+if(!file){
+
+return false;
+
+}
+
+if(
+!file.type ||
+!file.type.startsWith('audio/')
+){
+
+setMusicAddStatus(
+'⚠️ Файл «'+
+file.name+
+'» не является аудиофайлом.'
+);
+
+return false;
+
+}
+
+if(
+file.size>MAX_MUSIC_SIZE
+){
+
+setMusicAddStatus(
+'⚠️ «'+
+file.name+
+'» слишком большой. Максимум 50 МБ.'
+);
+
+return false;
+
+}
+
+try{
+
+const db=
+await openMusicDB();
+
+const id=
+'user_'+
+Date.now()+
+'_'+
+Math.random()
+.toString(36)
+.substring(2,9);
+
+const track={
+
+id:id,
+
+title:
+file.name.replace(
+/\.[^/.]+$/,
+''
+),
+
+artist:'Моя музыка',
+
+genre:'Моя музыка',
+
+file:file,
+
+type:file.type,
+
+size:file.size,
+
+createdAt:Date.now(),
+
+builtin:false
+
+};
+
+return await new Promise(
+function(resolve){
+
+const transaction=
+db.transaction(
+[MUSIC_STORE],
+'readwrite'
+);
+
+const store=
+transaction.objectStore(
+MUSIC_STORE
+);
+
+const request=
+store.put(track);
+
+request.onsuccess=
+function(){
+
+resolve(true);
+
+};
+
+request.onerror=
+function(){
+
+console.error(
+'Music save error:',
+request.error
+);
+
+resolve(false);
+
+};
+
+});
+
+}catch(error){
+
+console.error(
+'Music storage error:',
+error
+);
+
+setMusicAddStatus(
+'⚠️ Не удалось сохранить «'+
+file.name+
+'».'
+);
+
+return false;
+
+}
+
+}
+
+
+/* =====================================================
+   ЗАГРУЗКА ПОЛЬЗОВАТЕЛЬСКОЙ МУЗЫКИ
+===================================================== */
+
+async function loadUserMusic(){
+
+try{
+
+const db=
+await openMusicDB();
+
+return await new Promise(
+function(resolve){
+
+const transaction=
+db.transaction(
+[MUSIC_STORE],
+'readonly'
+);
+
+const store=
+transaction.objectStore(
+MUSIC_STORE
+);
+
+const request=
+store.getAll();
+
+request.onsuccess=
+function(){
+
+resolve(
+Array.isArray(
+request.result
+)
+?
+request.result
+:
+[]
+);
+
+};
+
+request.onerror=
+function(){
+
+resolve([]);
+
+};
+
+});
+
+}catch(error){
+
+console.error(
+'Music load error:',
+error
+);
+
+return [];
+
+}
+
+}
+
+
+/* =====================================================
+   ОБНОВИТЬ БИБЛИОТЕКУ
+===================================================== */
+
+async function refreshMusicLibrary(){
+
+userTracks=
+await loadUserMusic();
+
+playlistData=[
+...builtinTracks,
+...userTracks
+];
+
+renderPlaylist();
+
+}
+
+
+/* =====================================================
+   MUSIC FILE PICKER
+===================================================== */
+
+function openMusicFilePicker(){
+
+const input=
+document.getElementById(
+'musicFileInput'
+);
+
+if(!input){
+
+return;
+
+}
+
+input.click();
+
+}
+
+
+/* =====================================================
+   MUSIC STATUS
+===================================================== */
+
+function setMusicAddStatus(text){
+
+const element=
+document.getElementById(
+'musicAddStatus'
+);
+
+if(element){
+
+element.textContent=text;
+
+}
+
+}
+
+
+/* =====================================================
+   ОБРАБОТЧИК МУЗЫКИ
+===================================================== */
+
+const musicFileInput=
+document.getElementById(
+'musicFileInput'
+);
+
+if(musicFileInput){
+
+musicFileInput.onchange=
+async function(event){
+
+const files=
+Array.from(
+event.target.files||[]
+);
+
+if(!files.length){
+
+return;
+
+}
+
+setMusicAddStatus(
+'⏳ Добавляю музыку...'
+);
+
+let added=0;
+
+for(
+const file of files
+){
+
+const success=
+await saveMusicFile(file);
+
+if(success){
+
+added++;
+
+}
+
+}
+
+await refreshMusicLibrary();
+
+if(
+added===files.length
+){
+
+setMusicAddStatus(
+'✅ Добавлено треков: '+
+added+
+'.'
+);
+
+}else{
+
+setMusicAddStatus(
+'⚠️ Добавлено '+
+added+
+' из '+
+files.length+
+'.'
+);
+
+}
+
+event.target.value='';
+
+};
+
+}
+
+
+/* =====================================================
+   DELETE USER TRACK
+===================================================== */
+
+async function deleteUserTrack(id){
+
+const track=
+playlistData.find(
+function(item){
+
+return item.id===id;
+
+}
+);
+
+if(
+!track ||
+track.builtin
+){
+
+return;
+
+}
+
+if(
+!confirm(
+'Удалить «'+
+track.title+
+'» из плейлиста?'
+)
+){
+
+return;
+
+}
+
+try{
+
+const db=
+await openMusicDB();
+
+await new Promise(
+function(resolve,reject){
+
+const transaction=
+db.transaction(
+[MUSIC_STORE],
+'readwrite'
+);
+
+const store=
+transaction.objectStore(
+MUSIC_STORE
+);
+
+store.delete(id);
+
+transaction.oncomplete=
+function(){
+
+resolve();
+
+};
+
+transaction.onerror=
+function(){
+
+reject(
+transaction.error
+);
+
+};
+
+});
+
+if(
+playlistData[currentTrack] &&
+playlistData[currentTrack].id===id
+){
+
+audio.pause();
+
+audio.removeAttribute('src');
+
+audio.load();
+
+}
+
+await refreshMusicLibrary();
+
+if(
+currentTrack>=playlistData.length
+){
+
+currentTrack=0;
+
+}
+
+setMusicAddStatus(
+'🗑️ Трек удалён.'
+);
+
+}catch(error){
+
+console.error(
+error
+);
+
+setMusicAddStatus(
+'⚠️ Не удалось удалить трек.'
+);
+
+}
+
+}
+
+
+/* =====================================================
+   FORMAT TIME
+===================================================== */
+
 function formatTime(seconds){
 
-seconds=Math.floor(Number(seconds)||0);
+seconds=
+Math.floor(
+Number(seconds)||0
+);
 
 return(
 Math.floor(seconds/60)+
 ':'+
-String(seconds%60).padStart(2,'0')
+String(
+seconds%60
+).padStart(2,'0')
 );
 
 }
 
+
+/* =====================================================
+   RENDER PLAYLIST
+===================================================== */
+
 function renderPlaylist(){
 
-const box=document.getElementById('playlist');
+const box=
+document.getElementById(
+'playlist'
+);
+
+if(!box){
+
+return;
+
+}
 
 box.innerHTML='';
 
-playlistData.forEach(function(track,index){
+let visibleCount=0;
+
+playlistData.forEach(
+function(track,index){
 
 if(
 currentGenre!=='all' &&
 track.genre!==currentGenre
 ){
+
 return;
+
 }
 
-const item=document.createElement('div');
+visibleCount++;
+
+const item=
+document.createElement('div');
 
 item.className=
 'track'+
-(index===currentTrack?' active':'');
+(
+index===currentTrack
+?
+' active'
+:
+''
+);
 
-const number=document.createElement('div');
 
-number.className='track-number';
+const number=
+document.createElement('div');
+
+number.className=
+'track-number';
 
 number.textContent=
-String(index+1).padStart(2,'0');
+String(
+index+1
+).padStart(2,'0');
 
-const info=document.createElement('div');
 
-info.className='track-info';
+const info=
+document.createElement('div');
 
-const title=document.createElement('div');
+info.className=
+'track-info';
 
-title.className='track-name';
 
-title.textContent=track.title;
+const title=
+document.createElement('div');
 
-const meta=document.createElement('div');
+title.className=
+'track-name';
 
-meta.className='track-meta';
+title.textContent=
+track.title;
+
+
+const meta=
+document.createElement('div');
+
+meta.className=
+'track-meta';
 
 meta.textContent=
-track.artist+' · '+track.genre;
+track.artist+
+' · '+
+track.genre;
 
 info.appendChild(title);
+
 info.appendChild(meta);
 
 item.appendChild(number);
+
 item.appendChild(info);
 
-item.onclick=function(){
-loadTrack(index,true);
+
+if(!track.builtin){
+
+const remove=
+document.createElement('button');
+
+remove.className=
+'track-delete';
+
+remove.textContent='🗑️';
+
+remove.title=
+'Удалить трек';
+
+remove.onclick=
+function(event){
+
+event.stopPropagation();
+
+deleteUserTrack(
+track.id
+);
+
+};
+
+item.appendChild(remove);
+
+}
+
+
+item.onclick=
+function(){
+
+loadTrack(
+index,
+true
+);
+
 };
 
 box.appendChild(item);
 
 });
 
+
+if(!visibleCount){
+
+const empty=
+document.createElement('div');
+
+empty.className=
+'muted';
+
+empty.textContent=
+'В этом разделе пока нет музыки.';
+
+box.appendChild(empty);
+
 }
 
-function loadTrack(index,autoPlay=false){
+}
+
+
+/* =====================================================
+   SOURCE
+===================================================== */
+
+function getTrackSource(track){
+
+if(!track){
+
+return null;
+
+}
+
+if(track.builtin){
+
+return track.src;
+
+}
+
+if(track.file){
+
+if(currentObjectURL){
+
+URL.revokeObjectURL(
+currentObjectURL
+);
+
+currentObjectURL=null;
+
+}
+
+currentObjectURL=
+URL.createObjectURL(
+track.file
+);
+
+return currentObjectURL;
+
+}
+
+return null;
+
+}
+
+
+/* =====================================================
+   LOAD TRACK
+===================================================== */
+
+function loadTrack(
+index,
+autoPlay=false
+){
 
 if(!playlistData.length){
+
+musicStatus.textContent=
+'Плейлист пуст.';
+
 return;
+
 }
 
 if(index<0){
-index=playlistData.length-1;
+
+index=
+playlistData.length-1;
+
 }
 
-if(index>=playlistData.length){
+if(
+index>=playlistData.length
+){
+
 index=0;
+
 }
 
 currentTrack=index;
 
-const track=playlistData[currentTrack];
+const track=
+playlistData[currentTrack];
 
-audio.src=track.src;
+const source=
+getTrackSource(track);
 
-document.getElementById('trackTitle').textContent=
+if(!source){
+
+musicStatus.textContent=
+'⚠️ Не удалось открыть файл.';
+
+return;
+
+}
+
+audio.pause();
+
+audio.src=source;
+
+audio.load();
+
+document
+.getElementById(
+'trackTitle'
+)
+.textContent=
 track.title;
 
-document.getElementById('trackArtist').textContent=
-track.artist+' · '+track.genre;
+document
+.getElementById(
+'trackArtist'
+)
+.textContent=
+track.artist+
+' · '+
+track.genre;
 
 localStorage.setItem(
 MUSIC_TRACK_KEY,
@@ -1450,7 +2397,8 @@ MUSIC_TIME_KEY,
 renderPlaylist();
 
 musicStatus.textContent=
-'Выбран трек: '+track.title;
+'Выбран трек: '+
+track.title;
 
 if(autoPlay){
 
@@ -1458,13 +2406,19 @@ audio.play()
 .then(function(){
 
 musicStatus.textContent=
-'▶️ Играет: '+track.title;
+'▶️ Играет: '+
+track.title;
 
 })
-.catch(function(){
+.catch(function(error){
+
+console.warn(
+'Playback blocked:',
+error
+);
 
 musicStatus.textContent=
-'⚠️ Браузер заблокировал запуск. Нажми ▶️ ещё раз.';
+'⚠️ Нажми ▶️ для запуска музыки.';
 
 });
 
@@ -1472,11 +2426,28 @@ musicStatus.textContent=
 
 }
 
+
+/* =====================================================
+   PLAY / PAUSE
+===================================================== */
+
 function toggleMusic(){
+
+if(!playlistData.length){
+
+musicStatus.textContent=
+'⚠️ В плейлисте нет музыки.';
+
+return;
+
+}
 
 if(!audio.src){
 
-loadTrack(currentTrack,false);
+loadTrack(
+currentTrack,
+false
+);
 
 }
 
@@ -1485,7 +2456,8 @@ if(audio.paused){
 audio.play()
 .then(function(){
 
-musicStatus.textContent='▶️ Музыка играет';
+musicStatus.textContent=
+'▶️ Музыка играет';
 
 })
 .catch(function(){
@@ -1503,61 +2475,142 @@ audio.pause();
 
 }
 
-function previousTrack(){
-loadTrack(currentTrack-1,true);
-}
+
+/* =====================================================
+   NEXT
+===================================================== */
 
 function nextTrack(){
-loadTrack(currentTrack+1,true);
+
+if(!playlistData.length){
+
+return;
+
 }
 
-audio.onplay=function(){
-playButton.textContent='⏸️';
+loadTrack(
+currentTrack+1,
+true
+);
+
+}
+
+
+/* =====================================================
+   PREVIOUS
+===================================================== */
+
+function previousTrack(){
+
+if(!playlistData.length){
+
+return;
+
+}
+
+loadTrack(
+currentTrack-1,
+true
+);
+
+}
+
+
+/* =====================================================
+   AUDIO EVENTS
+===================================================== */
+
+audio.onplay=
+function(){
+
+playButton.textContent=
+'⏸️';
+
 };
 
-audio.onpause=function(){
-playButton.textContent='▶️';
+
+audio.onpause=
+function(){
+
+playButton.textContent=
+'▶️';
+
 saveMusicState();
+
 };
 
-audio.onended=function(){
+
+audio.onended=
+function(){
+
 nextTrack();
+
 };
 
-audio.onerror=function(){
+
+audio.onerror=
+function(){
+
+const track=
+playlistData[currentTrack];
 
 musicStatus.textContent=
-'⚠️ Не найден или не поддерживается музыкальный файл: '+
-(playlistData[currentTrack]?.src||'');
+'⚠️ Не удалось воспроизвести: '+
+(
+track
+?
+track.title
+:
+'неизвестный файл'
+);
 
 };
 
-audio.ontimeupdate=function(){
+
+audio.ontimeupdate=
+function(){
 
 updateMusicUI();
+
 saveMusicState();
 
 };
 
-audio.onloadedmetadata=function(){
+
+audio.onloadedmetadata=
+function(){
 
 updateMusicUI();
 
-const savedTime=Number(
-localStorage.getItem(MUSIC_TIME_KEY)
+const savedTime=
+Number(
+localStorage.getItem(
+MUSIC_TIME_KEY
+)
 );
 
 if(
 Number.isFinite(savedTime) &&
 savedTime>0 &&
+Number.isFinite(audio.duration) &&
 savedTime<audio.duration
 ){
 
-audio.currentTime=savedTime;
+try{
+
+audio.currentTime=
+savedTime;
+
+}catch(error){}
 
 }
 
 };
+
+
+/* =====================================================
+   MUSIC UI
+===================================================== */
 
 function updateMusicUI(){
 
@@ -1567,41 +2620,106 @@ audio.duration>0
 ){
 
 seek.value=
-(audio.currentTime/audio.duration)*100;
+(
+audio.currentTime/
+audio.duration
+)*100;
 
 }
 
-document.getElementById('time').textContent=
-formatTime(audio.currentTime)+
+document
+.getElementById(
+'time'
+)
+.textContent=
+formatTime(
+audio.currentTime
+)+
 ' / '+
-formatTime(audio.duration);
-
-}
-
-function saveMusicState(){
-
-localStorage.setItem(
-MUSIC_TIME_KEY,
-String(audio.currentTime||0)
+formatTime(
+audio.duration
 );
 
 }
 
-seek.oninput=function(){
 
-if(audio.duration){
+function saveMusicState(){
+
+try{
+
+localStorage.setItem(
+MUSIC_TIME_KEY,
+String(
+audio.currentTime||0
+)
+);
+
+}catch(error){}
+
+}
+
+
+/* =====================================================
+   SEEK
+===================================================== */
+
+seek.oninput=
+function(){
+
+if(
+audio.duration &&
+Number.isFinite(
+audio.duration
+)
+){
 
 audio.currentTime=
-(Number(seek.value)/100)*
+(
+Number(seek.value)/100
+)*
 audio.duration;
 
 }
 
 };
 
-volume.oninput=function(){
 
-const value=Number(volume.value);
+/* =====================================================
+   VOLUME
+===================================================== */
+
+const savedVolume=
+Number(
+localStorage.getItem(
+MUSIC_VOLUME_KEY
+)
+);
+
+if(
+Number.isFinite(savedVolume) &&
+savedVolume>=0 &&
+savedVolume<=1
+){
+
+audio.volume=
+savedVolume;
+
+volume.value=
+savedVolume;
+
+}else{
+
+audio.volume=.8;
+
+volume.value=.8;
+
+}
+
+volume.oninput=
+function(){
+
+const value=
+Number(volume.value);
 
 audio.volume=value;
 
@@ -1612,95 +2730,195 @@ String(value)
 
 };
 
-function filterGenre(genre,button){
+
+/* =====================================================
+   GENRE
+===================================================== */
+
+function filterGenre(
+genre,
+button
+){
 
 currentGenre=genre;
 
-document.querySelectorAll('.genre-row button')
-.forEach(function(x){
-x.classList.remove('active');
+document
+.querySelectorAll(
+'.genre-row button'
+)
+.forEach(
+function(element){
+
+element.classList.remove(
+'active'
+);
+
 });
 
-button.classList.add('active');
+if(button){
+
+button.classList.add(
+'active'
+);
+
+}
 
 renderPlaylist();
 
 }
 
-const savedTrack=Number(
-localStorage.getItem(MUSIC_TRACK_KEY)
+
+/* =====================================================
+   RESTORE MUSIC
+===================================================== */
+
+const savedTrack=
+Number(
+localStorage.getItem(
+MUSIC_TRACK_KEY
+)
 );
 
 if(
 Number.isInteger(savedTrack) &&
-savedTrack>=0 &&
-savedTrack<playlistData.length
+savedTrack>=0
 ){
 
 currentTrack=savedTrack;
 
 }
 
-loadTrack(currentTrack,false);
+
+/* =====================================================
+   START MUSIC
+===================================================== */
+
+(async function(){
+
+await refreshMusicLibrary();
+
+if(
+currentTrack>=playlistData.length
+){
+
+currentTrack=0;
+
+}
+
+loadTrack(
+currentTrack,
+false
+);
+
+})();
 
 
 /* =====================================================
    NEWS
 ===================================================== */
 
-const LIKE_KEY='ashina20_like';
-const DISLIKE_KEY='ashina20_dislike';
+const LIKE_KEY=
+'ashina20_like';
 
-let like=localStorage.getItem(LIKE_KEY)==='1';
-let dislike=localStorage.getItem(DISLIKE_KEY)==='1';
+const DISLIKE_KEY=
+'ashina20_dislike';
+
+let like=
+localStorage.getItem(
+LIKE_KEY
+)==='1';
+
+let dislike=
+localStorage.getItem(
+DISLIKE_KEY
+)==='1';
+
 
 function updateVoteUI(){
 
-const lb=document.getElementById('likeButton');
-const db=document.getElementById('dislikeButton');
+const lb=
+document.getElementById(
+'likeButton'
+);
+
+const db=
+document.getElementById(
+'dislikeButton'
+);
 
 if(!lb||!db){
+
 return;
+
 }
 
-lb.classList.toggle('selected',like);
-db.classList.toggle('selected',dislike);
+lb.classList.toggle(
+'selected',
+like
+);
 
-document.getElementById('likeCount').textContent=
+db.classList.toggle(
+'selected',
+dislike
+);
+
+document.getElementById(
+'likeCount'
+).textContent=
 like?'1':'0';
 
-document.getElementById('dislikeCount').textContent=
+document.getElementById(
+'dislikeCount'
+).textContent=
 dislike?'1':'0';
 
-const status=document.getElementById('voteStatus');
+const status=
+document.getElementById(
+'voteStatus'
+);
 
 status.textContent=
 like
-?'👍 Твой лайк учтён'
-:dislike
-?'👎 Твой дизлайк учтён'
-:'';
+?
+'👍 Твой лайк учтён'
+:
+dislike
+?
+'👎 Твой дизлайк учтён'
+:
+'';
 
 }
+
 
 function vote(type){
 
 if(type==='like'){
 
 if(like){
+
 like=false;
+
 }else{
+
 like=true;
+
 dislike=false;
+
 }
 
 }else{
 
 if(dislike){
+
 dislike=false;
+
 }else{
+
 dislike=true;
+
 like=false;
+
 }
 
 }
@@ -1723,23 +2941,30 @@ updateVoteUI();
 
 
 /* =====================================================
-   CHAT ENGINE
+   CHAT
 ===================================================== */
 
-const CHAT_KEY='ashina20_chat';
+const CHAT_KEY=
+'ashina20_chat';
 
 let messages=[];
 
 try{
 
-const saved=localStorage.getItem(CHAT_KEY);
+const saved=
+localStorage.getItem(
+CHAT_KEY
+);
 
 if(saved){
 
-const parsed=JSON.parse(saved);
+const parsed=
+JSON.parse(saved);
 
 if(Array.isArray(parsed)){
+
 messages=parsed;
+
 }
 
 }
@@ -1751,33 +2976,19 @@ messages=[];
 }
 
 
-/*
-   Максимальный размер одного файла.
-
-   5 МБ безопаснее для localStorage,
-   чем старые 8 МБ.
-
-   Важно:
-   localStorage имеет ограниченный объём,
-   поэтому очень большие файлы хранить
-   в нём нельзя.
-*/
-
-const MAX_FILE_SIZE=5*1024*1024;
+const MAX_FILE_SIZE=
+5*1024*1024;
 
 
 function saveMessages(){
 
 try{
 
-/*
-   Оставляем последние 100 сообщений,
-   чтобы не переполнять localStorage.
-*/
-
 localStorage.setItem(
 CHAT_KEY,
-JSON.stringify(messages.slice(-100))
+JSON.stringify(
+messages.slice(-100)
+)
 );
 
 return true;
@@ -1786,7 +2997,11 @@ return true;
 
 console.error(error);
 
-document.getElementById('chatStatus').textContent=
+document
+.getElementById(
+'chatStatus'
+)
+.textContent=
 '⚠️ Не удалось сохранить файл. Локальное хранилище переполнено.';
 
 return false;
@@ -1798,59 +3013,89 @@ return false;
 
 function formatFileSize(bytes){
 
-if(!Number.isFinite(bytes)){
+if(
+!Number.isFinite(bytes)
+){
+
 return '';
+
 }
 
 if(bytes<1024){
+
 return bytes+' Б';
-}
-
-if(bytes<1024*1024){
-return (bytes/1024).toFixed(1)+' КБ';
-}
-
-return (bytes/(1024*1024)).toFixed(1)+' МБ';
 
 }
 
+if(
+bytes<1024*1024
+){
 
-/*
-   Создаёт настоящий элемент вложения.
-*/
+return(
+bytes/1024
+).toFixed(1)+
+' КБ';
 
-function renderAttachment(attachment){
+}
 
-const wrapper=document.createElement('div');
+return(
+bytes/
+(1024*1024)
+).toFixed(1)+
+' МБ';
 
-wrapper.className='attachment';
+}
 
 
-const name=document.createElement('div');
+/* =====================================================
+   RENDER ATTACHMENT
+===================================================== */
 
-name.className='attachment-name';
+function renderAttachment(
+attachment
+){
 
-name.textContent='📎 '+attachment.name;
+const wrapper=
+document.createElement('div');
+
+wrapper.className=
+'attachment';
+
+
+const name=
+document.createElement('div');
+
+name.className=
+'attachment-name';
+
+name.textContent=
+'📎 '+
+attachment.name;
 
 wrapper.appendChild(name);
 
 
-const type=attachment.type||'';
+const type=
+attachment.type||'';
 
 
-/* IMAGE */
+if(
+type.startsWith('image/')
+){
 
-if(type.startsWith('image/')){
+const img=
+document.createElement('img');
 
-const img=document.createElement('img');
+img.src=
+attachment.data;
 
-img.src=attachment.data;
-
-img.alt=attachment.name;
+img.alt=
+attachment.name;
 
 img.loading='lazy';
 
-img.onclick=function(){
+img.onclick=
+function(){
 
 window.open(
 attachment.data,
@@ -1864,13 +3109,15 @@ wrapper.appendChild(img);
 }
 
 
-/* VIDEO */
+else if(
+type.startsWith('video/')
+){
 
-else if(type.startsWith('video/')){
+const video=
+document.createElement('video');
 
-const video=document.createElement('video');
-
-video.src=attachment.data;
+video.src=
+attachment.data;
 
 video.controls=true;
 
@@ -1881,79 +3128,96 @@ wrapper.appendChild(video);
 }
 
 
-/* AUDIO */
+else if(
+type.startsWith('audio/')
+){
 
-else if(type.startsWith('audio/')){
+const audioElement=
+document.createElement('audio');
 
-const audioElement=document.createElement('audio');
-
-audioElement.src=attachment.data;
+audioElement.src=
+attachment.data;
 
 audioElement.controls=true;
 
-wrapper.appendChild(audioElement);
+wrapper.appendChild(
+audioElement
+);
 
 }
 
 
-/* PDF */
+else if(
+type==='application/pdf'
+){
 
-else if(type==='application/pdf'){
+const link=
+document.createElement('a');
 
-const link=document.createElement('a');
+link.className=
+'file-open';
 
-link.className='file-open';
-
-link.href=attachment.data;
+link.href=
+attachment.data;
 
 link.target='_blank';
 
 link.rel='noopener';
 
-link.textContent='📄 Открыть PDF';
+link.textContent=
+'📄 Открыть PDF';
 
 wrapper.appendChild(link);
 
 }
 
 
-/* OTHER FILE */
-
 else{
 
-const icon=document.createElement('div');
+const icon=
+document.createElement('div');
 
-icon.className='attachment-icon';
+icon.className=
+'attachment-icon';
 
 icon.textContent='📎';
 
 wrapper.appendChild(icon);
 
-const link=document.createElement('a');
+const link=
+document.createElement('a');
 
-link.className='file-open';
+link.className=
+'file-open';
 
-link.href=attachment.data;
+link.href=
+attachment.data;
 
 link.target='_blank';
 
 link.rel='noopener';
 
-link.download=attachment.name;
+link.download=
+attachment.name;
 
-link.textContent='⬇️ Открыть / скачать файл';
+link.textContent=
+'⬇️ Открыть / скачать файл';
 
 wrapper.appendChild(link);
 
 }
 
 
-const size=document.createElement('div');
+const size=
+document.createElement('div');
 
-size.className='file-size';
+size.className=
+'file-size';
 
 size.textContent=
-formatFileSize(attachment.size);
+formatFileSize(
+attachment.size
+);
 
 wrapper.appendChild(size);
 
@@ -1962,20 +3226,29 @@ return wrapper;
 }
 
 
+/* =====================================================
+   RENDER CHAT
+===================================================== */
+
 function renderChat(){
 
-const box=document.getElementById('chatBox');
+const box=
+document.getElementById(
+'chatBox'
+);
 
 box.innerHTML='';
 
 
 if(!messages.length){
 
-const empty=document.createElement('div');
+const empty=
+document.createElement('div');
 
 empty.className='muted';
 
-empty.textContent='Пока сообщений нет.';
+empty.textContent=
+'Пока сообщений нет.';
 
 box.appendChild(empty);
 
@@ -1984,42 +3257,54 @@ return;
 }
 
 
-messages.forEach(function(message){
+messages.forEach(
+function(message){
 
-const item=document.createElement('div');
+const item=
+document.createElement('div');
 
 item.className=
 'message'+
-(message.me?' me':'');
+(
+message.me
+?
+' me'
+:
+''
+);
 
 
-const name=document.createElement('div');
+const name=
+document.createElement('div');
 
-name.className='message-name';
+name.className=
+'message-name';
 
 name.textContent=
-message.me?'Ты':'ASHINA';
+message.me
+?
+'Ты'
+:
+'ASHINA';
 
 item.appendChild(name);
 
 
 if(message.text){
 
-const text=document.createElement('div');
+const text=
+document.createElement('div');
 
-text.className='message-text';
+text.className=
+'message-text';
 
-text.textContent=message.text;
+text.textContent=
+message.text;
 
 item.appendChild(text);
 
 }
 
-
-/*
-   Если у сообщения есть настоящее вложение,
-   создаём его заново из сохранённого dataURL.
-*/
 
 if(message.attachment){
 
@@ -2030,31 +3315,40 @@ renderAttachment(
 message.attachment
 );
 
-item.appendChild(attachmentElement);
+item.appendChild(
+attachmentElement
+);
 
 }catch(error){
 
 const errorText=
 document.createElement('div');
 
-errorText.className='status';
+errorText.className=
+'status';
 
 errorText.textContent=
 '⚠️ Не удалось отобразить вложение.';
 
-item.appendChild(errorText);
+item.appendChild(
+errorText
+);
 
 }
 
 }
 
 
-const time=document.createElement('div');
+const time=
+document.createElement('div');
 
-time.className='message-time';
+time.className=
+'message-time';
 
 time.textContent=
-new Date(message.time)
+new Date(
+message.time
+)
 .toLocaleTimeString(
 'ru-RU',
 {
@@ -2068,25 +3362,34 @@ item.appendChild(time);
 
 if(message.me){
 
-const actions=document.createElement('div');
+const actions=
+document.createElement('div');
 
-actions.className='message-actions';
+actions.className=
+'message-actions';
 
-
-const del=document.createElement('button');
+const del=
+document.createElement('button');
 
 del.textContent='🗑️';
 
-del.title='Удалить сообщение';
+del.title=
+'Удалить сообщение';
 
-del.onclick=function(){
+del.onclick=
+function(){
 
 messages=
 messages.filter(
-x=>x.id!==message.id
+function(x){
+
+return x.id!==message.id;
+
+}
 );
 
 saveMessages();
+
 renderChat();
 
 };
@@ -2097,34 +3400,41 @@ item.appendChild(actions);
 
 }
 
-
 box.appendChild(item);
 
 });
 
-
-box.scrollTop=box.scrollHeight;
+box.scrollTop=
+box.scrollHeight;
 
 }
 
 
-/*
-   Обычное текстовое сообщение.
-*/
+/* =====================================================
+   SEND MESSAGE
+===================================================== */
 
 function sendMessage(){
 
-const input=document.getElementById('chatInput');
+const input=
+document.getElementById(
+'chatInput'
+);
 
-const text=input.value.trim();
+const text=
+input.value.trim();
 
 if(!text){
+
 return;
+
 }
 
 messages.push({
 
-id:Date.now()+Math.random(),
+id:
+Date.now()+
+Math.random(),
 
 text:text,
 
@@ -2134,11 +3444,13 @@ time:Date.now()
 
 });
 
-messages=messages.slice(-100);
+messages=
+messages.slice(-100);
 
 if(saveMessages()){
 
 input.value='';
+
 renderChat();
 
 }
@@ -2147,7 +3459,9 @@ renderChat();
 
 
 document
-.getElementById('chatInput')
+.getElementById(
+'chatInput'
+)
 .addEventListener(
 'keydown',
 function(event){
@@ -2165,7 +3479,10 @@ sendMessage();
 
 function insertEmoji(emoji){
 
-const input=document.getElementById('chatInput');
+const input=
+document.getElementById(
+'chatInput'
+);
 
 input.value+=emoji;
 
@@ -2181,27 +3498,37 @@ if(
 'Очистить локальный чат и все его вложения?'
 )
 ){
+
 return;
+
 }
 
 messages=[];
 
-localStorage.removeItem(CHAT_KEY);
+localStorage.removeItem(
+CHAT_KEY
+);
 
 renderChat();
 
-document.getElementById('chatStatus').textContent=
+document
+.getElementById(
+'chatStatus'
+)
+.textContent=
 '🧹 Чат очищен.';
 
 }
 
 
 /* =====================================================
-   FILE PICKER
+   CHAT FILE PICKER
 ===================================================== */
 
 const fileInput=
-document.getElementById('fileInput');
+document.getElementById(
+'fileInput'
+);
 
 
 function openFilePicker(){
@@ -2240,39 +3567,51 @@ fileInput.click();
 }
 
 
-/*
-   Создание сообщения с настоящим файлом.
-*/
+/* =====================================================
+   ADD CHAT FILE
+===================================================== */
 
 function addFileToChat(file){
 
-return new Promise(function(resolve,reject){
+return new Promise(
+function(resolve,reject){
 
-if(file.size>MAX_FILE_SIZE){
+if(
+file.size>MAX_FILE_SIZE
+){
 
-document.getElementById('chatStatus').textContent=
-'⚠️ Файл «'+file.name+
+document
+.getElementById(
+'chatStatus'
+)
+.textContent=
+'⚠️ Файл «'+
+file.name+
 '» слишком большой. Максимум 5 МБ.';
 
 reject(
-new Error('file too large')
+new Error(
+'file too large'
+)
 );
 
 return;
 
 }
 
+const reader=
+new FileReader();
 
-const reader=new FileReader();
-
-
-reader.onload=function(){
+reader.onload=
+function(){
 
 const attachment={
 
 name:file.name,
 
-type:file.type||'application/octet-stream',
+type:
+file.type||
+'application/octet-stream',
 
 size:file.size,
 
@@ -2280,10 +3619,11 @@ data:reader.result
 
 };
 
-
 const message={
 
-id:Date.now()+Math.random(),
+id:
+Date.now()+
+Math.random(),
 
 text:'',
 
@@ -2295,36 +3635,37 @@ attachment:attachment
 
 };
 
-
 messages.push(message);
 
-messages=messages.slice(-100);
-
+messages=
+messages.slice(-100);
 
 if(!saveMessages()){
 
 reject(
-new Error('storage full')
+new Error(
+'storage full'
+)
 );
 
 return;
 
 }
 
-
 resolve(message);
 
 };
 
-
-reader.onerror=function(){
+reader.onerror=
+function(){
 
 reject(
-new Error('read error')
+new Error(
+'read error'
+)
 );
 
 };
-
 
 reader.readAsDataURL(file);
 
@@ -2333,32 +3674,39 @@ reader.readAsDataURL(file);
 }
 
 
-fileInput.onchange=async function(event){
+fileInput.onchange=
+async function(event){
 
 const files=
-Array.from(event.target.files||[]);
+Array.from(
+event.target.files||[]
+);
 
 if(!files.length){
+
 return;
+
 }
 
-
 const status=
-document.getElementById('chatStatus');
-
+document.getElementById(
+'chatStatus'
+);
 
 status.textContent=
 '⏳ Добавляю файлы...';
 
-
 let success=0;
 
-
-for(const file of files){
+for(
+const file of files
+){
 
 try{
 
-await addFileToChat(file);
+await addFileToChat(
+file
+);
 
 success++;
 
@@ -2374,14 +3722,15 @@ error
 
 }
 
-
 renderChat();
 
-
-if(success===files.length){
+if(
+success===files.length
+){
 
 status.textContent=
-'✅ Добавлено файлов: '+success;
+'✅ Добавлено файлов: '+
+success;
 
 }else{
 
@@ -2393,11 +3742,6 @@ files.length;
 
 }
 
-
-/*
-   Позволяет выбрать тот же файл повторно.
-*/
-
 event.target.value='';
 
 };
@@ -2407,18 +3751,28 @@ event.target.value='';
    AI CORE
 ===================================================== */
 
-const AI_HISTORY_KEY='ashina20_ai_history';
-const AI_MEMORY_KEY='ashina20_memory';
+const AI_HISTORY_KEY=
+'ashina20_ai_history';
+
+const AI_MEMORY_KEY=
+'ashina20_memory';
 
 let aiHistory=[];
 
 let aiMemory={
+
 name:'',
+
 lastTopic:'',
+
 lastCommand:'',
+
 lastSection:'home',
+
 lastTrack:'',
+
 preferences:{}
+
 };
 
 let lastAIText='';
@@ -2428,15 +3782,22 @@ try{
 
 const history=
 JSON.parse(
-localStorage.getItem(AI_HISTORY_KEY)||'[]'
+localStorage.getItem(
+AI_HISTORY_KEY
+)||'[]'
 );
 
 if(Array.isArray(history)){
-aiHistory=history.slice(-50);
+
+aiHistory=
+history.slice(-50);
+
 }
 
 }catch(error){
+
 aiHistory=[];
+
 }
 
 
@@ -2444,10 +3805,15 @@ try{
 
 const memory=
 JSON.parse(
-localStorage.getItem(AI_MEMORY_KEY)||'{}'
+localStorage.getItem(
+AI_MEMORY_KEY
+)||'{}'
 );
 
-if(memory&&typeof memory==='object'){
+if(
+memory &&
+typeof memory==='object'
+){
 
 aiMemory={
 ...aiMemory,
@@ -2463,13 +3829,25 @@ function saveAIMemory(){
 
 localStorage.setItem(
 AI_MEMORY_KEY,
-JSON.stringify(aiMemory)
+JSON.stringify(
+aiMemory
+)
 );
 
-document.getElementById('aiMemory').textContent=
-'Память: '+aiHistory.length+' сообщений';
+document
+.getElementById(
+'aiMemory'
+)
+.textContent=
+'Память: '+
+aiHistory.length+
+' сообщений';
 
-document.getElementById('homeMemory').textContent=
+document
+.getElementById(
+'homeMemory'
+)
+.textContent=
 'активна';
 
 }
@@ -2477,11 +3855,14 @@ document.getElementById('homeMemory').textContent=
 
 function saveAIHistory(){
 
-aiHistory=aiHistory.slice(-50);
+aiHistory=
+aiHistory.slice(-50);
 
 localStorage.setItem(
 AI_HISTORY_KEY,
-JSON.stringify(aiHistory)
+JSON.stringify(
+aiHistory
+)
 );
 
 saveAIMemory();
@@ -2503,49 +3884,74 @@ minute:'2-digit'
 }
 
 
-function addAIMessage(text,user){
+function addAIMessage(
+text,
+user
+){
 
-const box=document.getElementById('aiCore');
+const box=
+document.getElementById(
+'aiCore'
+);
 
-const message=document.createElement('div');
+const message=
+document.createElement('div');
 
 message.className=
 'ai-message'+
-(user?' user':'');
+(
+user
+?
+' user'
+:
+''
+);
 
-const name=document.createElement('div');
+const name=
+document.createElement('div');
 
 name.className='ai-name';
 
 name.textContent=
-user?'ТЫ':'ASHINA AI';
+user
+?
+'ТЫ'
+:
+'ASHINA AI';
 
 message.appendChild(name);
 
-const content=document.createElement('div');
+const content=
+document.createElement('div');
 
 content.textContent=text;
 
 message.appendChild(content);
 
-const time=document.createElement('div');
+const time=
+document.createElement('div');
 
 time.className='ai-time';
 
-time.textContent=getTime();
+time.textContent=
+getTime();
 
 message.appendChild(time);
 
 box.appendChild(message);
 
-box.scrollTop=box.scrollHeight;
+box.scrollTop=
+box.scrollHeight;
 
 }
 
 
 function loadAIHistory(){
 
-const box=document.getElementById('aiCore');
+const box=
+document.getElementById(
+'aiCore'
+);
 
 box.innerHTML='';
 
@@ -2562,7 +3968,8 @@ return;
 }
 
 
-aiHistory.forEach(function(item){
+aiHistory.forEach(
+function(item){
 
 addAIMessage(
 item.text,
@@ -2576,9 +3983,15 @@ saveAIMemory();
 }
 
 
-function setAIStatus(text,thinking=false){
+function setAIStatus(
+text,
+thinking=false
+){
 
-const status=document.getElementById('aiStatus');
+const status=
+document.getElementById(
+'aiStatus'
+);
 
 status.textContent=text;
 
@@ -2594,20 +4007,31 @@ function normalize(text){
 
 return text
 .toLowerCase()
-.replace(/[!?.,;:()]/g,' ')
-.replace(/\s+/g,' ')
+.replace(
+/[!?.,;:()]/g,
+' '
+)
+.replace(
+/\s+/g,
+' '
+)
 .trim();
 
 }
 
 
-function containsAny(text,words){
+function containsAny(
+text,
+words
+){
 
-return words.some(function(word){
+return words.some(
+function(word){
 
 return text.includes(word);
 
-});
+}
+);
 
 }
 
@@ -2617,46 +4041,75 @@ function detectSection(text){
 if(
 containsAny(
 text,
-['музык','плеер','песн','трек']
+[
+'музык',
+'плеер',
+'песн',
+'трек'
+]
 )
 ){
+
 return 'music';
+
 }
 
 if(
 containsAny(
 text,
-['чат','сообщен','переписк']
+[
+'чат',
+'сообщен',
+'переписк'
+]
 )
 ){
+
 return 'chat';
+
 }
 
 if(
 containsAny(
 text,
-['лент','новост','публикац']
+[
+'лент',
+'новост',
+'публикац'
+]
 )
 ){
+
 return 'news';
+
 }
 
 if(
 containsAny(
 text,
-['настрой','параметр']
+[
+'настрой',
+'параметр'
+]
 )
 ){
+
 return 'settings';
+
 }
 
 if(
 containsAny(
 text,
-['главн','домой']
+[
+'главн',
+'домой'
+]
 )
 ){
+
 return 'home';
+
 }
 
 return null;
@@ -2669,19 +4122,32 @@ function detectMusicAction(text){
 if(
 containsAny(
 text,
-['следующ','следом','дальше','следующий трек']
+[
+'следующ',
+'следом',
+'дальше',
+'следующий трек'
+]
 )
 ){
+
 return 'next';
+
 }
 
 if(
 containsAny(
 text,
-['предыдущ','прошлый трек','назад трек']
+[
+'предыдущ',
+'прошлый трек',
+'назад трек'
+]
 )
 ){
+
 return 'previous';
+
 }
 
 if(
@@ -2696,7 +4162,9 @@ text,
 ]
 )
 ){
+
 return 'pause';
+
 }
 
 if(
@@ -2711,16 +4179,25 @@ text,
 ]
 )
 ){
+
 return 'play';
+
 }
 
 if(
 containsAny(
 text,
-['музыку','музыка','плеер','трек']
+[
+'музыку',
+'музыка',
+'плеер',
+'трек'
+]
 )
 ){
+
 return 'open';
+
 }
 
 return null;
@@ -2728,7 +4205,9 @@ return null;
 }
 
 
-function executeMusicAction(action){
+function executeMusicAction(
+action
+){
 
 if(action==='next'){
 
@@ -2763,10 +4242,17 @@ if(action==='play'){
 show('music');
 
 if(!audio.src){
-loadTrack(currentTrack,false);
+
+loadTrack(
+currentTrack,
+false
+);
+
 }
 
-audio.play().catch(function(){});
+audio.play().catch(
+function(){}
+);
 
 return 'Запускаю музыку. ▶️';
 
@@ -2785,13 +4271,19 @@ return null;
 }
 
 
+/* =====================================================
+   AI COMMAND PROCESSOR
+===================================================== */
+
 function processAICommand(raw){
 
-const text=normalize(raw);
-
+const text=
+normalize(raw);
 
 if(!text){
+
 return 'Я не получила команду.';
+
 }
 
 
@@ -2802,12 +4294,16 @@ text.match(
 
 if(nameMatch){
 
-aiMemory.name=nameMatch[1];
+aiMemory.name=
+nameMatch[1];
 
 saveAIMemory();
 
-return 'Запомнила. Буду обращаться к тебе по имени '+
-aiMemory.name+'. 🧠';
+return(
+'Запомнила. Буду обращаться к тебе по имени '+
+aiMemory.name+
+'. 🧠'
+);
 
 }
 
@@ -2829,7 +4325,9 @@ text,
 
 return aiMemory.name
 ?
-'Привет, '+aiMemory.name+'! ASHINA на связи. 🟢'
+'Привет, '+
+aiMemory.name+
+'! ASHINA на связи. 🟢'
 :
 'Привет! ASHINA на связи. 🟢';
 
@@ -2847,7 +4345,9 @@ text,
 )
 ){
 
-return 'Я ASHINA AI 2.0 — локальное интеллектуальное ядро приложения. Сейчас я могу понимать команды, управлять разделами, музыкой, памятью и голосовым вводом.';
+return(
+'Я ASHINA AI 2.0 — локальное интеллектуальное ядро приложения. Сейчас я могу понимать команды, управлять разделами, музыкой, памятью и голосовым вводом.'
+);
 
 }
 
@@ -2865,7 +4365,9 @@ text,
 )
 ){
 
-return 'Я умею открывать разделы, управлять музыкой, переключать треки, работать с голосом и запоминать информацию. Например: «Открой музыку и включи её».';
+return(
+'Я умею открывать разделы, управлять музыкой, переключать треки, работать с голосом и запоминать информацию. Например: «Открой музыку и включи её».'
+);
 
 }
 
@@ -2881,7 +4383,11 @@ text,
 )
 ){
 
-return 'Сейчас '+getTime()+'. ⏰';
+return(
+'Сейчас '+
+getTime()+
+'. ⏰'
+);
 
 }
 
@@ -2897,7 +4403,10 @@ text,
 )
 ){
 
-return lastAIText||'Мне пока нечего повторять.';
+return(
+lastAIText||
+'Мне пока нечего повторять.'
+);
 
 }
 
@@ -2913,18 +4422,31 @@ text,
 )
 ){
 
-let result='В памяти ASHINA:';
+let result=
+'В памяти ASHINA:';
 
 if(aiMemory.name){
-result+='\nИмя: '+aiMemory.name;
+
+result+=
+'\nИмя: '+
+aiMemory.name;
+
 }
 
 if(aiMemory.lastSection){
-result+='\nПоследний раздел: '+aiMemory.lastSection;
+
+result+=
+'\nПоследний раздел: '+
+aiMemory.lastSection;
+
 }
 
 if(aiMemory.lastCommand){
-result+='\nПоследняя команда: '+aiMemory.lastCommand;
+
+result+=
+'\nПоследняя команда: '+
+aiMemory.lastCommand;
+
 }
 
 return result;
@@ -2944,17 +4466,28 @@ text,
 ){
 
 aiMemory={
+
 name:'',
+
 lastTopic:'',
+
 lastCommand:'',
+
 lastSection:'home',
+
 lastTrack:'',
+
 preferences:{}
+
 };
 
-localStorage.removeItem(AI_MEMORY_KEY);
+localStorage.removeItem(
+AI_MEMORY_KEY
+);
 
-return 'Память ASHINA очищена. 🧹';
+return(
+'Память ASHINA очищена. 🧹'
+);
 
 }
 
@@ -2971,7 +4504,9 @@ text,
 )
 ){
 
-return 'ASHINA работает в штатном режиме. AI-ядро онлайн, локальная память доступна, музыкальный движок активен, чат работает. 🟢';
+return(
+'ASHINA работает в штатном режиме. AI-ядро онлайн, локальная память доступна, музыкальный движок активен, чат работает. 🟢'
+);
 
 }
 
@@ -2990,79 +4525,123 @@ text,
 
 show('settings');
 
-setTimeout(runGuard,200);
+setTimeout(
+runGuard,
+200
+);
 
-return 'Запускаю ASHINA Guard. 🛡️';
+return(
+'Запускаю ASHINA Guard. 🛡️'
+);
 
 }
 
 
-/* Музыка */
+/* MUSIC */
 
-const musicAction=detectMusicAction(text);
+const musicAction=
+detectMusicAction(text);
 
 if(musicAction){
 
-aiMemory.lastSection='music';
-aiMemory.lastCommand=raw;
+aiMemory.lastSection=
+'music';
+
+aiMemory.lastCommand=
+raw;
 
 const result=
-executeMusicAction(musicAction);
+executeMusicAction(
+musicAction
+);
 
 if(result){
+
+saveAIMemory();
+
 return result;
-}
 
 }
 
+}
 
-/* Навигация */
 
-const section=detectSection(text);
+/* NAVIGATION */
+
+const section=
+detectSection(text);
 
 if(section){
 
 show(section);
 
-aiMemory.lastSection=section;
-aiMemory.lastCommand=raw;
+aiMemory.lastSection=
+section;
+
+aiMemory.lastCommand=
+raw;
 
 saveAIMemory();
 
 const names={
+
 home:'главную',
+
 music:'музыку',
+
 chat:'чат',
+
 news:'ленту',
+
 settings:'настройки'
+
 };
 
-return 'Открываю '+names[section]+'.';
+return(
+'Открываю '+
+names[section]+
+'.'
+);
 
 }
 
 
-/* Комбинированная команда */
+/* COMBINED */
 
 const wantsMusic=
 containsAny(
 text,
-['музык','плеер','песн','трек']
+[
+'музык',
+'плеер',
+'песн',
+'трек'
+]
 );
 
 const wantsPlay=
 containsAny(
 text,
-['включ','запуст','играй','воспроизвед']
+[
+'включ',
+'запуст',
+'играй',
+'воспроизвед'
+]
 );
 
-if(wantsMusic&&wantsPlay){
+if(
+wantsMusic &&
+wantsPlay
+){
 
 show('music');
 
 toggleMusic();
 
-return 'Открываю музыку и запускаю воспроизведение. 🎵▶️';
+return(
+'Открываю музыку и запускаю воспроизведение. 🎵▶️'
+);
 
 }
 
@@ -3079,33 +4658,51 @@ text,
 )
 ){
 
-return 'ASHINA состоит из нескольких локальных модулей: интерфейс, музыка, чат, память, AI-ядро и Guard.';
+return(
+'ASHINA состоит из нескольких локальных модулей: интерфейс, музыка, чат, память, AI-ядро и Guard.'
+);
 
 }
 
 
-return 'Я поняла сообщение, но пока не знаю, какое действие выполнить. Попробуй: «Открой музыку», «Включи музыку», «Следующий трек», «Открой чат» или «Проверь защиту».';
+return(
+'Я поняла сообщение, но пока не знаю, какое действие выполнить. Попробуй: «Открой музыку», «Включи музыку», «Следующий трек», «Открой чат» или «Проверь защиту».'
+);
 
 }
 
 
-/* SEND AI */
+/* =====================================================
+   SEND AI
+===================================================== */
 
 function sendAI(){
 
-const input=document.getElementById('aiInput');
+const input=
+document.getElementById(
+'aiInput'
+);
 
-const text=input.value.trim();
+const text=
+input.value.trim();
 
 if(!text){
+
 return;
+
 }
 
-addAIMessage(text,true);
+addAIMessage(
+text,
+true
+);
 
 aiHistory.push({
+
 text:text,
+
 user:true
+
 });
 
 input.value='';
@@ -3115,44 +4712,68 @@ setAIStatus(
 true
 );
 
-aiMemory.lastCommand=text;
+aiMemory.lastCommand=
+text;
 
-setTimeout(function(){
+setTimeout(
+function(){
 
-const answer=processAICommand(text);
+const answer=
+processAICommand(
+text
+);
 
-lastAIText=answer;
+lastAIText=
+answer;
 
-addAIMessage(answer,false);
+addAIMessage(
+answer,
+false
+);
 
 aiHistory.push({
+
 text:answer,
+
 user:false
+
 });
 
 saveAIHistory();
 
-setAIStatus('🟢 AI готов.');
+setAIStatus(
+'🟢 AI готов.'
+);
 
 if(AUTO_SPEECH){
+
 speakText(answer);
+
 }
 
-},250);
+},
+250
+);
 
 }
 
 
 function aiQuick(text){
 
-document.getElementById('aiInput').value=text;
+document
+.getElementById(
+'aiInput'
+)
+.value=text;
 
 sendAI();
 
 }
 
 
-/* VOICE */
+/* =====================================================
+   VOICE
+===================================================== */
 
 let recognition=null;
 
@@ -3175,20 +4796,27 @@ return;
 if(recognition){
 
 try{
+
 recognition.stop();
+
 }catch(e){}
 
 }
 
-recognition=new SpeechRecognition();
+recognition=
+new SpeechRecognition();
 
-recognition.lang='ru-RU';
+recognition.lang=
+'ru-RU';
 
-recognition.interimResults=false;
+recognition.interimResults=
+false;
 
-recognition.maxAlternatives=1;
+recognition.maxAlternatives=
+1;
 
-recognition.onstart=function(){
+recognition.onstart=
+function(){
 
 setAIStatus(
 '🎙️ Слушаю... Говори.',
@@ -3197,36 +4825,53 @@ true
 
 };
 
-recognition.onresult=function(event){
+recognition.onresult=
+function(event){
 
 const text=
-event.results[0][0].transcript;
+event.results[0][0]
+.transcript;
 
-document.getElementById('aiInput').value=text;
+document
+.getElementById(
+'aiInput'
+)
+.value=text;
 
 sendAI();
 
 };
 
-recognition.onerror=function(event){
+recognition.onerror=
+function(event){
 
 setAIStatus(
 '⚠️ Ошибка микрофона: '+
-(event.error||'неизвестная')
+(
+event.error||
+'неизвестная'
+)
 );
 
 };
 
-recognition.onend=function(){
+recognition.onend=
+function(){
 
 if(
 document
-.getElementById('aiStatus')
+.getElementById(
+'aiStatus'
+)
 .textContent
-.includes('Слушаю')
+.includes(
+'Слушаю'
+)
 ){
 
-setAIStatus('🟢 AI готов.');
+setAIStatus(
+'🟢 AI готов.'
+);
 
 }
 
@@ -3247,11 +4892,15 @@ setAIStatus(
 }
 
 
-/* SPEECH */
+/* =====================================================
+   SPEECH
+===================================================== */
 
 function speakText(text){
 
-if(!('speechSynthesis' in window)){
+if(
+!('speechSynthesis' in window)
+){
 
 setAIStatus(
 '⚠️ Озвучивание недоступно.'
@@ -3264,9 +4913,12 @@ return;
 speechSynthesis.cancel();
 
 const speech=
-new SpeechSynthesisUtterance(text);
+new SpeechSynthesisUtterance(
+text
+);
 
-speech.lang='ru-RU';
+speech.lang=
+'ru-RU';
 
 speech.rate=.95;
 
@@ -3274,7 +4926,8 @@ speech.pitch=.9;
 
 speech.volume=1;
 
-speech.onstart=function(){
+speech.onstart=
+function(){
 
 setAIStatus(
 '🔊 ASHINA говорит...'
@@ -3282,7 +4935,8 @@ setAIStatus(
 
 };
 
-speech.onend=function(){
+speech.onend=
+function(){
 
 setAIStatus(
 '🟢 AI готов.'
@@ -3290,9 +4944,13 @@ setAIStatus(
 
 };
 
-speechSynthesis.speak(speech);
+speechSynthesis.speak(
+speech
+);
 
 }
+
+let AUTO_SPEECH=false;
 
 
 function speakLastAI(){
@@ -3307,14 +4965,16 @@ return;
 
 }
 
-speakText(lastAIText);
+speakText(
+lastAIText
+);
 
 }
 
-let AUTO_SPEECH=false;
 
-
-/* CLEAR AI */
+/* =====================================================
+   CLEAR AI
+===================================================== */
 
 function clearAI(){
 
@@ -3323,14 +4983,18 @@ if(
 'Очистить историю AI?'
 )
 ){
+
 return;
+
 }
 
 aiHistory=[];
 
 lastAIText='';
 
-localStorage.removeItem(AI_HISTORY_KEY);
+localStorage.removeItem(
+AI_HISTORY_KEY
+);
 
 loadAIHistory();
 
@@ -3341,10 +5005,14 @@ setAIStatus(
 }
 
 
-/* ENTER AI */
+/* =====================================================
+   ENTER AI
+===================================================== */
 
 document
-.getElementById('aiInput')
+.getElementById(
+'aiInput'
+)
 .addEventListener(
 'keydown',
 function(event){
@@ -3390,13 +5058,24 @@ return false;
 
 async function runGuard(){
 
-const result=document.getElementById('guardResult');
+const result=
+document.getElementById(
+'guardResult'
+);
 
-const files=document.getElementById('guardFiles');
+const files=
+document.getElementById(
+'guardFiles'
+);
 
-const total=document.getElementById('guardTotal');
+const total=
+document.getElementById(
+'guardTotal'
+);
 
-result.classList.add('show');
+result.classList.add(
+'show'
+);
 
 files.innerHTML=
 '<div class="status">🔍 Проверка ASHINA...</div>';
@@ -3406,31 +5085,53 @@ total.textContent='';
 const checks=[
 
 {
-name:'manifest.webmanifest',
+name:
+'manifest.webmanifest',
+
 promise:
-guardCheckFile('manifest.webmanifest')
+guardCheckFile(
+'manifest.webmanifest'
+)
+
 },
 
 {
-name:'IndexedDB',
+name:
+'IndexedDB',
+
 promise:
-Promise.resolve('indexedDB' in window)
+Promise.resolve(
+'indexedDB' in window
+)
+
 },
 
 {
-name:'LocalStorage',
+name:
+'LocalStorage',
+
 promise:
-Promise.resolve(typeof localStorage!=='undefined')
+Promise.resolve(
+typeof localStorage!=='undefined'
+)
+
 },
 
 {
-name:'Service Worker API',
+name:
+'Service Worker API',
+
 promise:
-Promise.resolve('serviceWorker' in navigator)
+Promise.resolve(
+'serviceWorker' in navigator
+)
+
 },
 
 {
-name:'Speech API',
+name:
+'Speech API',
+
 promise:
 Promise.resolve(
 !!(
@@ -3438,18 +5139,52 @@ window.SpeechRecognition||
 window.webkitSpeechRecognition
 )
 )
+
 },
 
 {
-name:'Audio API',
+name:
+'Audio API',
+
 promise:
-Promise.resolve(!!window.HTMLAudioElement)
+Promise.resolve(
+!!window.HTMLAudioElement
+)
+
 },
 
 {
-name:'Media API',
+name:
+'Media API',
+
 promise:
-Promise.resolve(!!navigator.mediaDevices)
+Promise.resolve(
+!!navigator.mediaDevices
+)
+
+},
+
+{
+name:
+'Music IndexedDB',
+
+promise:
+openMusicDB()
+.then(
+function(){
+
+return true;
+
+}
+)
+.catch(
+function(){
+
+return false;
+
+}
+)
+
 }
 
 ];
@@ -3458,31 +5193,50 @@ files.innerHTML='';
 
 let good=0;
 
-for(const check of checks){
+for(
+const check of checks
+){
 
-const ok=await check.promise;
+const ok=
+await check.promise;
 
 if(ok){
+
 good++;
+
 }
 
-const row=document.createElement('div');
+const row=
+document.createElement('div');
 
-row.className='guard-item';
+row.className=
+'guard-item';
 
-const name=document.createElement('span');
+const name=
+document.createElement('span');
 
-name.textContent=check.name;
+name.textContent=
+check.name;
 
-const state=document.createElement('span');
+const state=
+document.createElement('span');
 
 state.className=
-ok?'guard-ok':'guard-error';
+ok
+?
+'guard-ok'
+:
+'guard-error';
 
 state.textContent=
-ok?'🟢 Доступен':'🔴 Недоступен';
+ok
+?
+'🟢 Доступен'
+:
+'🔴 Недоступен';
 
 row.appendChild(name);
+
 row.appendChild(state);
 
 files.appendChild(row);
@@ -3511,29 +5265,40 @@ prompt(
 );
 
 if(pin===null){
+
 return;
+
 }
 
 if(pin!=='2468'){
 
-alert('❌ Неверный PIN.');
+alert(
+'❌ Неверный PIN.'
+);
 
 return;
 
 }
 
 document
-.getElementById('adminPanel')
+.getElementById(
+'adminPanel'
+)
 .classList
-.remove('admin-hidden');
+.remove(
+'admin-hidden'
+);
 
-const log=document.getElementById('adminLog');
+const log=
+document.getElementById(
+'adminLog'
+);
 
 log.innerHTML=
 '<div>🟢 Администратор авторизован</div>'+
 '<div>AI Core: ONLINE</div>'+
 '<div>Memory: ACTIVE</div>'+
-'<div>Music Engine: READY</div>'+
+'<div>Music Engine: INDEXEDDB</div>'+
 '<div>Chat Attachments: READY</div>'+
 '<div>Guard: READY</div>';
 
@@ -3543,9 +5308,13 @@ log.innerHTML=
 function closeAdmin(){
 
 document
-.getElementById('adminPanel')
+.getElementById(
+'adminPanel'
+)
 .classList
-.add('admin-hidden');
+.add(
+'admin-hidden'
+);
 
 }
 
@@ -3554,14 +5323,16 @@ document
    CLEAR EVERYTHING
 ===================================================== */
 
-function clearEverything(){
+async function clearEverything(){
 
 if(
 !confirm(
-'Удалить всю локальную память ASHINA, включая чат и вложения?'
+'Удалить всю локальную память ASHINA, включая чат, вложения и добавленную музыку?'
 )
 ){
+
 return;
+
 }
 
 localStorage.clear();
@@ -3571,17 +5342,90 @@ messages=[];
 aiHistory=[];
 
 aiMemory={
+
 name:'',
+
 lastTopic:'',
+
 lastCommand:'',
+
 lastSection:'home',
+
 lastTrack:'',
+
 preferences:{}
+
 };
+
+
+/* Очистить пользовательскую музыку */
+
+try{
+
+const db=
+await openMusicDB();
+
+await new Promise(
+function(resolve,reject){
+
+const transaction=
+db.transaction(
+[MUSIC_STORE],
+'readwrite'
+);
+
+const store=
+transaction.objectStore(
+MUSIC_STORE
+);
+
+store.clear();
+
+transaction.oncomplete=
+function(){
+
+resolve();
+
+};
+
+transaction.onerror=
+function(){
+
+reject(
+transaction.error
+);
+
+};
+
+});
+
+}catch(error){
+
+console.error(
+'Music clear error:',
+error
+);
+
+}
 
 loadAIHistory();
 
 renderChat();
+
+userTracks=[];
+
+playlistData=[
+...builtinTracks
+];
+
+currentTrack=0;
+
+loadTrack(
+0,
+false
+);
+
+renderPlaylist();
 
 alert(
 'Локальные данные ASHINA очищены.'
@@ -3598,10 +5442,10 @@ renderChat();
 
 loadAIHistory();
 
-renderPlaylist();
-
 console.log(
-'ASHINA AI Core '+APP_VERSION+' ONLINE'
+'ASHINA AI Core '+
+APP_VERSION+
+' ONLINE'
 );
 
 </script>
