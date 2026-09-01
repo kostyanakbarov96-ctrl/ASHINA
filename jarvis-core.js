@@ -1,2596 +1,1390 @@
-```javascript
-/* =====================================================
-   ASHINA JARVIS CORE 0.3
-   LOCAL INTELLIGENCE ENGINE
-
-   Этот файл является мозгом JARVIS.
-
-   Интерфейс находится в:
-   ai-test.html
-
-   Логика находится здесь:
-   jarvis-core.js
-===================================================== */
-
-
-/* =====================================================
-   ОСНОВНЫЕ ОБЪЕКТЫ
-===================================================== */
-
-const JARVIS = {
-
-    name: "JARVIS",
-
-    project: "ASHINA",
-
-    version: "0.3",
-
-    mode: "LOCAL",
-
-    ready: false,
-
-    thinking: false,
-
-    speaking: false,
-
-    listening: false
-
-};
-
-
-/* =====================================================
-   DOM
-===================================================== */
-
-const log =
-document.getElementById("log");
-
-const input =
-document.getElementById("command");
-
-const core =
-document.getElementById("core");
-
-const aiStatus =
-document.getElementById("aiStatus");
-
-const music =
-document.getElementById("music");
-
-const memoryBox =
-document.getElementById("memory");
-
-const systemStatus =
-document.getElementById("systemStatus");
-
-const adminPin =
-document.getElementById("adminPin");
-
-const adminStatus =
-document.getElementById("adminStatus");
-
-
-/* =====================================================
-   LOCAL STORAGE
-===================================================== */
-
-const STORAGE = {
-
-    chat: "ashina_jarvis_chat",
-
-    memory: "ashina_jarvis_memory",
-
-    settings: "ashina_jarvis_settings",
-
-    admin: "ashina_jarvis_admin",
-
-    stats: "ashina_jarvis_stats"
-
-};
-
-
-/* =====================================================
-   СОСТОЯНИЕ JARVIS
-===================================================== */
-
-let conversation = [];
-
-let jarvisMemory = {
-
-    project: "ASHINA",
-
-    version: "0.3",
-
-    role: "JARVIS",
-
-    memories: [],
-
-    lastCommand: "",
-
-    lastTopic: "",
-
-    lastUserMessage: "",
-
-    lastAIMessage: "",
-
-    commandCount: 0,
-
-    admin: false,
-
-    created: Date.now(),
-
-    updated: Date.now()
-
-};
-
-
-/* =====================================================
-   ЗАГРУЗКА ПАМЯТИ
-===================================================== */
-
-function loadMemory(){
-
-    try{
-
-        const saved =
-        localStorage.getItem(
-            STORAGE.memory
-        );
-
-        if(saved){
-
-            const parsed =
-            JSON.parse(saved);
-
-            if(
-                parsed &&
-                typeof parsed === "object"
-            ){
-
-                jarvisMemory = {
-
-                    ...jarvisMemory,
-
-                    ...parsed
-
-                };
-
-            }
-
-        }
-
-    }catch(error){
-
-        console.warn(
-            "JARVIS memory load error:",
-            error
-        );
-
-    }
-
-
-    try{
-
-        const savedChat =
-        localStorage.getItem(
-            STORAGE.chat
-        );
-
-        if(savedChat){
-
-            const parsed =
-            JSON.parse(savedChat);
-
-            if(Array.isArray(parsed)){
-
-                conversation =
-                parsed.slice(-50);
-
-            }
-
-        }
-
-    }catch(error){
-
-        console.warn(
-            "JARVIS chat load error:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   СОХРАНЕНИЕ ПАМЯТИ
-===================================================== */
-
-function saveMemory(){
-
-    try{
-
-        jarvisMemory.updated =
-        Date.now();
-
-        localStorage.setItem(
-            STORAGE.memory,
-            JSON.stringify(
-                jarvisMemory
-            )
-        );
-
-    }catch(error){
-
-        console.warn(
-            "JARVIS memory save error:",
-            error
-        );
-
-    }
-
-    updateMemoryUI();
-
-}
-
-
-/* =====================================================
-   СОХРАНЕНИЕ ДИАЛОГА
-===================================================== */
-
-function saveConversation(){
-
-    try{
-
-        localStorage.setItem(
-            STORAGE.chat,
-            JSON.stringify(
-                conversation.slice(-50)
-            )
-        );
-
-    }catch(error){
-
-        console.warn(
-            "JARVIS conversation save error:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   БЕЗОПАСНЫЙ HTML
-===================================================== */
-
-function escapeHTML(text){
-
-    return String(text)
-
-        .replace(/&/g,"&amp;")
-
-        .replace(/</g,"&lt;")
-
-        .replace(/>/g,"&gt;")
-
-        .replace(/"/g,"&quot;")
-
-        .replace(/'/g,"&#039;");
-
-}
-
-
-/* =====================================================
-   UI ПАМЯТИ
-===================================================== */
-
-function updateMemoryUI(){
-
-    if(!memoryBox){
-        return;
-    }
-
-    let html = "";
-
-
-    html +=
-    '<div class="memory-row">' +
-
-        '<span>Проект</span>' +
-
-        '<strong>' +
-
-        escapeHTML(
-            jarvisMemory.project
-        ) +
-
-        '</strong>' +
-
-    '</div>';
-
-
-    html +=
-    '<div class="memory-row">' +
-
-        '<span>Роль</span>' +
-
-        '<strong>' +
-
-        escapeHTML(
-            jarvisMemory.role
-        ) +
-
-        '</strong>' +
-
-    '</div>';
-
-
-    html +=
-    '<div class="memory-row">' +
-
-        '<span>Версия</span>' +
-
-        '<strong>' +
-
-        escapeHTML(
-            jarvisMemory.version
-        ) +
-
-        '</strong>' +
-
-    '</div>';
-
-
-    html +=
-    '<div class="memory-row">' +
-
-        '<span>Режим</span>' +
-
-        '<strong class="green">' +
-
-        escapeHTML(
-            JARVIS.mode
-        ) +
-
-        '</strong>' +
-
-    '</div>';
-
-
-    html +=
-    '<div class="memory-row">' +
-
-        '<span>Команд</span>' +
-
-        '<strong>' +
-
-        jarvisMemory.commandCount +
-
-        '</strong>' +
-
-    '</div>';
-
-
-    html +=
-    '<div class="memory-row">' +
-
-        '<span>Администратор</span>' +
-
-        '<strong class="' +
-
-        (
-            jarvisMemory.admin
-            ?
-            "green"
-            :
-            "yellow"
-        ) +
-
-        '">' +
-
-        (
-            jarvisMemory.admin
-            ?
-            "Открыт"
-            :
-            "Закрыт"
-        ) +
-
-        '</strong>' +
-
-    '</div>';
-
-
-    html +=
-    '<div style="margin-top:8px">' +
-
-        '<strong>Запомнено:</strong>' +
-
-    '</div>';
-
-
-    if(
-        Array.isArray(
-            jarvisMemory.memories
-        ) &&
-        jarvisMemory.memories.length
-    ){
-
-        jarvisMemory.memories
-        .slice(-10)
-        .forEach(
-            function(memory){
-
-                html +=
-                '<div class="small">• ' +
-
-                escapeHTML(memory) +
-
-                '</div>';
-
-            }
-        );
-
-    }else{
-
-        html +=
-        '<div class="small">' +
-        'Пока ничего.' +
-        '</div>';
-
-    }
-
-
-    memoryBox.innerHTML =
-    html;
-
-}
-
-
-/* =====================================================
-   СООБЩЕНИЕ
-===================================================== */
-
-function addMessage(
-    text,
-    type
-){
-
-    const div =
-    document.createElement(
-        "div"
-    );
-
-
-    div.className =
-    "message " +
-
-    (
-        type === "user"
-
-        ?
-
-        "user"
-
-        :
-
-        type === "system"
-
-        ?
-
-        "system"
-
-        :
-
-        "ai"
-    );
-
-
-    const label =
-    document.createElement(
-        "div"
-    );
-
-    label.className =
-    "message-label";
-
-
-    label.textContent =
-
-    type === "user"
-
-    ?
-
-    "Ты"
-
-    :
-
-    type === "system"
-
-    ?
-
-    "Система"
-
-    :
-
-    "JARVIS";
-
-
-    div.appendChild(
-        label
-    );
-
-
-    const body =
-    document.createElement(
-        "div"
-    );
-
-    body.textContent =
-    text;
-
-
-    div.appendChild(
-        body
-    );
-
-
-    log.appendChild(
-        div
-    );
-
-
-    log.scrollTop =
-    log.scrollHeight;
-
-
-    conversation.push({
-
-        type: type,
-
-        text: text,
-
-        time: Date.now()
-
-    });
-
-
-    saveConversation();
-
-}
-
-
-/* =====================================================
-   ВОССТАНОВЛЕНИЕ ДИАЛОГА
-===================================================== */
-
-function restoreConversation(){
-
-    if(
-        !conversation.length
-    ){
-
-        addMessage(
-
-            "JARVIS CORE запущен. " +
-
-            "Локальное интеллектуальное ядро " +
-
-            "готово к работе с ASHINA.",
-
-            "ai"
-
-        );
-
-        return;
-
-    }
-
-
-    conversation
-    .slice(-15)
-    .forEach(
-        function(item){
-
-            const div =
-            document.createElement(
-                "div"
-            );
-
-
-            div.className =
-            "message " +
-
-            (
-                item.type === "user"
-
-                ?
-
-                "user"
-
-                :
-
-                item.type === "system"
-
-                ?
-
-                "system"
-
-                :
-
-                "ai"
-            );
-
-
-            const label =
-            document.createElement(
-                "div"
-            );
-
-            label.className =
-            "message-label";
-
-
-            label.textContent =
-
-            item.type === "user"
-
-            ?
-
-            "Ты"
-
-            :
-
-            item.type === "system"
-
-            ?
-
-            "Система"
-
-            :
-
-            "JARVIS";
-
-
-            div.appendChild(
-                label
-            );
-
-
-            const body =
-            document.createElement(
-                "div"
-            );
-
-            body.textContent =
-            item.text;
-
-
-            div.appendChild(
-                body
-            );
-
-
-            log.appendChild(
-                div
-            );
-
-        }
-    );
-
-
-    log.scrollTop =
-    log.scrollHeight;
-
-}
-
-
-/* =====================================================
-   ГОЛОС JARVIS
-===================================================== */
-
-function speak(text){
-
-    if(
-        !("speechSynthesis" in window)
-    ){
-
-        return;
-
-    }
-
-
-    try{
-
-        speechSynthesis.cancel();
-
-    }catch(error){}
-
-
-    const speech =
-    new SpeechSynthesisUtterance(
-        text
-    );
-
-
-    speech.lang =
-    "ru-RU";
-
-
-    speech.rate =
-    0.94;
-
-
-    speech.pitch =
-    0.90;
-
-
-    speech.volume =
-    1;
-
-
-    speech.onstart =
-    function(){
-
-        JARVIS.speaking =
-        true;
-
-        core.classList.add(
-            "active"
-        );
-
-        aiStatus.textContent =
-        "JARVIS говорит...";
-
-    };
-
-
-    speech.onend =
-    function(){
-
-        JARVIS.speaking =
-        false;
-
-        core.classList.remove(
-            "active"
-        );
-
-        aiStatus.textContent =
-        "JARVIS готов.";
-
-    };
-
-
-    speech.onerror =
-    function(){
-
-        JARVIS.speaking =
-        false;
-
-        core.classList.remove(
-            "active"
-        );
-
-        aiStatus.textContent =
-        "JARVIS готов.";
-
-    };
-
-
-    speechSynthesis.speak(
-        speech
-    );
-
-}
-
-
-/* =====================================================
-   ОТВЕТ JARVIS
-===================================================== */
-
-function answer(text){
-
-    JARVIS.thinking =
-    true;
-
-
-    core.classList.add(
-        "thinking"
-    );
-
-
-    aiStatus.textContent =
-    "JARVIS анализирует...";
-
-
-    setTimeout(
-
-        function(){
-
-            JARVIS.thinking =
-            false;
-
-
-            core.classList.remove(
-                "thinking"
-            );
-
-
-            jarvisMemory.lastAIMessage =
-            text;
-
-
-            saveMemory();
-
-
-            addMessage(
-                text,
-                "ai"
-            );
-
-
-            speak(
-                text
-            );
-
+/* =========================================================
+   ASHINA JARVIS CORE
+   Version 1.0
+   Local Intelligence Core
+   ========================================================= */
+
+(() => {
+    "use strict";
+
+    /* ---------------------------------------------------------
+       CONFIG
+    --------------------------------------------------------- */
+
+    const CONFIG = {
+        name: "JARVIS",
+        project: "ASHINA",
+        version: "1.0",
+        mode: "LOCAL",
+
+        storage: {
+            memory: "ashina_jarvis_memory_v1",
+            history: "ashina_jarvis_history_v1",
+            settings: "ashina_jarvis_settings_v1"
         },
 
-        220
-
-    );
-
-}
+        maxHistory: 100,
+        maxMemories: 100
+    };
 
 
-/* =====================================================
-   НОРМАЛИЗАЦИЯ ТЕКСТА
-===================================================== */
+    /* ---------------------------------------------------------
+       STATE
+    --------------------------------------------------------- */
 
-function normalize(text){
+    const state = {
+        ready: false,
+        thinking: false,
+        speaking: false,
+        listening: false,
 
-    return String(text)
+        lastCommand: "",
+        lastTopic: "",
+        lastUserMessage: "",
+        lastAIMessage: "",
 
-        .toLowerCase()
+        commandCount: 0,
 
-        .replace(/[!?.,:;]/g," ")
+        memory: [],
+        history: [],
 
-        .replace(/\s+/g," ")
-
-        .trim();
-
-}
-
-
-/* =====================================================
-   ПОИСК СЛОВ
-===================================================== */
-
-function containsAny(
-    text,
-    words
-){
-
-    return words.some(
-        function(word){
-
-            return text.includes(
-                word
-            );
-
+        settings: {
+            voice: true,
+            speech: true,
+            fastMode: false
         }
-    );
-
-}
+    };
 
 
-/* =====================================================
-   ПАМЯТЬ КОНТЕКСТА
-===================================================== */
+    /* ---------------------------------------------------------
+       SAFE DOM
+    --------------------------------------------------------- */
 
-function getRecentContext(){
-
-    return conversation
-        .slice(-8)
-        .map(
-            function(item){
-
-                return (
-
-                    item.type +
-
-                    ": " +
-
-                    item.text
-
-                );
-
-            }
-        )
-        .join("\n");
-
-}
-
-
-/* =====================================================
-   ЗАПОМИНАНИЕ
-===================================================== */
-
-function remember(text){
-
-    const value =
-    String(text)
-    .trim();
-
-
-    if(!value){
-
-        return false;
-
+    function $(id) {
+        return document.getElementById(id) || null;
     }
 
 
-    if(
-        !jarvisMemory.memories
-        .includes(value)
-    ){
-
-        jarvisMemory.memories.push(
-            value
-        );
-
-    }
-
-
-    if(
-        jarvisMemory.memories.length > 50
-    ){
-
-        jarvisMemory.memories =
-        jarvisMemory.memories
-        .slice(-50);
-
-    }
-
-
-    saveMemory();
-
-    return true;
-
-}
-
-
-/* =====================================================
-   ОПРЕДЕЛЕНИЕ КОМАНДЫ ПАМЯТИ
-===================================================== */
-
-function extractMemory(
-    original
-){
-
-    let value =
-    original;
-
-
-    value =
-    value.replace(
-        /запомни/ig,
-        ""
-    );
-
-
-    value =
-    value.replace(
-        /запиши в память/ig,
-        ""
-    );
-
-
-    value =
-    value.replace(
-        /сохрани в память/ig,
-        ""
-    );
-
-
-    value =
-    value.trim();
-
-
-    return value;
-
-}
-
-
-/* =====================================================
-   ОЧИСТКА ПАМЯТИ
-===================================================== */
-
-function clearMemory(){
-
-    jarvisMemory.memories =
-    [];
-
-    jarvisMemory.lastTopic =
-    "";
-
-    jarvisMemory.lastCommand =
-    "";
-
-    saveMemory();
-
-}
-
-
-/* =====================================================
-   ДИАГНОСТИКА
-===================================================== */
-
-async function runStatus(
-    sayResult = false
-){
-
-    if(!systemStatus){
-
-        return;
-
-    }
-
-
-    systemStatus.textContent =
-    "Проверяю компоненты...";
-
-
-    const checks = [];
-
-
-    /* -------------------------
-       LocalStorage
-    ------------------------- */
-
-    try{
-
-        localStorage.setItem(
-            "ashina_test",
-            "1"
-        );
-
-        localStorage.removeItem(
-            "ashina_test"
-        );
-
-        checks.push([
-            "Локальная память",
-            true
-        ]);
-
-    }catch(error){
-
-        checks.push([
-            "Локальная память",
-            false
-        ]);
-
-    }
-
-
-    /* -------------------------
-       Speech
-    ------------------------- */
-
-    checks.push([
-        "Голосовой синтез",
-        "speechSynthesis" in window
-    ]);
-
-
-    /* -------------------------
-       Recognition
-    ------------------------- */
-
-    checks.push([
-        "Распознавание речи",
-
-        (
-            "SpeechRecognition"
-            in window
-
-            ||
-
-            "webkitSpeechRecognition"
-            in window
-        )
-    ]);
-
-
-    /* -------------------------
-       Service Worker
-    ------------------------- */
-
-    checks.push([
-        "Service Worker",
-        "serviceWorker" in navigator
-    ]);
-
-
-    /* -------------------------
-       Audio
-    ------------------------- */
-
-    try{
-
-        const response =
-        await fetch(
-            "audio.wav",
-            {
-                method:"HEAD",
-                cache:"no-store"
-            }
-        );
-
-
-        checks.push([
-            "audio.wav",
-            response.ok
-        ]);
-
-    }catch(error){
-
-        checks.push([
-            "audio.wav",
-            false
-        ]);
-
-    }
-
-
-    /* -------------------------
-       Manifest
-    ------------------------- */
-
-    try{
-
-        const response =
-        await fetch(
-            "manifest.webmanifest",
-            {
-                method:"HEAD",
-                cache:"no-store"
-            }
-        );
-
-
-        checks.push([
-            "Manifest",
-            response.ok
-        ]);
-
-    }catch(error){
-
-        checks.push([
-            "Manifest",
-            false
-        ]);
-
-    }
-
-
-    /* -------------------------
-       JARVIS CORE
-    ------------------------- */
-
-    checks.push([
-        "JARVIS Core",
-        true
-    ]);
-
-
-    /* -------------------------
-       Результат
-    ------------------------- */
-
-    let html = "";
-
-    let good = 0;
-
-
-    checks.forEach(
-        function(check){
-
-            if(check[1]){
-
-                good++;
-
-            }
-
-
-            html +=
-
-            '<div class="' +
-
-            (
-                check[1]
-                ?
-                "green"
-                :
-                "red"
-            ) +
-
-            '">' +
-
-            (
-                check[1]
-                ?
-                "🟢 "
-                :
-                "🔴 "
-            ) +
-
-            escapeHTML(
-                check[0]
-            ) +
-
-            '</div>';
-
+    function setText(id, text) {
+        const el = $(id);
+
+        if (el) {
+            el.textContent = text;
         }
-    );
-
-
-    systemStatus.innerHTML =
-
-    html +
-
-    "<br><strong>" +
-
-    good +
-
-    "/" +
-
-    checks.length +
-
-    " систем доступны</strong>";
-
-
-    if(sayResult){
-
-        answer(
-
-            "Диагностика завершена. " +
-
-            good +
-
-            " из " +
-
-            checks.length +
-
-            " систем доступны."
-
-        );
-
     }
 
-}
+
+    function addClass(id, className) {
+        const el = $(id);
+
+        if (el) {
+            el.classList.add(className);
+        }
+    }
 
 
-/* =====================================================
-   АДМИНИСТРАТОР
-===================================================== */
+    function removeClass(id, className) {
+        const el = $(id);
 
-const DEMO_ADMIN_PIN =
-"ASHINA";
-
-
-function unlockAdmin(){
-
-    const pin =
-    adminPin.value;
+        if (el) {
+            el.classList.remove(className);
+        }
+    }
 
 
-    if(
-        pin === DEMO_ADMIN_PIN
-    ){
+    /* ---------------------------------------------------------
+       STORAGE
+    --------------------------------------------------------- */
 
-        jarvisMemory.admin =
-        true;
+    function loadJSON(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
 
+            if (!raw) {
+                return fallback;
+            }
+
+            return JSON.parse(raw);
+        } catch (error) {
+            console.warn("JARVIS storage read error:", error);
+            return fallback;
+        }
+    }
+
+
+    function saveJSON(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (error) {
+            console.warn("JARVIS storage write error:", error);
+            return false;
+        }
+    }
+
+
+    /* ---------------------------------------------------------
+       MEMORY
+    --------------------------------------------------------- */
+
+    function loadMemory() {
+        const saved = loadJSON(CONFIG.storage.memory, null);
+
+        if (saved && typeof saved === "object") {
+            state.memory = Array.isArray(saved.memories)
+                ? saved.memories
+                : [];
+
+            state.lastCommand = saved.lastCommand || "";
+            state.lastTopic = saved.lastTopic || "";
+            state.lastUserMessage = saved.lastUserMessage || "";
+            state.lastAIMessage = saved.lastAIMessage || "";
+            state.commandCount = Number(saved.commandCount || 0);
+        }
+    }
+
+
+    function saveMemory() {
+        saveJSON(CONFIG.storage.memory, {
+            memories: state.memory.slice(0, CONFIG.maxMemories),
+            lastCommand: state.lastCommand,
+            lastTopic: state.lastTopic,
+            lastUserMessage: state.lastUserMessage,
+            lastAIMessage: state.lastAIMessage,
+            commandCount: state.commandCount,
+            updated: Date.now()
+        });
+
+        renderMemory();
+    }
+
+
+    function remember(text) {
+        if (!text) {
+            return false;
+        }
+
+        const clean = String(text).trim();
+
+        if (!clean) {
+            return false;
+        }
+
+        const exists = state.memory.some(
+            item => item.toLowerCase() === clean.toLowerCase()
+        );
+
+        if (!exists) {
+            state.memory.unshift(clean);
+            state.memory = state.memory.slice(0, CONFIG.maxMemories);
+            saveMemory();
+        }
+
+        return true;
+    }
+
+
+    function clearMemory() {
+        state.memory = [];
+
+        state.lastTopic = "";
+        state.lastCommand = "";
 
         saveMemory();
 
-
-        adminStatus.innerHTML =
-        '<span class="green">' +
-
-        '🟢 Административный режим активирован.' +
-
-        '</span>';
-
-
-        answer(
-
-            "Административный режим активирован. " +
-
-            "Это демонстрационный локальный режим."
-
-        );
-
-    }else{
-
-        jarvisMemory.admin =
-        false;
-
-
-        saveMemory();
-
-
-        adminStatus.innerHTML =
-        '<span class="red">' +
-
-        '🔴 Неверный PIN.' +
-
-        '</span>';
-
-
-        answer(
-            "Доступ отклонён."
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   ОПРЕДЕЛЕНИЕ ВРЕМЕНИ
-===================================================== */
-
-function currentTime(){
-
-    const now =
-    new Date();
-
-
-    return now.toLocaleTimeString(
-        "ru-RU",
-        {
-            hour:"2-digit",
-            minute:"2-digit"
-        }
-    );
-
-}
-
-
-/* =====================================================
-   ОПРЕДЕЛЕНИЕ ДАТЫ
-===================================================== */
-
-function currentDate(){
-
-    const now =
-    new Date();
-
-
-    return now.toLocaleDateString(
-        "ru-RU",
-        {
-            day:"numeric",
-            month:"long",
-            year:"numeric"
-        }
-    );
-
-}
-
-
-/* =====================================================
-   ОТКРЫТИЕ РАЗДЕЛОВ ASHINA
-===================================================== */
-
-function openAshinaSection(
-    section
-){
-
-    try{
-
-        window.location.href =
-        "index.html#" +
-        section;
-
-    }catch(error){
-
-        answer(
-            "Не удалось открыть раздел ASHINA."
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   МУЗЫКА
-===================================================== */
-
-function playMusic(){
-
-    music.play()
-
-    .then(
-        function(){
-
-            answer(
-                "Музыка включена."
-            );
-
-        }
-    )
-
-    .catch(
-        function(){
-
-            answer(
-
-                "Браузер заблокировал запуск звука. " +
-
-                "Нажми на страницу и повтори команду."
-
-            );
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   ОСНОВНОЙ МОЗГ JARVIS
-===================================================== */
-
-function processCommand(
-    command
-){
-
-    const original =
-    String(command).trim();
-
-
-    if(!original){
-
-        return;
-
+        return true;
     }
 
 
-    const text =
-    normalize(
-        original
-    );
-
-
-    jarvisMemory.lastCommand =
-    original;
-
-
-    jarvisMemory.lastUserMessage =
-    original;
-
-
-    jarvisMemory.commandCount++;
-
-
-    saveMemory();
-
-
-    /* =================================================
-       ПРИВЕТСТВИЕ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "привет",
-                "здравствуй",
-                "добрый день",
-                "добрый вечер",
-                "доброе утро",
-                "хай",
-                "hello",
-                "здарова"
-            ]
-        )
-    ){
-
-        answer(
-
-            "Привет. JARVIS на связи. " +
-
-            "Локальное ядро ASHINA активно. " +
-
-            "Готов работать."
-
-        );
-
-        return;
-
+    function getMemory() {
+        return [...state.memory];
     }
 
 
-    /* =================================================
-       КАК ДЕЛА
-    ================================================= */
+    function renderMemory() {
+        const box = $("memoryBox");
 
-    if(
-        containsAny(
-            text,
-            [
-                "как дела",
-                "как ты",
-                "что нового"
-            ]
-        )
-    ){
-
-        answer(
-
-            "Системы работают стабильно. " +
-
-            "Я нахожусь в локальном режиме " +
-
-            "и продолжаю развиваться вместе с ASHINA."
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       КТО ТЫ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "кто ты",
-                "ты кто",
-                "что ты такое"
-            ]
-        )
-    ){
-
-        answer(
-
-            "Я JARVIS — локальное интеллектуальное ядро ASHINA. " +
-
-            "Сейчас я работаю без обязательного подключения к интернету. " +
-
-            "Моя архитектура позволяет постепенно добавлять новые навыки, " +
-
-            "память, анализ и управление ASHINA."
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ВОЗМОЖНОСТИ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "что ты умеешь",
-                "что умеешь",
-                "твои возможности",
-                "возможности",
-                "что можешь"
-            ]
-        )
-    ){
-
-        answer(
-
-            "Сейчас я умею понимать команды на естественном языке, " +
-
-            "сохранять память, учитывать недавний контекст, " +
-
-            "работать с голосом, управлять музыкой, " +
-
-            "проверять состояние ASHINA и открывать её разделы. " +
-
-            "Следующий уровень — подключение дополнительных локальных навыков."
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ВРЕМЯ
-    ================================================= */
-
-    if(
-        text === "время" ||
-        containsAny(
-            text,
-            [
-                "который час",
-                "сколько времени",
-                "текущее время"
-            ]
-        )
-    ){
-
-        answer(
-
-            "Сейчас " +
-            currentTime() +
-            "."
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ДАТА
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "какое сегодня число",
-                "какая сегодня дата",
-                "сегодняшняя дата"
-            ]
-        )
-    ){
-
-        answer(
-
-            "Сегодня " +
-            currentDate() +
-            "."
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ПАМЯТЬ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "запомни",
-                "запиши в память",
-                "сохрани в память"
-            ]
-        )
-    ){
-
-        const memory =
-        extractMemory(
-            original
-        );
-
-
-        if(!memory){
-
-            answer(
-                "Что именно мне нужно запомнить?"
-            );
-
+        if (!box) {
             return;
-
         }
 
-
-        remember(
-            memory
-        );
-
-
-        answer(
-
-            "Запомнил. " +
-
-            "Информация сохранена в локальной памяти JARVIS."
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ЧТО ПОМНИШЬ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "что ты помнишь",
-                "что помнишь",
-                "покажи память",
-                "что в памяти"
-            ]
-        )
-    ){
-
-        if(
-            !jarvisMemory.memories.length
-        ){
-
-            answer(
-                "В пользовательской памяти пока ничего нет."
-            );
-
+        if (!state.memory.length) {
+            box.textContent = "Память пуста.";
             return;
-
         }
 
-
-        answer(
-
-            "Последнее, что я помню: " +
-
-            jarvisMemory.memories
-            .slice(-5)
-            .join("; ")
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ОЧИСТКА ПАМЯТИ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "очисти память",
-                "удали память",
-                "забудь всё",
-                "забудь все"
-            ]
-        )
-    ){
-
-        const confirmed =
-        confirm(
-            "Очистить пользовательскую память JARVIS?"
-        );
-
-
-        if(!confirmed){
-
-            answer(
-                "Очистка памяти отменена."
-            );
-
-            return;
-
-        }
-
-
-        clearMemory();
-
-
-        answer(
-            "Память очищена."
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ДИАГНОСТИКА
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "проверь систему",
-                "диагностика",
-                "диагностируй",
-                "проверь ашина",
-                "состояние системы",
-                "статус системы",
-                "проверка системы"
-            ]
-        )
-    ){
-
-        runStatus(
-            true
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       МУЗЫКА — ВКЛЮЧИТЬ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "включи музыку",
-                "запусти музыку",
-                "проиграй музыку",
-                "включить музыку"
-            ]
-        )
-    ){
-
-        playMusic();
-
-        return;
-
-    }
-
-
-    /* =================================================
-       МУЗЫКА — ОСТАНОВИТЬ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "останови музыку",
-                "выключи музыку",
-                "поставь музыку на паузу",
-                "пауза музыки"
-            ]
-        )
-    ){
-
-        music.pause();
-
-
-        answer(
-            "Музыка остановлена."
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ОТКРЫТЬ ЧАТ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "открой чат",
-                "перейди в чат",
-                "запусти чат"
-            ]
-        )
-    ){
-
-        answer(
-            "Открываю чат ASHINA."
-        );
-
-
-        setTimeout(
-            function(){
-
-                openAshinaSection(
-                    "chat"
-                );
-
-            },
-            400
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ОТКРЫТЬ МУЗЫКУ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "открой музыку",
-                "перейди в музыку",
-                "музыкальный раздел"
-            ]
-        )
-    ){
-
-        answer(
-            "Открываю музыкальный раздел ASHINA."
-        );
-
-
-        setTimeout(
-            function(){
-
-                openAshinaSection(
-                    "music"
-                );
-
-            },
-            400
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       ПОВТОР
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "повтори",
-                "повтори последнюю команду"
-            ]
-        )
-    ){
-
-        const previous =
-        conversation
-        .filter(
-            function(item){
-
-                return item.type === "user";
-
-            }
-        )
-        .slice(-2,-1)[0];
-
-
-        if(previous){
-
-            answer(
-
-                "Последняя команда была: " +
-
-                previous.text
-
-            );
-
-        }else{
-
-            answer(
-                "Мне пока нечего повторять."
-            );
-
-        }
-
-        return;
-
-    }
-
-
-    /* =================================================
-       КОНТЕКСТ
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "что мы делали",
-                "о чём мы говорили",
-                "о чем мы говорили",
-                "что было раньше"
-            ]
-        )
-    ){
-
-        const context =
-        getRecentContext();
-
-
-        if(!context){
-
-            answer(
-                "Контекст пока пуст."
-            );
-
-            return;
-
-        }
-
-
-        const lastMessages =
-        conversation
-        .slice(-6)
-        .map(
-            function(item){
-
-                return item.text;
-
-            }
-        );
-
-
-        answer(
-
-            "Последние события диалога: " +
-
-            lastMessages.join(
-                " | "
+        box.innerHTML = state.memory
+            .map((item, index) =>
+                `<div>${index + 1}. ${escapeHTML(item)}</div>`
             )
-
-        );
-
-        return;
-
+            .join("");
     }
 
 
-    /* =================================================
-       ASHINA
-    ================================================= */
+    /* ---------------------------------------------------------
+       HISTORY
+    --------------------------------------------------------- */
 
-    if(
-        containsAny(
-            text,
-            [
-                "что такое ашина",
-                "что такое ashina",
-                "расскажи про ашина",
-                "расскажи про ashina"
-            ]
-        )
-    ){
+    function loadHistory() {
+        const saved = loadJSON(CONFIG.storage.history, []);
 
-        answer(
-
-            "ASHINA — проект, в котором JARVIS является " +
-
-            "одним из интеллектуальных компонентов. " +
-
-            "Моя задача — постепенно научиться понимать " +
-
-            "команды пользователя и помогать управлять системой."
-
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       АДМИНИСТРАТОР
-    ================================================= */
-
-    if(
-        containsAny(
-            text,
-            [
-                "режим администратора",
-                "админ режим",
-                "административный режим"
-            ]
-        )
-    ){
-
-        if(
-            jarvisMemory.admin
-        ){
-
-            answer(
-                "Административный режим уже активен."
-            );
-
-        }else{
-
-            answer(
-
-                "Административный режим закрыт. " +
-
-                "Для локального прототипа используй поле PIN."
-
-            );
-
+        if (Array.isArray(saved)) {
+            state.history = saved.slice(-CONFIG.maxHistory);
         }
-
-        return;
-
     }
 
 
-    /* =================================================
-       ПОМОЩЬ
-    ================================================= */
+    function saveHistory() {
+        state.history = state.history.slice(-CONFIG.maxHistory);
 
-    if(
-        containsAny(
+        saveJSON(CONFIG.storage.history, state.history);
+    }
+
+
+    function addHistory(role, text) {
+        state.history.push({
+            role,
             text,
-            [
-                "помоги",
-                "помощь",
-                "help",
-                "команды"
-            ]
-        )
-    ){
+            time: Date.now()
+        });
 
-        answer(
+        saveHistory();
+    }
 
-            "Ты можешь попросить меня: " +
 
-            "проверить систему, запомнить информацию, " +
+    function getContext(limit = 10) {
+        return state.history
+            .slice(-limit)
+            .map(item => ({
+                role: item.role,
+                text: item.text
+            }));
+    }
 
-            "показать память, включить музыку, открыть чат, " +
 
-            "открыть музыку, сообщить время или дату, " +
+    /* ---------------------------------------------------------
+       SETTINGS
+    --------------------------------------------------------- */
 
-            "рассказать о себе или повторить последнюю команду."
-
+    function loadSettings() {
+        const saved = loadJSON(
+            CONFIG.storage.settings,
+            null
         );
 
-        return;
-
+        if (saved && typeof saved === "object") {
+            state.settings = {
+                ...state.settings,
+                ...saved
+            };
+        }
     }
 
 
-    /* =================================================
-       НЕИЗВЕСТНАЯ КОМАНДА
-    ================================================= */
-
-    jarvisMemory.lastTopic =
-    original;
-
-
-    saveMemory();
-
-
-    answer(
-
-        "Я понял обращение: «" +
-
-        original +
-
-        "». Но у меня пока нет навыка для выполнения этой команды. " +
-
-        "Я сохранил её в контексте. " +
-
-        "В дальнейшем мы сможем добавить для неё отдельный навык."
-
-    );
-
-}
-
-
-/* =====================================================
-   ОТПРАВКА
-===================================================== */
-
-function sendCommand(){
-
-    if(!input){
-
-        return;
-
+    function saveSettings() {
+        saveJSON(
+            CONFIG.storage.settings,
+            state.settings
+        );
     }
 
 
-    const text =
-    input.value.trim();
+    function setSettings(settings = {}) {
+        state.settings = {
+            ...state.settings,
+            ...settings
+        };
 
+        saveSettings();
 
-    if(!text){
-
-        return;
-
+        return {
+            ...state.settings
+        };
     }
 
 
-    input.value = "";
+    /* ---------------------------------------------------------
+       SECURITY
+    --------------------------------------------------------- */
 
-
-    ask(
-        text
-    );
-
-}
-
-
-/* =====================================================
-   ASK
-===================================================== */
-
-function ask(text){
-
-    const value =
-    String(text).trim();
-
-
-    if(!value){
-
-        return;
-
+    function escapeHTML(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
 
-    addMessage(
-        value,
-        "user"
-    );
+    /* ---------------------------------------------------------
+       UI OUTPUT
+    --------------------------------------------------------- */
 
+    function setThinking(value) {
+        state.thinking = value;
 
-    processCommand(
-        value
-    );
+        const core = $("core");
 
-}
-
-
-/* =====================================================
-   ENTER
-===================================================== */
-
-if(input){
-
-    input.addEventListener(
-        "keydown",
-        function(event){
-
-            if(
-                event.key === "Enter"
-            ){
-
-                event.preventDefault();
-
-                sendCommand();
-
+        if (core) {
+            if (value) {
+                core.classList.add("thinking");
+            } else {
+                core.classList.remove("thinking");
             }
-
         }
-    );
 
-}
+        const status = $("aiStatus");
 
-
-/* =====================================================
-   ГОЛОСОВОЙ ВВОД
-===================================================== */
-
-function startVoice(){
-
-    const Recognition =
-
-    window.SpeechRecognition ||
-
-    window.webkitSpeechRecognition;
-
-
-    if(!Recognition){
-
-        answer(
-
-            "Распознавание речи недоступно " +
-
-            "в этом браузере."
-
-        );
-
-        return;
-
+        if (status) {
+            status.textContent = value
+                ? "JARVIS думает..."
+                : "JARVIS готов";
+        }
     }
 
 
-    if(
-        JARVIS.listening
-    ){
+    function addMessage(text, type = "ai") {
+        const log = $("log");
 
-        return;
+        if (log) {
+            const message = document.createElement("div");
 
-    }
+            message.className = `message ${type}`;
+            message.textContent = text;
 
+            log.appendChild(message);
 
-    const recognition =
-    new Recognition();
+            log.scrollTop = log.scrollHeight;
+        }
 
-
-    JARVIS.listening =
-    true;
-
-
-    recognition.lang =
-    "ru-RU";
-
-
-    recognition.interimResults =
-    false;
-
-
-    recognition.maxAlternatives =
-    3;
-
-
-    aiStatus.textContent =
-    "🎙️ Слушаю...";
-
-
-    core.classList.add(
-        "active"
-    );
-
-
-    recognition.onresult =
-    function(event){
-
-        const text =
-        event.results[0][0]
-        .transcript;
-
-
-        JARVIS.listening =
-        false;
-
-
-        core.classList.remove(
-            "active"
-        );
-
-
-        aiStatus.textContent =
-        "Команда получена.";
-
-
-        ask(
+        addHistory(
+            type === "user" ? "user" : "assistant",
             text
         );
-
-    };
-
-
-    recognition.onerror =
-    function(){
-
-        JARVIS.listening =
-        false;
-
-
-        core.classList.remove(
-            "active"
-        );
-
-
-        aiStatus.textContent =
-        "Ошибка распознавания речи.";
-
-    };
-
-
-    recognition.onend =
-    function(){
-
-        JARVIS.listening =
-        false;
-
-
-        core.classList.remove(
-            "active"
-        );
-
-
-        if(
-            !JARVIS.thinking &&
-            !JARVIS.speaking
-        ){
-
-            aiStatus.textContent =
-            "JARVIS готов.";
-
-        }
-
-    };
-
-
-    try{
-
-        recognition.start();
-
-    }catch(error){
-
-        JARVIS.listening =
-        false;
-
-
-        core.classList.remove(
-            "active"
-        );
-
-
-        aiStatus.textContent =
-        "Не удалось запустить микрофон.";
-
     }
 
-}
+
+    /* ---------------------------------------------------------
+       VOICE
+    --------------------------------------------------------- */
+
+    function speak(text) {
+        if (!state.settings.voice) {
+            return;
+        }
+
+        if (!state.settings.speech) {
+            return;
+        }
+
+        if (!("speechSynthesis" in window)) {
+            return;
+        }
+
+        try {
+            window.speechSynthesis.cancel();
+
+            const utterance =
+                new SpeechSynthesisUtterance(text);
+
+            utterance.lang = "ru-RU";
+            utterance.rate = 0.95;
+            utterance.pitch = 0.95;
+            utterance.volume = 1;
+
+            state.speaking = true;
+
+            utterance.onend = () => {
+                state.speaking = false;
+            };
+
+            utterance.onerror = () => {
+                state.speaking = false;
+            };
+
+            window.speechSynthesis.speak(utterance);
+
+        } catch (error) {
+            console.warn("JARVIS speech error:", error);
+            state.speaking = false;
+        }
+    }
 
 
-/* =====================================================
-   SERVICE WORKER
-===================================================== */
+    function stopSpeaking() {
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
 
-if(
-    "serviceWorker" in navigator
-){
+        state.speaking = false;
+    }
 
-    navigator.serviceWorker
-    .register(
-        "sw.js"
-    )
-    .catch(
-        function(error){
 
+    /* ---------------------------------------------------------
+       NORMALIZATION
+    --------------------------------------------------------- */
+
+    function normalize(text) {
+        return String(text || "")
+            .toLowerCase()
+            .replace(/[!?.,:;()[\]{}"'`]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+
+    function contains(text, words) {
+        return words.some(word =>
+            text.includes(word)
+        );
+    }
+
+
+    /* ---------------------------------------------------------
+       MUSIC
+    --------------------------------------------------------- */
+
+    function getMusicElement() {
+        return (
+            $("audio") ||
+            $("music")
+        );
+    }
+
+
+    async function playMusic() {
+        const audio = getMusicElement();
+
+        if (!audio) {
+            return {
+                ok: false,
+                message: "Музыкальный модуль сейчас недоступен."
+            };
+        }
+
+        try {
+            await audio.play();
+
+            return {
+                ok: true,
+                message: "Музыка запущена."
+            };
+
+        } catch (error) {
+            console.warn("Music play error:", error);
+
+            return {
+                ok: false,
+                message: "Не удалось запустить музыку. Возможно, браузер ждёт нажатия пользователя."
+            };
+        }
+    }
+
+
+    function stopMusic() {
+        const audio = getMusicElement();
+
+        if (!audio) {
+            return {
+                ok: false,
+                message: "Музыкальный модуль недоступен."
+            };
+        }
+
+        audio.pause();
+
+        return {
+            ok: true,
+            message: "Музыка остановлена."
+        };
+    }
+
+
+    function toggleMusic() {
+        const audio = getMusicElement();
+
+        if (!audio) {
+            return {
+                ok: false,
+                message: "Музыкальный модуль недоступен."
+            };
+        }
+
+        if (audio.paused) {
+            return playMusic();
+        }
+
+        audio.pause();
+
+        return {
+            ok: true,
+            message: "Музыка поставлена на паузу."
+        };
+    }
+
+
+    /* ---------------------------------------------------------
+       NAVIGATION
+    --------------------------------------------------------- */
+
+    function openSection(section) {
+        if (!section) {
+            return false;
+        }
+
+        const cleanSection =
+            String(section)
+                .replace("#", "")
+                .trim();
+
+        const target =
+            document.getElementById(cleanSection);
+
+        if (target) {
+            document.querySelectorAll("section").forEach(
+                sectionElement => {
+                    sectionElement.style.display =
+                        sectionElement.id === cleanSection
+                            ? ""
+                            : "none";
+                }
+            );
+
+            window.location.hash = cleanSection;
+
+            return true;
+        }
+
+        window.location.hash = cleanSection;
+
+        return true;
+    }
+
+
+    /* ---------------------------------------------------------
+       DIAGNOSTICS
+    --------------------------------------------------------- */
+
+    async function diagnose() {
+        const results = {};
+
+        results.localStorage =
+            (() => {
+                try {
+                    const test = "__ashina_test__";
+
+                    localStorage.setItem(test, "1");
+                    localStorage.removeItem(test);
+
+                    return true;
+                } catch {
+                    return false;
+                }
+            })();
+
+        results.audio =
+            !!getMusicElement();
+
+        results.speechSynthesis =
+            "speechSynthesis" in window;
+
+        results.speechRecognition =
+            !!(
+                window.SpeechRecognition ||
+                window.webkitSpeechRecognition
+            );
+
+        results.serviceWorker =
+            "serviceWorker" in navigator;
+
+        results.indexedDB =
+            "indexedDB" in window;
+
+        results.jarvis =
+            true;
+
+        results.online =
+            navigator.onLine;
+
+        const available =
+            Object.values(results)
+                .filter(Boolean)
+                .length;
+
+        const total =
+            Object.keys(results).length;
+
+        return {
+            ...results,
+            available,
+            total,
+            percentage:
+                Math.round(
+                    (available / total) * 100
+                )
+        };
+    }
+
+
+    async function diagnosticsText() {
+        const result = await diagnose();
+
+        const lines = [
+            "Диагностика ASHINA:",
+            `LocalStorage: ${result.localStorage ? "OK" : "ERROR"}`,
+            `Audio: ${result.audio ? "OK" : "ERROR"}`,
+            `Speech: ${result.speechSynthesis ? "OK" : "ERROR"}`,
+            `Voice input: ${result.speechRecognition ? "OK" : "ERROR"}`,
+            `Service Worker: ${result.serviceWorker ? "OK" : "ERROR"}`,
+            `IndexedDB: ${result.indexedDB ? "OK" : "ERROR"}`,
+            `Интернет: ${result.online ? "ONLINE" : "OFFLINE"}`,
+            `JARVIS: ${result.jarvis ? "ONLINE" : "ERROR"}`,
+            `Готовность: ${result.percentage}%`
+        ];
+
+        return lines.join("\n");
+    }
+
+
+    /* ---------------------------------------------------------
+       COMMAND PROCESSOR
+       --------------------------------------------------------- */
+
+    async function processCommand(command) {
+        const original =
+            String(command || "").trim();
+
+        if (!original) {
+            return "";
+        }
+
+        const text = normalize(original);
+
+        state.lastCommand = original;
+        state.lastUserMessage = original;
+        state.commandCount++;
+
+        addHistory("user", original);
+
+        saveMemory();
+
+        /* GREETING */
+
+        if (
+            contains(text, [
+                "привет",
+                "здравствуй",
+                "доброе утро",
+                "добрый день",
+                "добрый вечер"
+            ])
+        ) {
+            return "Привет. JARVIS на связи. ASHINA готова к работе.";
+        }
+
+
+        /* IDENTITY */
+
+        if (
+            contains(text, [
+                "кто ты",
+                "ты кто",
+                "представься"
+            ])
+        ) {
+            return `Я ${CONFIG.name}, локальное AI-ядро проекта ${CONFIG.project}. Версия ${CONFIG.version}.`;
+        }
+
+
+        /* STATUS */
+
+        if (
+            contains(text, [
+                "статус",
+                "состояние",
+                "как дела"
+            ])
+        ) {
+            return `JARVIS работает. Команд обработано: ${state.commandCount}.`;
+        }
+
+
+        /* CAPABILITIES */
+
+        if (
+            contains(text, [
+                "что ты умеешь",
+                "возможности",
+                "что умеешь"
+            ])
+        ) {
+            return "Я могу управлять разделами ASHINA, музыкой, памятью, голосом и диагностикой. Архитектура готова для расширения AI-модуля.";
+        }
+
+
+        /* TIME */
+
+        if (
+            contains(text, [
+                "который час",
+                "сколько времени",
+                "время"
+            ])
+        ) {
+            return `Сейчас ${new Date().toLocaleTimeString(
+                "ru-RU",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            )}.`;
+        }
+
+
+        /* DATE */
+
+        if (
+            contains(text, [
+                "какая дата",
+                "сегодня дата",
+                "какое сегодня число"
+            ])
+        ) {
+            return `Сегодня ${new Date().toLocaleDateString(
+                "ru-RU",
+                {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            )}.`;
+        }
+
+
+        /* MEMORY ADD */
+
+        if (
+            text.startsWith("запомни ") ||
+            text.startsWith("запиши в память ") ||
+            text.startsWith("сохрани в память ")
+        ) {
+            let memoryText = original
+                .replace(
+                    /^запомни\s+/i,
+                    ""
+                )
+                .replace(
+                    /^запиши в память\s+/i,
+                    ""
+                )
+                .replace(
+                    /^сохрани в память\s+/i,
+                    ""
+                )
+                .trim();
+
+            if (memoryText) {
+                remember(memoryText);
+
+                return "Записал это в память ASHINA.";
+            }
+
+            return "Что именно нужно запомнить?";
+        }
+
+
+        /* MEMORY SHOW */
+
+        if (
+            contains(text, [
+                "покажи память",
+                "что ты помнишь",
+                "моя память"
+            ])
+        ) {
+            if (!state.memory.length) {
+                return "Память пока пуста.";
+            }
+
+            return [
+                "Что сейчас хранится в памяти:",
+                ...state.memory.map(
+                    (item, index) =>
+                        `${index + 1}. ${item}`
+                )
+            ].join("\n");
+        }
+
+
+        /* MEMORY CLEAR */
+
+        if (
+            contains(text, [
+                "очисти память",
+                "забудь всё",
+                "удали память"
+            ])
+        ) {
+            clearMemory();
+
+            return "Память очищена.";
+        }
+
+
+        /* DIAGNOSTICS */
+
+        if (
+            contains(text, [
+                "диагностика",
+                "проверь систему",
+                "проведи диагностику",
+                "проверка системы"
+            ])
+        ) {
+            return await diagnosticsText();
+        }
+
+
+        /* MUSIC PLAY */
+
+        if (
+            contains(text, [
+                "включи музыку",
+                "запусти музыку",
+                "играй музыку",
+                "включи трек"
+            ])
+        ) {
+            const result = await playMusic();
+
+            return result.message;
+        }
+
+
+        /* MUSIC STOP */
+
+        if (
+            contains(text, [
+                "выключи музыку",
+                "останови музыку",
+                "поставь музыку на паузу",
+                "пауза"
+            ])
+        ) {
+            const result = stopMusic();
+
+            return result.message;
+        }
+
+
+        /* MUSIC TOGGLE */
+
+        if (
+            text === "музыка"
+        ) {
+            const result = await toggleMusic();
+
+            return result.message;
+        }
+
+
+        /* OPEN CHAT */
+
+        if (
+            contains(text, [
+                "открой чат",
+                "перейди в чат"
+            ])
+        ) {
+            openSection("chat");
+
+            return "Открываю чат.";
+        }
+
+
+        /* OPEN MUSIC */
+
+        if (
+            contains(text, [
+                "открой музыку",
+                "перейди в музыку"
+            ])
+        ) {
+            openSection("music");
+
+            return "Открываю музыку.";
+        }
+
+
+        /* OPEN NEWS */
+
+        if (
+            contains(text, [
+                "открой новости",
+                "перейди в новости",
+                "открой ленту"
+            ])
+        ) {
+            openSection("news");
+
+            return "Открываю ленту.";
+        }
+
+
+        /* OPEN HOME */
+
+        if (
+            contains(text, [
+                "открой главную",
+                "на главную"
+            ])
+        ) {
+            openSection("home");
+
+            return "Возвращаюсь на главную.";
+        }
+
+
+        /* OPEN AI */
+
+        if (
+            contains(text, [
+                "открой ai",
+                "открой ии",
+                "открой искусственный интеллект"
+            ])
+        ) {
+            openSection("ai");
+
+            return "Открываю AI-центр.";
+        }
+
+
+        /* STOP VOICE */
+
+        if (
+            contains(text, [
+                "замолчи",
+                "останови голос",
+                "выключи голос"
+            ])
+        ) {
+            stopSpeaking();
+
+            return "Голосовой вывод остановлен.";
+        }
+
+
+        /* HELP */
+
+        if (
+            contains(text, [
+                "помощь",
+                "справка",
+                "команды"
+            ])
+        ) {
+            return [
+                "Доступные команды:",
+                "• Привет",
+                "• Кто ты?",
+                "• Что ты умеешь?",
+                "• Статус",
+                "• Диагностика",
+                "• Включи музыку",
+                "• Останови музыку",
+                "• Открой чат",
+                "• Открой музыку",
+                "• Открой новости",
+                "• Покажи память",
+                "• Запомни ...",
+                "• Очисти память"
+            ].join("\n");
+        }
+
+
+        /* FALLBACK */
+
+        return "Команда получена. Сейчас я ещё не знаю, как выполнить её полностью, но архитектура JARVIS готова для подключения новых навыков.";
+    }
+
+
+    /* ---------------------------------------------------------
+       ASK
+       --------------------------------------------------------- */
+
+    async function ask(command, options = {}) {
+        const text =
+            String(command || "").trim();
+
+        if (!text) {
+            return "";
+        }
+
+        setThinking(true);
+
+        let response;
+
+        try {
+            response = await processCommand(text);
+        } catch (error) {
+            console.error("JARVIS command error:", error);
+
+            response =
+                "Произошла ошибка при обработке команды.";
+        }
+
+        state.lastAIMessage = response;
+
+        saveMemory();
+
+        if (options.render !== false) {
+            addMessage(response, "ai");
+        }
+
+        if (
+            options.speak !== false &&
+            state.settings.voice &&
+            state.settings.speech
+        ) {
+            speak(response);
+        }
+
+        setThinking(false);
+
+        return response;
+    }
+
+
+    /* ---------------------------------------------------------
+       VOICE INPUT
+       --------------------------------------------------------- */
+
+    let recognition = null;
+
+
+    function createRecognition() {
+        const Recognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+        if (!Recognition) {
+            return null;
+        }
+
+        const instance = new Recognition();
+
+        instance.lang = "ru-RU";
+        instance.continuous = false;
+        instance.interimResults = false;
+
+        instance.onstart = () => {
+            state.listening = true;
+
+            setText(
+                "aiStatus",
+                "Слушаю..."
+            );
+        };
+
+        instance.onend = () => {
+            state.listening = false;
+
+            if (!state.thinking) {
+                setText(
+                    "aiStatus",
+                    "JARVIS готов"
+                );
+            }
+        };
+
+        instance.onerror = error => {
             console.warn(
-                "ASHINA Service Worker:",
+                "JARVIS voice recognition error:",
                 error
             );
 
-        }
-    );
+            state.listening = false;
 
-}
-
-
-/* =====================================================
-   ВОССТАНОВЛЕНИЕ АДМИНА
-===================================================== */
-
-function restoreAdmin(){
-
-    if(
-        jarvisMemory.admin
-    ){
-
-        adminStatus.innerHTML =
-
-        '<span class="green">' +
-
-        '🟢 Локальный административный режим активен.' +
-
-        '</span>';
-
-    }
-
-}
-
-
-/* =====================================================
-   ЗАПУСК JARVIS
-===================================================== */
-
-function initializeJarvis(){
-
-    loadMemory();
-
-    updateMemoryUI();
-
-    restoreConversation();
-
-    restoreAdmin();
-
-    runStatus();
-
-    JARVIS.ready =
-    true;
-
-
-    aiStatus.textContent =
-
-    "JARVIS готов. " +
-
-    "Локальное интеллектуальное ядро активно.";
-
-}
-
-
-initializeJarvis();
-
-
-/* =====================================================
-   ГЛОБАЛЬНЫЙ API JARVIS
-
-   Это важно для будущего развития.
-
-   Другие файлы ASHINA смогут обращаться
-   к JARVIS через window.JARVIS_API
-===================================================== */
-
-window.JARVIS_API = {
-
-    version: JARVIS.version,
-
-    mode: JARVIS.mode,
-
-    ask: ask,
-
-    speak: speak,
-
-    remember: remember,
-
-    getMemory: function(){
-
-        return {
-
-            ...jarvisMemory,
-
-            memories: [
-                ...jarvisMemory.memories
-            ]
-
+            setText(
+                "aiStatus",
+                "Ошибка голосового ввода"
+            );
         };
 
-    },
+        instance.onresult = event => {
+            const transcript =
+                event.results?.[0]?.[0]?.transcript || "";
 
-    clearMemory: clearMemory,
+            if (!transcript) {
+                return;
+            }
 
-    diagnose: runStatus,
+            const input =
+                $("command") ||
+                $("input");
 
-    playMusic: playMusic,
+            if (input) {
+                input.value = transcript;
+            }
 
-    stopMusic: function(){
+            ask(transcript);
+        };
 
-        music.pause();
-
-    },
-
-    openSection: openAshinaSection,
-
-    getContext: getRecentContext
-
-};
+        return instance;
+    }
 
 
-/* =====================================================
-   КОНЕЦ JARVIS CORE
-===================================================== */
-```
+    function startVoice() {
+        if (state.listening) {
+            return false;
+        }
+
+        if (!recognition) {
+            recognition = createRecognition();
+        }
+
+        if (!recognition) {
+            return false;
+        }
+
+        try {
+            recognition.start();
+            return true;
+        } catch (error) {
+            console.warn(
+                "Voice start error:",
+                error
+            );
+
+            return false;
+        }
+    }
+
+
+    function stopVoice() {
+        if (!recognition) {
+            return;
+        }
+
+        try {
+            recognition.stop();
+        } catch {
+            // already stopped
+        }
+
+        state.listening = false;
+    }
+
+
+    /* ---------------------------------------------------------
+       INPUT CONNECTION
+       --------------------------------------------------------- */
+
+    function connectInput() {
+        const input =
+            $("command") ||
+            $("input");
+
+        if (!input) {
+            return;
+        }
+
+        input.addEventListener(
+            "keydown",
+            event => {
+                if (event.key !== "Enter") {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const text =
+                    input.value.trim();
+
+                if (!text) {
+                    return;
+                }
+
+                addMessage(text, "user");
+
+                input.value = "";
+
+                ask(text);
+            }
+        );
+    }
+
+
+    /* ---------------------------------------------------------
+       RESTORE UI
+       --------------------------------------------------------- */
+
+    function restoreHistory() {
+        const log = $("log");
+
+        if (!log) {
+            return;
+        }
+
+        log.innerHTML = "";
+
+        const items =
+            state.history.slice(-15);
+
+        if (!items.length) {
+            addMessage(
+                "JARVIS онлайн. Ядро ASHINA готово.",
+                "ai"
+            );
+
+            return;
+        }
+
+        items.forEach(item => {
+            const message =
+                document.createElement("div");
+
+            message.className =
+                `message ${
+                    item.role === "user"
+                        ? "user"
+                        : "ai"
+                }`;
+
+            message.textContent =
+                item.text;
+
+            log.appendChild(message);
+        });
+
+        log.scrollTop = log.scrollHeight;
+    }
+
+
+    /* ---------------------------------------------------------
+       PUBLIC API
+       --------------------------------------------------------- */
+
+    const API = {
+        name: CONFIG.name,
+        project: CONFIG.project,
+        version: CONFIG.version,
+        mode: CONFIG.mode,
+
+        get ready() {
+            return state.ready;
+        },
+
+        ask,
+
+        speak,
+
+        stopSpeaking,
+
+        startVoice,
+
+        stopVoice,
+
+        remember,
+
+        getMemory,
+
+        clearMemory,
+
+        getContext,
+
+        diagnose,
+
+        playMusic,
+
+        stopMusic,
+
+        toggleMusic,
+
+        openSection,
+
+        setSettings,
+
+        getSettings() {
+            return {
+                ...state.settings
+            };
+        },
+
+        getState() {
+            return {
+                ...state,
+                memory: [...state.memory],
+                history: [...state.history]
+            };
+        }
+    };
+
+
+    /* ---------------------------------------------------------
+       GLOBAL REGISTRATION
+       --------------------------------------------------------- */
+
+    window.JARVIS = API;
+    window.JARVIS_API = API;
+
+    window.ASHINA_JARVIS = API;
+
+
+    /* ---------------------------------------------------------
+       STARTUP
+       --------------------------------------------------------- */
+
+    function initialize() {
+        try {
+            loadSettings();
+            loadMemory();
+            loadHistory();
+
+            renderMemory();
+            restoreHistory();
+            connectInput();
+
+            state.ready = true;
+
+            setText(
+                "aiStatus",
+                "JARVIS готов"
+            );
+
+            const systemStatus =
+                $("systemStatus");
+
+            if (systemStatus) {
+                systemStatus.textContent =
+                    "JARVIS ONLINE";
+            }
+
+            console.log(
+                `ASHINA ${CONFIG.project} — ${CONFIG.name} Core ${CONFIG.version} ONLINE`
+            );
+
+        } catch (error) {
+            console.error(
+                "JARVIS initialization error:",
+                error
+            );
+        }
+    }
+
+
+    if (
+        document.readyState === "loading"
+    ) {
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            { once: true }
+        );
+    } else {
+        initialize();
+    }
+
+})();
