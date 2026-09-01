@@ -1,8 +1,11 @@
-const CACHE_NAME = "ashina-cache-1-8";
+```javascript
+const CACHE_NAME = "ashina-cache-1-9";
 
 const APP_FILES = [
   "./",
   "./index.html",
+  "./ai-test.html",
+  "./jarvis-core.js",
   "./manifest.webmanifest",
   "./sw.js",
   "./audio.wav"
@@ -15,6 +18,8 @@ const APP_FILES = [
 
 const GUARD_FILES = [
   "./index.html",
+  "./ai-test.html",
+  "./jarvis-core.js",
   "./manifest.webmanifest",
   "./sw.js",
   "./audio.wav"
@@ -77,6 +82,12 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
 
+  /*
+     Сначала проверяем кэш.
+     Если файла нет — пытаемся
+     получить его из сети.
+  */
+
   event.respondWith(
 
     caches.match(event.request)
@@ -93,13 +104,46 @@ self.addEventListener("fetch", event => {
 
           .then(response => {
 
+            /*
+               Кэшируем только успешные
+               ответы нашего приложения.
+            */
+
+            if (
+              response &&
+              response.status === 200 &&
+              response.type === "basic"
+            ) {
+
+              const copy = response.clone();
+
+              caches.open(CACHE_NAME)
+
+                .then(cache => {
+
+                  cache.put(
+                    event.request,
+                    copy
+                  );
+
+                });
+
+            }
+
             return response;
 
           })
 
           .catch(() => {
 
-            return caches.match("./index.html");
+            /*
+               Если сеть недоступна,
+               возвращаем главный экран.
+            */
+
+            return caches.match(
+              "./index.html"
+            );
 
           });
 
@@ -157,7 +201,14 @@ self.addEventListener("message", event => {
   }
 
 
-  if (event.data.type === "ASHINA_GUARD_CHECK") {
+  /* =========================
+     GUARD CHECK
+  ========================= */
+
+  if (
+    event.data.type ===
+    "ASHINA_GUARD_CHECK"
+  ) {
 
     event.waitUntil(
 
@@ -165,15 +216,21 @@ self.addEventListener("message", event => {
 
         .then(result => {
 
-          if (event.ports && event.ports[0]) {
+          if (
+            event.ports &&
+            event.ports[0]
+          ) {
 
             event.ports[0].postMessage({
 
-              type: "ASHINA_GUARD_RESULT",
+              type:
+                "ASHINA_GUARD_RESULT",
 
-              files: result,
+              files:
+                result,
 
-              time: Date.now()
+              time:
+                Date.now()
 
             });
 
@@ -185,4 +242,19 @@ self.addEventListener("message", event => {
 
   }
 
+
+  /* =========================
+     FORCE UPDATE
+  ========================= */
+
+  if (
+    event.data.type ===
+    "ASHINA_SKIP_WAITING"
+  ) {
+
+    self.skipWaiting();
+
+  }
+
 });
+```
