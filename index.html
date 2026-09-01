@@ -1550,4 +1550,2061 @@ localStorage.getItem(MUSIC_TIME_KEY)
 if(
 Number.isFinite(savedTime) &&
 savedTime>0 &&
-sa
+savedTime<audio.duration
+){
+
+audio.currentTime=savedTime;
+
+}
+
+};
+
+function updateMusicUI(){
+
+if(
+Number.isFinite(audio.duration) &&
+audio.duration>0
+){
+
+seek.value=
+(audio.currentTime/audio.duration)*100;
+
+}
+
+document.getElementById('time').textContent=
+formatTime(audio.currentTime)+
+' / '+
+formatTime(audio.duration);
+
+}
+
+function saveMusicState(){
+
+localStorage.setItem(
+MUSIC_TIME_KEY,
+String(audio.currentTime||0)
+);
+
+}
+
+seek.oninput=function(){
+
+if(audio.duration){
+
+audio.currentTime=
+(Number(seek.value)/100)*
+audio.duration;
+
+}
+
+};
+
+volume.oninput=function(){
+
+const value=Number(volume.value);
+
+audio.volume=value;
+
+localStorage.setItem(
+MUSIC_VOLUME_KEY,
+String(value)
+);
+
+};
+
+function filterGenre(genre,button){
+
+currentGenre=genre;
+
+document.querySelectorAll('.genre-row button')
+.forEach(function(x){
+x.classList.remove('active');
+});
+
+button.classList.add('active');
+
+renderPlaylist();
+
+}
+
+const savedTrack=Number(
+localStorage.getItem(MUSIC_TRACK_KEY)
+);
+
+if(
+Number.isInteger(savedTrack) &&
+savedTrack>=0 &&
+savedTrack<playlistData.length
+){
+
+currentTrack=savedTrack;
+
+}
+
+loadTrack(currentTrack,false);
+
+
+/* =====================================================
+   NEWS
+===================================================== */
+
+const LIKE_KEY='ashina20_like';
+const DISLIKE_KEY='ashina20_dislike';
+
+let like=localStorage.getItem(LIKE_KEY)==='1';
+let dislike=localStorage.getItem(DISLIKE_KEY)==='1';
+
+function updateVoteUI(){
+
+const lb=document.getElementById('likeButton');
+const db=document.getElementById('dislikeButton');
+
+if(!lb||!db){
+return;
+}
+
+lb.classList.toggle('selected',like);
+db.classList.toggle('selected',dislike);
+
+document.getElementById('likeCount').textContent=
+like?'1':'0';
+
+document.getElementById('dislikeCount').textContent=
+dislike?'1':'0';
+
+const status=document.getElementById('voteStatus');
+
+status.textContent=
+like
+?'👍 Твой лайк учтён'
+:dislike
+?'👎 Твой дизлайк учтён'
+:'';
+
+}
+
+function vote(type){
+
+if(type==='like'){
+
+if(like){
+like=false;
+}else{
+like=true;
+dislike=false;
+}
+
+}else{
+
+if(dislike){
+dislike=false;
+}else{
+dislike=true;
+like=false;
+}
+
+}
+
+localStorage.setItem(
+LIKE_KEY,
+like?'1':'0'
+);
+
+localStorage.setItem(
+DISLIKE_KEY,
+dislike?'1':'0'
+);
+
+updateVoteUI();
+
+}
+
+updateVoteUI();
+
+
+/* =====================================================
+   CHAT ENGINE
+===================================================== */
+
+const CHAT_KEY='ashina20_chat';
+
+let messages=[];
+
+try{
+
+const saved=localStorage.getItem(CHAT_KEY);
+
+if(saved){
+
+const parsed=JSON.parse(saved);
+
+if(Array.isArray(parsed)){
+messages=parsed;
+}
+
+}
+
+}catch(error){
+
+messages=[];
+
+}
+
+
+/*
+   Максимальный размер одного файла.
+
+   5 МБ безопаснее для localStorage,
+   чем старые 8 МБ.
+
+   Важно:
+   localStorage имеет ограниченный объём,
+   поэтому очень большие файлы хранить
+   в нём нельзя.
+*/
+
+const MAX_FILE_SIZE=5*1024*1024;
+
+
+function saveMessages(){
+
+try{
+
+/*
+   Оставляем последние 100 сообщений,
+   чтобы не переполнять localStorage.
+*/
+
+localStorage.setItem(
+CHAT_KEY,
+JSON.stringify(messages.slice(-100))
+);
+
+return true;
+
+}catch(error){
+
+console.error(error);
+
+document.getElementById('chatStatus').textContent=
+'⚠️ Не удалось сохранить файл. Локальное хранилище переполнено.';
+
+return false;
+
+}
+
+}
+
+
+function formatFileSize(bytes){
+
+if(!Number.isFinite(bytes)){
+return '';
+}
+
+if(bytes<1024){
+return bytes+' Б';
+}
+
+if(bytes<1024*1024){
+return (bytes/1024).toFixed(1)+' КБ';
+}
+
+return (bytes/(1024*1024)).toFixed(1)+' МБ';
+
+}
+
+
+/*
+   Создаёт настоящий элемент вложения.
+*/
+
+function renderAttachment(attachment){
+
+const wrapper=document.createElement('div');
+
+wrapper.className='attachment';
+
+
+const name=document.createElement('div');
+
+name.className='attachment-name';
+
+name.textContent='📎 '+attachment.name;
+
+wrapper.appendChild(name);
+
+
+const type=attachment.type||'';
+
+
+/* IMAGE */
+
+if(type.startsWith('image/')){
+
+const img=document.createElement('img');
+
+img.src=attachment.data;
+
+img.alt=attachment.name;
+
+img.loading='lazy';
+
+img.onclick=function(){
+
+window.open(
+attachment.data,
+'_blank'
+);
+
+};
+
+wrapper.appendChild(img);
+
+}
+
+
+/* VIDEO */
+
+else if(type.startsWith('video/')){
+
+const video=document.createElement('video');
+
+video.src=attachment.data;
+
+video.controls=true;
+
+video.playsInline=true;
+
+wrapper.appendChild(video);
+
+}
+
+
+/* AUDIO */
+
+else if(type.startsWith('audio/')){
+
+const audioElement=document.createElement('audio');
+
+audioElement.src=attachment.data;
+
+audioElement.controls=true;
+
+wrapper.appendChild(audioElement);
+
+}
+
+
+/* PDF */
+
+else if(type==='application/pdf'){
+
+const link=document.createElement('a');
+
+link.className='file-open';
+
+link.href=attachment.data;
+
+link.target='_blank';
+
+link.rel='noopener';
+
+link.textContent='📄 Открыть PDF';
+
+wrapper.appendChild(link);
+
+}
+
+
+/* OTHER FILE */
+
+else{
+
+const icon=document.createElement('div');
+
+icon.className='attachment-icon';
+
+icon.textContent='📎';
+
+wrapper.appendChild(icon);
+
+const link=document.createElement('a');
+
+link.className='file-open';
+
+link.href=attachment.data;
+
+link.target='_blank';
+
+link.rel='noopener';
+
+link.download=attachment.name;
+
+link.textContent='⬇️ Открыть / скачать файл';
+
+wrapper.appendChild(link);
+
+}
+
+
+const size=document.createElement('div');
+
+size.className='file-size';
+
+size.textContent=
+formatFileSize(attachment.size);
+
+wrapper.appendChild(size);
+
+return wrapper;
+
+}
+
+
+function renderChat(){
+
+const box=document.getElementById('chatBox');
+
+box.innerHTML='';
+
+
+if(!messages.length){
+
+const empty=document.createElement('div');
+
+empty.className='muted';
+
+empty.textContent='Пока сообщений нет.';
+
+box.appendChild(empty);
+
+return;
+
+}
+
+
+messages.forEach(function(message){
+
+const item=document.createElement('div');
+
+item.className=
+'message'+
+(message.me?' me':'');
+
+
+const name=document.createElement('div');
+
+name.className='message-name';
+
+name.textContent=
+message.me?'Ты':'ASHINA';
+
+item.appendChild(name);
+
+
+if(message.text){
+
+const text=document.createElement('div');
+
+text.className='message-text';
+
+text.textContent=message.text;
+
+item.appendChild(text);
+
+}
+
+
+/*
+   Если у сообщения есть настоящее вложение,
+   создаём его заново из сохранённого dataURL.
+*/
+
+if(message.attachment){
+
+try{
+
+const attachmentElement=
+renderAttachment(
+message.attachment
+);
+
+item.appendChild(attachmentElement);
+
+}catch(error){
+
+const errorText=
+document.createElement('div');
+
+errorText.className='status';
+
+errorText.textContent=
+'⚠️ Не удалось отобразить вложение.';
+
+item.appendChild(errorText);
+
+}
+
+}
+
+
+const time=document.createElement('div');
+
+time.className='message-time';
+
+time.textContent=
+new Date(message.time)
+.toLocaleTimeString(
+'ru-RU',
+{
+hour:'2-digit',
+minute:'2-digit'
+}
+);
+
+item.appendChild(time);
+
+
+if(message.me){
+
+const actions=document.createElement('div');
+
+actions.className='message-actions';
+
+
+const del=document.createElement('button');
+
+del.textContent='🗑️';
+
+del.title='Удалить сообщение';
+
+del.onclick=function(){
+
+messages=
+messages.filter(
+x=>x.id!==message.id
+);
+
+saveMessages();
+renderChat();
+
+};
+
+actions.appendChild(del);
+
+item.appendChild(actions);
+
+}
+
+
+box.appendChild(item);
+
+});
+
+
+box.scrollTop=box.scrollHeight;
+
+}
+
+
+/*
+   Обычное текстовое сообщение.
+*/
+
+function sendMessage(){
+
+const input=document.getElementById('chatInput');
+
+const text=input.value.trim();
+
+if(!text){
+return;
+}
+
+messages.push({
+
+id:Date.now()+Math.random(),
+
+text:text,
+
+me:true,
+
+time:Date.now()
+
+});
+
+messages=messages.slice(-100);
+
+if(saveMessages()){
+
+input.value='';
+renderChat();
+
+}
+
+}
+
+
+document
+.getElementById('chatInput')
+.addEventListener(
+'keydown',
+function(event){
+
+if(event.key==='Enter'){
+
+event.preventDefault();
+
+sendMessage();
+
+}
+
+});
+
+
+function insertEmoji(emoji){
+
+const input=document.getElementById('chatInput');
+
+input.value+=emoji;
+
+input.focus();
+
+}
+
+
+function clearChat(){
+
+if(
+!confirm(
+'Очистить локальный чат и все его вложения?'
+)
+){
+return;
+}
+
+messages=[];
+
+localStorage.removeItem(CHAT_KEY);
+
+renderChat();
+
+document.getElementById('chatStatus').textContent=
+'🧹 Чат очищен.';
+
+}
+
+
+/* =====================================================
+   FILE PICKER
+===================================================== */
+
+const fileInput=
+document.getElementById('fileInput');
+
+
+function openFilePicker(){
+
+fileInput.accept='*/*';
+
+fileInput.click();
+
+}
+
+
+function openImagePicker(){
+
+fileInput.accept='image/*';
+
+fileInput.click();
+
+}
+
+
+function openVideoPicker(){
+
+fileInput.accept='video/*';
+
+fileInput.click();
+
+}
+
+
+function openAudioPicker(){
+
+fileInput.accept='audio/*';
+
+fileInput.click();
+
+}
+
+
+/*
+   Создание сообщения с настоящим файлом.
+*/
+
+function addFileToChat(file){
+
+return new Promise(function(resolve,reject){
+
+if(file.size>MAX_FILE_SIZE){
+
+document.getElementById('chatStatus').textContent=
+'⚠️ Файл «'+file.name+
+'» слишком большой. Максимум 5 МБ.';
+
+reject(
+new Error('file too large')
+);
+
+return;
+
+}
+
+
+const reader=new FileReader();
+
+
+reader.onload=function(){
+
+const attachment={
+
+name:file.name,
+
+type:file.type||'application/octet-stream',
+
+size:file.size,
+
+data:reader.result
+
+};
+
+
+const message={
+
+id:Date.now()+Math.random(),
+
+text:'',
+
+me:true,
+
+time:Date.now(),
+
+attachment:attachment
+
+};
+
+
+messages.push(message);
+
+messages=messages.slice(-100);
+
+
+if(!saveMessages()){
+
+reject(
+new Error('storage full')
+);
+
+return;
+
+}
+
+
+resolve(message);
+
+};
+
+
+reader.onerror=function(){
+
+reject(
+new Error('read error')
+);
+
+};
+
+
+reader.readAsDataURL(file);
+
+});
+
+}
+
+
+fileInput.onchange=async function(event){
+
+const files=
+Array.from(event.target.files||[]);
+
+if(!files.length){
+return;
+}
+
+
+const status=
+document.getElementById('chatStatus');
+
+
+status.textContent=
+'⏳ Добавляю файлы...';
+
+
+let success=0;
+
+
+for(const file of files){
+
+try{
+
+await addFileToChat(file);
+
+success++;
+
+}catch(error){
+
+console.error(
+'Ошибка файла:',
+file.name,
+error
+);
+
+}
+
+}
+
+
+renderChat();
+
+
+if(success===files.length){
+
+status.textContent=
+'✅ Добавлено файлов: '+success;
+
+}else{
+
+status.textContent=
+'⚠️ Добавлено: '+
+success+
+' из '+
+files.length;
+
+}
+
+
+/*
+   Позволяет выбрать тот же файл повторно.
+*/
+
+event.target.value='';
+
+};
+
+
+/* =====================================================
+   AI CORE
+===================================================== */
+
+const AI_HISTORY_KEY='ashina20_ai_history';
+const AI_MEMORY_KEY='ashina20_memory';
+
+let aiHistory=[];
+
+let aiMemory={
+name:'',
+lastTopic:'',
+lastCommand:'',
+lastSection:'home',
+lastTrack:'',
+preferences:{}
+};
+
+let lastAIText='';
+
+
+try{
+
+const history=
+JSON.parse(
+localStorage.getItem(AI_HISTORY_KEY)||'[]'
+);
+
+if(Array.isArray(history)){
+aiHistory=history.slice(-50);
+}
+
+}catch(error){
+aiHistory=[];
+}
+
+
+try{
+
+const memory=
+JSON.parse(
+localStorage.getItem(AI_MEMORY_KEY)||'{}'
+);
+
+if(memory&&typeof memory==='object'){
+
+aiMemory={
+...aiMemory,
+...memory
+};
+
+}
+
+}catch(error){}
+
+
+function saveAIMemory(){
+
+localStorage.setItem(
+AI_MEMORY_KEY,
+JSON.stringify(aiMemory)
+);
+
+document.getElementById('aiMemory').textContent=
+'Память: '+aiHistory.length+' сообщений';
+
+document.getElementById('homeMemory').textContent=
+'активна';
+
+}
+
+
+function saveAIHistory(){
+
+aiHistory=aiHistory.slice(-50);
+
+localStorage.setItem(
+AI_HISTORY_KEY,
+JSON.stringify(aiHistory)
+);
+
+saveAIMemory();
+
+}
+
+
+function getTime(){
+
+return new Date()
+.toLocaleTimeString(
+'ru-RU',
+{
+hour:'2-digit',
+minute:'2-digit'
+}
+);
+
+}
+
+
+function addAIMessage(text,user){
+
+const box=document.getElementById('aiCore');
+
+const message=document.createElement('div');
+
+message.className=
+'ai-message'+
+(user?' user':'');
+
+const name=document.createElement('div');
+
+name.className='ai-name';
+
+name.textContent=
+user?'ТЫ':'ASHINA AI';
+
+message.appendChild(name);
+
+const content=document.createElement('div');
+
+content.textContent=text;
+
+message.appendChild(content);
+
+const time=document.createElement('div');
+
+time.className='ai-time';
+
+time.textContent=getTime();
+
+message.appendChild(time);
+
+box.appendChild(message);
+
+box.scrollTop=box.scrollHeight;
+
+}
+
+
+function loadAIHistory(){
+
+const box=document.getElementById('aiCore');
+
+box.innerHTML='';
+
+
+if(!aiHistory.length){
+
+addAIMessage(
+'Привет. Я ASHINA AI 2.0. Я готова понимать команды и помогать управлять приложением.',
+false
+);
+
+return;
+
+}
+
+
+aiHistory.forEach(function(item){
+
+addAIMessage(
+item.text,
+item.user
+);
+
+});
+
+saveAIMemory();
+
+}
+
+
+function setAIStatus(text,thinking=false){
+
+const status=document.getElementById('aiStatus');
+
+status.textContent=text;
+
+status.classList.toggle(
+'ai-thinking',
+thinking
+);
+
+}
+
+
+function normalize(text){
+
+return text
+.toLowerCase()
+.replace(/[!?.,;:()]/g,' ')
+.replace(/\s+/g,' ')
+.trim();
+
+}
+
+
+function containsAny(text,words){
+
+return words.some(function(word){
+
+return text.includes(word);
+
+});
+
+}
+
+
+function detectSection(text){
+
+if(
+containsAny(
+text,
+['музык','плеер','песн','трек']
+)
+){
+return 'music';
+}
+
+if(
+containsAny(
+text,
+['чат','сообщен','переписк']
+)
+){
+return 'chat';
+}
+
+if(
+containsAny(
+text,
+['лент','новост','публикац']
+)
+){
+return 'news';
+}
+
+if(
+containsAny(
+text,
+['настрой','параметр']
+)
+){
+return 'settings';
+}
+
+if(
+containsAny(
+text,
+['главн','домой']
+)
+){
+return 'home';
+}
+
+return null;
+
+}
+
+
+function detectMusicAction(text){
+
+if(
+containsAny(
+text,
+['следующ','следом','дальше','следующий трек']
+)
+){
+return 'next';
+}
+
+if(
+containsAny(
+text,
+['предыдущ','прошлый трек','назад трек']
+)
+){
+return 'previous';
+}
+
+if(
+containsAny(
+text,
+[
+'останови',
+'остановить',
+'выключи музыку',
+'пауза',
+'поставь на паузу'
+]
+)
+){
+return 'pause';
+}
+
+if(
+containsAny(
+text,
+[
+'включи',
+'запусти',
+'начни',
+'играй',
+'воспроизвед'
+]
+)
+){
+return 'play';
+}
+
+if(
+containsAny(
+text,
+['музыку','музыка','плеер','трек']
+)
+){
+return 'open';
+}
+
+return null;
+
+}
+
+
+function executeMusicAction(action){
+
+if(action==='next'){
+
+show('music');
+
+nextTrack();
+
+return 'Переключаю на следующий трек. 🎵';
+
+}
+
+if(action==='previous'){
+
+show('music');
+
+previousTrack();
+
+return 'Возвращаю предыдущий трек. 🎵';
+
+}
+
+if(action==='pause'){
+
+audio.pause();
+
+return 'Музыка поставлена на паузу. ⏸️';
+
+}
+
+if(action==='play'){
+
+show('music');
+
+if(!audio.src){
+loadTrack(currentTrack,false);
+}
+
+audio.play().catch(function(){});
+
+return 'Запускаю музыку. ▶️';
+
+}
+
+if(action==='open'){
+
+show('music');
+
+return 'Открываю ASHINA Music. 🎵';
+
+}
+
+return null;
+
+}
+
+
+function processAICommand(raw){
+
+const text=normalize(raw);
+
+
+if(!text){
+return 'Я не получила команду.';
+}
+
+
+const nameMatch=
+text.match(
+/меня зовут ([а-яёa-z0-9_-]+)/i
+);
+
+if(nameMatch){
+
+aiMemory.name=nameMatch[1];
+
+saveAIMemory();
+
+return 'Запомнила. Буду обращаться к тебе по имени '+
+aiMemory.name+'. 🧠';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'привет',
+'здравствуй',
+'добрый день',
+'доброе утро',
+'добрый вечер',
+'хай',
+'hello'
+]
+)
+){
+
+return aiMemory.name
+?
+'Привет, '+aiMemory.name+'! ASHINA на связи. 🟢'
+:
+'Привет! ASHINA на связи. 🟢';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'кто ты',
+'что ты такое',
+'расскажи о себе'
+]
+)
+){
+
+return 'Я ASHINA AI 2.0 — локальное интеллектуальное ядро приложения. Сейчас я могу понимать команды, управлять разделами, музыкой, памятью и голосовым вводом.';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'что ты умеешь',
+'твои возможности',
+'что умеешь',
+'помощь',
+'команды'
+]
+)
+){
+
+return 'Я умею открывать разделы, управлять музыкой, переключать треки, работать с голосом и запоминать информацию. Например: «Открой музыку и включи её».';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'который час',
+'сколько времени',
+'время сейчас'
+]
+)
+){
+
+return 'Сейчас '+getTime()+'. ⏰';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'повтори',
+'повтори ответ',
+'что ты сказала'
+]
+)
+){
+
+return lastAIText||'Мне пока нечего повторять.';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'что ты помнишь',
+'что помнишь обо мне',
+'покажи память'
+]
+)
+){
+
+let result='В памяти ASHINA:';
+
+if(aiMemory.name){
+result+='\nИмя: '+aiMemory.name;
+}
+
+if(aiMemory.lastSection){
+result+='\nПоследний раздел: '+aiMemory.lastSection;
+}
+
+if(aiMemory.lastCommand){
+result+='\nПоследняя команда: '+aiMemory.lastCommand;
+}
+
+return result;
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'забудь всё',
+'очисти память',
+'удали память'
+]
+)
+){
+
+aiMemory={
+name:'',
+lastTopic:'',
+lastCommand:'',
+lastSection:'home',
+lastTrack:'',
+preferences:{}
+};
+
+localStorage.removeItem(AI_MEMORY_KEY);
+
+return 'Память ASHINA очищена. 🧹';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'статус',
+'состояние системы',
+'как система',
+'всё работает'
+]
+)
+){
+
+return 'ASHINA работает в штатном режиме. AI-ядро онлайн, локальная память доступна, музыкальный движок активен, чат работает. 🟢';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'проверь защиту',
+'проверить систему',
+'запусти guard',
+'guard'
+]
+)
+){
+
+show('settings');
+
+setTimeout(runGuard,200);
+
+return 'Запускаю ASHINA Guard. 🛡️';
+
+}
+
+
+/* Музыка */
+
+const musicAction=detectMusicAction(text);
+
+if(musicAction){
+
+aiMemory.lastSection='music';
+aiMemory.lastCommand=raw;
+
+const result=
+executeMusicAction(musicAction);
+
+if(result){
+return result;
+}
+
+}
+
+
+/* Навигация */
+
+const section=detectSection(text);
+
+if(section){
+
+show(section);
+
+aiMemory.lastSection=section;
+aiMemory.lastCommand=raw;
+
+saveAIMemory();
+
+const names={
+home:'главную',
+music:'музыку',
+chat:'чат',
+news:'ленту',
+settings:'настройки'
+};
+
+return 'Открываю '+names[section]+'.';
+
+}
+
+
+/* Комбинированная команда */
+
+const wantsMusic=
+containsAny(
+text,
+['музык','плеер','песн','трек']
+);
+
+const wantsPlay=
+containsAny(
+text,
+['включ','запуст','играй','воспроизвед']
+);
+
+if(wantsMusic&&wantsPlay){
+
+show('music');
+
+toggleMusic();
+
+return 'Открываю музыку и запускаю воспроизведение. 🎵▶️';
+
+}
+
+
+if(
+containsAny(
+text,
+[
+'как работает',
+'что происходит',
+'приложение',
+'ашина'
+]
+)
+){
+
+return 'ASHINA состоит из нескольких локальных модулей: интерфейс, музыка, чат, память, AI-ядро и Guard.';
+
+}
+
+
+return 'Я поняла сообщение, но пока не знаю, какое действие выполнить. Попробуй: «Открой музыку», «Включи музыку», «Следующий трек», «Открой чат» или «Проверь защиту».';
+
+}
+
+
+/* SEND AI */
+
+function sendAI(){
+
+const input=document.getElementById('aiInput');
+
+const text=input.value.trim();
+
+if(!text){
+return;
+}
+
+addAIMessage(text,true);
+
+aiHistory.push({
+text:text,
+user:true
+});
+
+input.value='';
+
+setAIStatus(
+'🧠 Анализирую намерение...',
+true
+);
+
+aiMemory.lastCommand=text;
+
+setTimeout(function(){
+
+const answer=processAICommand(text);
+
+lastAIText=answer;
+
+addAIMessage(answer,false);
+
+aiHistory.push({
+text:answer,
+user:false
+});
+
+saveAIHistory();
+
+setAIStatus('🟢 AI готов.');
+
+if(AUTO_SPEECH){
+speakText(answer);
+}
+
+},250);
+
+}
+
+
+function aiQuick(text){
+
+document.getElementById('aiInput').value=text;
+
+sendAI();
+
+}
+
+
+/* VOICE */
+
+let recognition=null;
+
+function startVoiceInput(){
+
+const SpeechRecognition=
+window.SpeechRecognition||
+window.webkitSpeechRecognition;
+
+if(!SpeechRecognition){
+
+setAIStatus(
+'⚠️ Голосовой ввод не поддерживается браузером.'
+);
+
+return;
+
+}
+
+if(recognition){
+
+try{
+recognition.stop();
+}catch(e){}
+
+}
+
+recognition=new SpeechRecognition();
+
+recognition.lang='ru-RU';
+
+recognition.interimResults=false;
+
+recognition.maxAlternatives=1;
+
+recognition.onstart=function(){
+
+setAIStatus(
+'🎙️ Слушаю... Говори.',
+true
+);
+
+};
+
+recognition.onresult=function(event){
+
+const text=
+event.results[0][0].transcript;
+
+document.getElementById('aiInput').value=text;
+
+sendAI();
+
+};
+
+recognition.onerror=function(event){
+
+setAIStatus(
+'⚠️ Ошибка микрофона: '+
+(event.error||'неизвестная')
+);
+
+};
+
+recognition.onend=function(){
+
+if(
+document
+.getElementById('aiStatus')
+.textContent
+.includes('Слушаю')
+){
+
+setAIStatus('🟢 AI готов.');
+
+}
+
+};
+
+try{
+
+recognition.start();
+
+}catch(error){
+
+setAIStatus(
+'⚠️ Не удалось запустить микрофон.'
+);
+
+}
+
+}
+
+
+/* SPEECH */
+
+function speakText(text){
+
+if(!('speechSynthesis' in window)){
+
+setAIStatus(
+'⚠️ Озвучивание недоступно.'
+);
+
+return;
+
+}
+
+speechSynthesis.cancel();
+
+const speech=
+new SpeechSynthesisUtterance(text);
+
+speech.lang='ru-RU';
+
+speech.rate=.95;
+
+speech.pitch=.9;
+
+speech.volume=1;
+
+speech.onstart=function(){
+
+setAIStatus(
+'🔊 ASHINA говорит...'
+);
+
+};
+
+speech.onend=function(){
+
+setAIStatus(
+'🟢 AI готов.'
+);
+
+};
+
+speechSynthesis.speak(speech);
+
+}
+
+
+function speakLastAI(){
+
+if(!lastAIText){
+
+setAIStatus(
+'⚠️ Пока нечего озвучивать.'
+);
+
+return;
+
+}
+
+speakText(lastAIText);
+
+}
+
+let AUTO_SPEECH=false;
+
+
+/* CLEAR AI */
+
+function clearAI(){
+
+if(
+!confirm(
+'Очистить историю AI?'
+)
+){
+return;
+}
+
+aiHistory=[];
+
+lastAIText='';
+
+localStorage.removeItem(AI_HISTORY_KEY);
+
+loadAIHistory();
+
+setAIStatus(
+'🧹 История AI очищена.'
+);
+
+}
+
+
+/* ENTER AI */
+
+document
+.getElementById('aiInput')
+.addEventListener(
+'keydown',
+function(event){
+
+if(event.key==='Enter'){
+
+event.preventDefault();
+
+sendAI();
+
+}
+
+});
+
+
+/* =====================================================
+   GUARD
+===================================================== */
+
+async function guardCheckFile(name){
+
+try{
+
+const response=
+await fetch(
+name,
+{
+method:'HEAD',
+cache:'no-store'
+}
+);
+
+return response.ok;
+
+}catch(error){
+
+return false;
+
+}
+
+}
+
+
+async function runGuard(){
+
+const result=document.getElementById('guardResult');
+
+const files=document.getElementById('guardFiles');
+
+const total=document.getElementById('guardTotal');
+
+result.classList.add('show');
+
+files.innerHTML=
+'<div class="status">🔍 Проверка ASHINA...</div>';
+
+total.textContent='';
+
+const checks=[
+
+{
+name:'manifest.webmanifest',
+promise:
+guardCheckFile('manifest.webmanifest')
+},
+
+{
+name:'IndexedDB',
+promise:
+Promise.resolve('indexedDB' in window)
+},
+
+{
+name:'LocalStorage',
+promise:
+Promise.resolve(typeof localStorage!=='undefined')
+},
+
+{
+name:'Service Worker API',
+promise:
+Promise.resolve('serviceWorker' in navigator)
+},
+
+{
+name:'Speech API',
+promise:
+Promise.resolve(
+!!(
+window.SpeechRecognition||
+window.webkitSpeechRecognition
+)
+)
+},
+
+{
+name:'Audio API',
+promise:
+Promise.resolve(!!window.HTMLAudioElement)
+},
+
+{
+name:'Media API',
+promise:
+Promise.resolve(!!navigator.mediaDevices)
+}
+
+];
+
+files.innerHTML='';
+
+let good=0;
+
+for(const check of checks){
+
+const ok=await check.promise;
+
+if(ok){
+good++;
+}
+
+const row=document.createElement('div');
+
+row.className='guard-item';
+
+const name=document.createElement('span');
+
+name.textContent=check.name;
+
+const state=document.createElement('span');
+
+state.className=
+ok?'guard-ok':'guard-error';
+
+state.textContent=
+ok?'🟢 Доступен':'🔴 Недоступен';
+
+row.appendChild(name);
+row.appendChild(state);
+
+files.appendChild(row);
+
+}
+
+total.textContent=
+'ASHINA Guard: '+
+good+
+'/'+
+checks.length+
+' компонентов доступны';
+
+}
+
+
+/* =====================================================
+   ADMIN
+===================================================== */
+
+function openAdmin(){
+
+const pin=
+prompt(
+'Введите PIN администратора:'
+);
+
+if(pin===null){
+return;
+}
+
+if(pin!=='2468'){
+
+alert('❌ Неверный PIN.');
+
+return;
+
+}
+
+document
+.getElementById('adminPanel')
+.classList
+.remove('admin-hidden');
+
+const log=document.getElementById('adminLog');
+
+log.innerHTML=
+'<div>🟢 Администратор авторизован</div>'+
+'<div>AI Core: ONLINE</div>'+
+'<div>Memory: ACTIVE</div>'+
+'<div>Music Engine: READY</div>'+
+'<div>Chat Attachments: READY</div>'+
+'<div>Guard: READY</div>';
+
+}
+
+
+function closeAdmin(){
+
+document
+.getElementById('adminPanel')
+.classList
+.add('admin-hidden');
+
+}
+
+
+/* =====================================================
+   CLEAR EVERYTHING
+===================================================== */
+
+function clearEverything(){
+
+if(
+!confirm(
+'Удалить всю локальную память ASHINA, включая чат и вложения?'
+)
+){
+return;
+}
+
+localStorage.clear();
+
+messages=[];
+
+aiHistory=[];
+
+aiMemory={
+name:'',
+lastTopic:'',
+lastCommand:'',
+lastSection:'home',
+lastTrack:'',
+preferences:{}
+};
+
+loadAIHistory();
+
+renderChat();
+
+alert(
+'Локальные данные ASHINA очищены.'
+);
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+renderChat();
+
+loadAIHistory();
+
+renderPlaylist();
+
+console.log(
+'ASHINA AI Core '+APP_VERSION+' ONLINE'
+);
+
+</script>
+
+</body>
+</html>
