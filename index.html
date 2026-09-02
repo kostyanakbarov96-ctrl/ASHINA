@@ -747,6 +747,45 @@
       font-size: 11px;
     }
 
+    .message-file-button {
+      width: 100%;
+      margin-top: 7px;
+      padding: 10px 11px;
+      border-radius: 10px;
+      color: var(--text);
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.06);
+      text-align: left;
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .message-file-button:active {
+      transform: scale(.99);
+    }
+
+    .playlist-add {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      color: var(--text);
+      background: var(--panel2);
+      border: 1px dashed var(--border);
+      font-weight: 800;
+    }
+
+    .track-remove {
+      margin-left: auto;
+      width: 34px;
+      min-width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
     .chat-input-area {
       padding: 10px;
 
@@ -1389,6 +1428,7 @@
       >
         ⚙
       </button>
+
     </header>
 
     <!-- =========================
@@ -1508,7 +1548,7 @@
                 class="status-value"
                 id="homeJarvisStatus"
               >
-                READY
+                LOADING
               </div>
             </div>
 
@@ -1684,6 +1724,7 @@
               type="button"
               data-src="./audio.wav"
               data-name="ASHINA Audio"
+              data-track-id="builtin"
             >
 
               <div class="track-icon">
@@ -1705,6 +1746,21 @@
             </button>
 
           </div>
+
+          <button
+            class="playlist-add"
+            id="addMusicButton"
+            type="button"
+          >
+            ＋ Добавить музыку
+          </button>
+
+          <input
+            id="musicFileInput"
+            type="file"
+            accept="audio/*"
+            hidden
+          >
 
         </div>
 
@@ -1934,7 +1990,6 @@
             READY
           </div>
 
-          <!-- Совместимость с jarvis-core.js -->
           <div
             id="log"
             class="ai-log"
@@ -2294,6 +2349,7 @@
             class="select"
             id="aiMode"
           >
+
             <option value="LOCAL">
               LOCAL
             </option>
@@ -2305,6 +2361,7 @@
             <option value="HYBRID">
               HYBRID
             </option>
+
           </select>
 
           <div
@@ -2529,13 +2586,22 @@
         newsLike: "ashina20_like",
         newsDislike: "ashina20_dislike",
 
+        newsReaction: "ashina20_news_reaction",
+
         chat: "ashina20_chat"
       };
 
       const MAX_CHAT_MESSAGES = 100;
-      const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
+      const MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024;
 
-      const $ = (id) => document.getElementById(id);
+      const DB_NAME = "ashina20_db";
+      const DB_VERSION = 1;
+
+      const ATTACHMENT_STORE = "attachments";
+      const TRACK_STORE = "tracks";
+
+      const $ = (id) =>
+        document.getElementById(id);
 
       /* =========================
          TOAST
@@ -2548,15 +2614,17 @@
 
         if (!el) return;
 
-        el.textContent = String(message);
+        el.textContent =
+          String(message);
 
         el.classList.add("show");
 
         clearTimeout(toastTimer);
 
-        toastTimer = setTimeout(() => {
-          el.classList.remove("show");
-        }, 2200);
+        toastTimer =
+          setTimeout(() => {
+            el.classList.remove("show");
+          }, 2200);
       }
 
       /* =========================
@@ -2564,6 +2632,7 @@
       ========================= */
 
       function openSection(sectionName) {
+
         const allowed = [
           "home",
           "music",
@@ -2580,56 +2649,60 @@
         document
           .querySelectorAll("main > section")
           .forEach(section => {
+
             section.classList.toggle(
               "active",
               section.id === sectionName
             );
+
           });
 
         document
           .querySelectorAll(".nav-button")
           .forEach(button => {
+
             button.classList.toggle(
               "active",
               button.dataset.section === sectionName
             );
+
           });
 
         window.scrollTo({
           top: 0,
           behavior: "smooth"
         });
-
-        if (window.JARVIS && typeof window.JARVIS.openSection === "function") {
-          // Навигация уже выполнена UI.
-          // Не вызываем ядро повторно, чтобы не создать цикл.
-        }
       }
 
       document
         .querySelectorAll("[data-section]")
         .forEach(button => {
 
-          button.addEventListener("click", () => {
+          button.addEventListener(
+            "click",
+            () => {
 
-            openSection(
-              button.dataset.section
-            );
+              openSection(
+                button.dataset.section
+              );
 
-          });
+            }
+          );
 
         });
 
-      $("openSettingsButton")?.addEventListener(
-        "click",
-        () => openSection("settings")
-      );
+      $("openSettingsButton")
+        ?.addEventListener(
+          "click",
+          () => openSection("settings")
+        );
 
       /* =========================
          NETWORK STATUS
       ========================= */
 
       function updateNetworkStatus() {
+
         const online =
           navigator.onLine;
 
@@ -2637,8 +2710,12 @@
           $("homeNetworkStatus");
 
         if (home) {
+
           home.textContent =
-            online ? "ONLINE" : "OFFLINE";
+            online
+              ? "ONLINE"
+              : "OFFLINE";
+
         }
       }
 
@@ -2655,15 +2732,270 @@
       updateNetworkStatus();
 
       /* =========================
+         INDEXED DB
+      ========================= */
+
+      let dbPromise = null;
+
+      function openDB() {
+
+        if (dbPromise) {
+          return dbPromise;
+        }
+
+        dbPromise =
+          new Promise(
+            (resolve, reject) => {
+
+              if (!("indexedDB" in window)) {
+                reject(
+                  new Error(
+                    "IndexedDB недоступна"
+                  )
+                );
+
+                return;
+              }
+
+              const request =
+                indexedDB.open(
+                  DB_NAME,
+                  DB_VERSION
+                );
+
+              request.onupgradeneeded =
+                event => {
+
+                  const db =
+                    event.target.result;
+
+                  if (
+                    !db.objectStoreNames.contains(
+                      ATTACHMENT_STORE
+                    )
+                  ) {
+
+                    db.createObjectStore(
+                      ATTACHMENT_STORE,
+                      {
+                        keyPath: "id"
+                      }
+                    );
+
+                  }
+
+                  if (
+                    !db.objectStoreNames.contains(
+                      TRACK_STORE
+                    )
+                  ) {
+
+                    db.createObjectStore(
+                      TRACK_STORE,
+                      {
+                        keyPath: "id"
+                      }
+                    );
+
+                  }
+
+                };
+
+              request.onsuccess =
+                () => {
+
+                  resolve(
+                    request.result
+                  );
+
+                };
+
+              request.onerror =
+                () => {
+
+                  reject(
+                    request.error ||
+                    new Error(
+                      "Ошибка IndexedDB"
+                    )
+                  );
+
+                };
+
+            }
+          );
+
+        return dbPromise;
+      }
+
+      async function dbPut(
+        storeName,
+        value
+      ) {
+
+        const db =
+          await openDB();
+
+        return new Promise(
+          (resolve, reject) => {
+
+            const tx =
+              db.transaction(
+                storeName,
+                "readwrite"
+              );
+
+            const store =
+              tx.objectStore(
+                storeName
+              );
+
+            const request =
+              store.put(value);
+
+            request.onsuccess =
+              () => resolve(
+                request.result
+              );
+
+            request.onerror =
+              () => reject(
+                request.error
+              );
+
+          }
+        );
+      }
+
+      async function dbGetAll(
+        storeName
+      ) {
+
+        const db =
+          await openDB();
+
+        return new Promise(
+          (resolve, reject) => {
+
+            const tx =
+              db.transaction(
+                storeName,
+                "readonly"
+              );
+
+            const store =
+              tx.objectStore(
+                storeName
+              );
+
+            const request =
+              store.getAll();
+
+            request.onsuccess =
+              () => resolve(
+                request.result || []
+              );
+
+            request.onerror =
+              () => reject(
+                request.error
+              );
+
+          }
+        );
+      }
+
+      async function dbGet(
+        storeName,
+        id
+      ) {
+
+        const db =
+          await openDB();
+
+        return new Promise(
+          (resolve, reject) => {
+
+            const tx =
+              db.transaction(
+                storeName,
+                "readonly"
+              );
+
+            const request =
+              tx.objectStore(
+                storeName
+              ).get(id);
+
+            request.onsuccess =
+              () => resolve(
+                request.result || null
+              );
+
+            request.onerror =
+              () => reject(
+                request.error
+              );
+
+          }
+        );
+      }
+
+      async function dbDelete(
+        storeName,
+        id
+      ) {
+
+        const db =
+          await openDB();
+
+        return new Promise(
+          (resolve, reject) => {
+
+            const tx =
+              db.transaction(
+                storeName,
+                "readwrite"
+              );
+
+            const request =
+              tx.objectStore(
+                storeName
+              ).delete(id);
+
+            request.onsuccess =
+              () => resolve();
+
+            request.onerror =
+              () => reject(
+                request.error
+              );
+
+          }
+        );
+      }
+
+      /* =========================
          MUSIC
       ========================= */
 
-      const audio = $("audio");
-      const playButton = $("playButton");
-      const backButton = $("backButton");
-      const forwardButton = $("forwardButton");
-      const seek = $("seek");
-      const volume = $("volume");
+      const audio =
+        $("audio");
+
+      const playButton =
+        $("playButton");
+
+      const backButton =
+        $("backButton");
+
+      const forwardButton =
+        $("forwardButton");
+
+      const seek =
+        $("seek");
+
+      const volume =
+        $("volume");
 
       const currentTimeEl =
         $("currentTime");
@@ -2680,15 +3012,21 @@
       let musicReady = false;
 
       function formatTime(value) {
+
         if (!Number.isFinite(value)) {
           return "0:00";
         }
 
         const seconds =
-          Math.max(0, Math.floor(value));
+          Math.max(
+            0,
+            Math.floor(value)
+          );
 
         const minutes =
-          Math.floor(seconds / 60);
+          Math.floor(
+            seconds / 60
+          );
 
         const remaining =
           seconds % 60;
@@ -2696,27 +3034,38 @@
         return (
           minutes +
           ":" +
-          String(remaining).padStart(2, "0")
+          String(
+            remaining
+          ).padStart(2, "0")
         );
       }
 
       function saveMusicState() {
+
         if (!audio) return;
 
         try {
+
           localStorage.setItem(
             STORAGE.musicTime,
-            String(audio.currentTime || 0)
+            String(
+              audio.currentTime || 0
+            )
           );
 
           localStorage.setItem(
             STORAGE.musicVolume,
-            String(audio.volume)
+            String(
+              audio.volume
+            )
           );
+
         } catch (_) {}
+
       }
 
       function updateMusicUI() {
+
         if (!audio) return;
 
         const current =
@@ -2726,16 +3075,21 @@
           audio.duration || 0;
 
         if (currentTimeEl) {
+
           currentTimeEl.textContent =
             formatTime(current);
+
         }
 
         if (durationEl) {
+
           durationEl.textContent =
             formatTime(duration);
+
         }
 
         if (seek) {
+
           seek.max =
             duration > 0
               ? String(duration)
@@ -2743,47 +3097,76 @@
 
           seek.value =
             duration > 0
-              ? String(Math.min(current, duration))
+              ? String(
+                  Math.min(
+                    current,
+                    duration
+                  )
+                )
               : "0";
+
         }
 
         if (playButton) {
+
           playButton.textContent =
-            audio.paused ? "▶" : "Ⅱ";
+            audio.paused
+              ? "▶"
+              : "Ⅱ";
+
         }
 
         if (musicStatus) {
+
           if (audio.error) {
+
             musicStatus.textContent =
               "Ошибка загрузки аудио";
+
           } else if (!audio.paused) {
+
             musicStatus.textContent =
               "Воспроизведение";
-          } else if (audio.currentTime > 0) {
+
+          } else if (
+            audio.currentTime > 0
+          ) {
+
             musicStatus.textContent =
               "Пауза";
+
           } else {
+
             musicStatus.textContent =
               "Готово";
+
           }
+
         }
       }
 
       async function playMusic() {
+
         if (!audio) return;
 
         try {
+
           await audio.play();
 
           musicReady = true;
 
           updateMusicUI();
+
           saveMusicState();
 
         } catch (error) {
 
-          musicStatus.textContent =
-            "Нажмите ▶ для запуска";
+          if (musicStatus) {
+
+            musicStatus.textContent =
+              "Нажмите ▶ для запуска";
+
+          }
 
           toast(
             "Браузер заблокировал автоматический запуск"
@@ -2793,22 +3176,31 @@
       }
 
       function pauseMusic() {
+
         if (!audio) return;
 
         audio.pause();
 
         updateMusicUI();
+
         saveMusicState();
+
       }
 
       async function toggleMusicLocal() {
+
         if (!audio) return;
 
         if (audio.paused) {
+
           await playMusic();
+
         } else {
+
           pauseMusic();
+
         }
+
       }
 
       playButton?.addEventListener(
@@ -2829,6 +3221,7 @@
             );
 
           saveMusicState();
+
           updateMusicUI();
 
         }
@@ -2841,7 +3234,9 @@
           if (!audio) return;
 
           const duration =
-            Number.isFinite(audio.duration)
+            Number.isFinite(
+              audio.duration
+            )
               ? audio.duration
               : Infinity;
 
@@ -2852,6 +3247,7 @@
             );
 
           saveMusicState();
+
           updateMusicUI();
 
         }
@@ -2864,7 +3260,9 @@
           if (!audio) return;
 
           audio.currentTime =
-            Number(seek.value);
+            Number(
+              seek.value
+            );
 
           updateMusicUI();
 
@@ -2887,7 +3285,9 @@
               1,
               Math.max(
                 0,
-                Number(volume.value)
+                Number(
+                  volume.value
+                )
               )
             );
 
@@ -2922,6 +3322,7 @@
         () => {
 
           saveMusicState();
+
           updateMusicUI();
 
         }
@@ -2937,8 +3338,10 @@
         () => {
 
           if (musicStatus) {
+
             musicStatus.textContent =
               "Не удалось загрузить audio.wav";
+
           }
 
         }
@@ -2965,10 +3368,14 @@
               STORAGE.musicTime
             );
 
-          if (savedVolume !== null) {
+          if (
+            savedVolume !== null
+          ) {
 
             const value =
-              Number(savedVolume);
+              Number(
+                savedVolume
+              );
 
             if (
               Number.isFinite(value) &&
@@ -2976,33 +3383,40 @@
               value <= 1
             ) {
 
-              audio.volume = value;
+              audio.volume =
+                value;
 
               if (volume) {
+
                 volume.value =
                   String(value);
+
               }
 
             }
 
           }
 
-          if (savedTime !== null) {
+          if (
+            savedTime !== null
+          ) {
 
             const value =
-              Number(savedTime);
+              Number(
+                savedTime
+              );
 
             if (
               Number.isFinite(value) &&
               value >= 0
             ) {
 
-              audio.addEventListener(
-                "loadedmetadata",
+              const restore =
                 () => {
 
                   if (
-                    value <= audio.duration
+                    value <=
+                    audio.duration
                   ) {
 
                     audio.currentTime =
@@ -3012,9 +3426,26 @@
 
                   }
 
-                },
-                { once: true }
-              );
+                };
+
+              if (
+                Number.isFinite(
+                  audio.duration
+                ) &&
+                audio.duration > 0
+              ) {
+
+                restore();
+
+              } else {
+
+                audio.addEventListener(
+                  "loadedmetadata",
+                  restore,
+                  { once: true }
+                );
+
+              }
 
             }
 
@@ -3023,73 +3454,587 @@
         } catch (_) {}
 
         updateMusicUI();
+
       }
 
       restoreMusicState();
 
-      document
-        .querySelectorAll(".track")
-        .forEach(track => {
+      /* =========================
+         BUILT-IN / CUSTOM TRACKS
+      ========================= */
 
-          track.addEventListener(
+      async function getCustomTracks() {
+
+        try {
+
+          return await dbGetAll(
+            TRACK_STORE
+          );
+
+        } catch (_) {
+
+          return [];
+
+        }
+
+      }
+
+      function createTrackElement(
+        track
+      ) {
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+        button.className =
+          "track";
+
+        button.type =
+          "button";
+
+        button.dataset.trackId =
+          track.id;
+
+        button.dataset.name =
+          track.name || "Трек";
+
+        if (track.src) {
+
+          button.dataset.src =
+            track.src;
+
+        }
+
+        const icon =
+          document.createElement(
+            "div"
+          );
+
+        icon.className =
+          "track-icon";
+
+        icon.textContent =
+          "♫";
+
+        const info =
+          document.createElement(
+            "div"
+          );
+
+        info.className =
+          "track-info";
+
+        const title =
+          document.createElement(
+            "div"
+          );
+
+        title.className =
+          "track-title";
+
+        title.textContent =
+          track.name ||
+          "Трек";
+
+        const subtitle =
+          document.createElement(
+            "div"
+          );
+
+        subtitle.className =
+          "track-subtitle";
+
+        subtitle.textContent =
+          track.type ||
+          "Локальный аудиофайл";
+
+        info.appendChild(
+          title
+        );
+
+        info.appendChild(
+          subtitle
+        );
+
+        button.appendChild(
+          icon
+        );
+
+        button.appendChild(
+          info
+        );
+
+        if (
+          track.id !== "builtin"
+        ) {
+
+          const remove =
+            document.createElement(
+              "button"
+            );
+
+          remove.type =
+            "button";
+
+          remove.className =
+            "track-remove";
+
+          remove.textContent =
+            "×";
+
+          remove.title =
+            "Удалить трек";
+
+          remove.addEventListener(
             "click",
-            async () => {
+            async event => {
 
-              const src =
-                track.dataset.src;
-
-              const name =
-                track.dataset.name ||
-                "ASHINA Audio";
-
-              if (!src || !audio) {
-                return;
-              }
-
-              document
-                .querySelectorAll(".track")
-                .forEach(item => {
-                  item.classList.remove(
-                    "active"
-                  );
-                });
-
-              track.classList.add("active");
-
-              audio.src = src;
-              audio.currentTime = 0;
-
-              if (currentTrackName) {
-                currentTrackName.textContent =
-                  name;
-              }
+              event.stopPropagation();
 
               try {
-                localStorage.setItem(
-                  STORAGE.musicTrack,
-                  src
+
+                await dbDelete(
+                  TRACK_STORE,
+                  track.id
                 );
-              } catch (_) {}
 
-              updateMusicUI();
+                if (
+                  localStorage.getItem(
+                    STORAGE.musicTrack
+                  ) ===
+                  track.id
+                ) {
 
-              await playMusic();
+                  localStorage.removeItem(
+                    STORAGE.musicTrack
+                  );
+
+                }
+
+                await renderPlaylist();
+
+                toast(
+                  "Трек удалён"
+                );
+
+              } catch (_) {
+
+                toast(
+                  "Не удалось удалить трек"
+                );
+
+              }
 
             }
           );
 
-        });
+          button.appendChild(
+            remove
+          );
+
+        }
+
+        button.addEventListener(
+          "click",
+          async event => {
+
+            if (
+              event.target.closest(
+                ".track-remove"
+              )
+            ) {
+
+              return;
+
+            }
+
+            let src =
+              button.dataset.src;
+
+            if (
+              !src &&
+              track.id !== "builtin"
+            ) {
+
+              try {
+
+                const stored =
+                  await dbGet(
+                    TRACK_STORE,
+                    track.id
+                  );
+
+                if (
+                  stored &&
+                  stored.blob
+                ) {
+
+                  src =
+                    URL.createObjectURL(
+                      stored.blob
+                    );
+
+                  button.dataset.src =
+                    src;
+
+                }
+
+              } catch (_) {}
+
+            }
+
+            if (
+              !src ||
+              !audio
+            ) {
+
+              toast(
+                "Аудиофайл недоступен"
+              );
+
+              return;
+
+            }
+
+            document
+              .querySelectorAll(
+                ".track"
+              )
+              .forEach(
+                item =>
+                  item.classList.remove(
+                    "active"
+                  )
+              );
+
+            button.classList.add(
+              "active"
+            );
+
+            audio.src =
+              src;
+
+            audio.currentTime =
+              0;
+
+            if (
+              currentTrackName
+            ) {
+
+              currentTrackName.textContent =
+                track.name ||
+                "ASHINA Audio";
+
+            }
+
+            try {
+
+              localStorage.setItem(
+                STORAGE.musicTrack,
+                track.id
+              );
+
+            } catch (_) {}
+
+            updateMusicUI();
+
+            await playMusic();
+
+          }
+        );
+
+        return button;
+      }
+
+      async function renderPlaylist() {
+
+        const playlist =
+          $("playlist");
+
+        if (!playlist) {
+          return;
+        }
+
+        const builtin =
+          playlist.querySelector(
+            '[data-track-id="builtin"]'
+          );
+
+        playlist.innerHTML =
+          "";
+
+        if (builtin) {
+
+          playlist.appendChild(
+            builtin
+          );
+
+        }
+
+        const tracks =
+          await getCustomTracks();
+
+        tracks
+          .filter(
+            track =>
+              track.id !== "builtin"
+          )
+          .forEach(
+            track => {
+
+              playlist.appendChild(
+                createTrackElement(
+                  track
+                )
+              );
+
+            }
+          );
+
+        bindTrackButtons();
+
+      }
+
+      function bindTrackButtons() {
+
+        document
+          .querySelectorAll(
+            '.track[data-bound="true"]'
+          )
+          .forEach(
+            () => {}
+          );
+
+        document
+          .querySelectorAll(
+            ".track"
+          )
+          .forEach(
+            track => {
+
+              if (
+                track.dataset.bound ===
+                "true"
+              ) {
+
+                return;
+
+              }
+
+              track.dataset.bound =
+                "true";
+
+              track.addEventListener(
+                "click",
+                async event => {
+
+                  if (
+                    event.target.closest(
+                      ".track-remove"
+                    )
+                  ) {
+
+                    return;
+
+                  }
+
+                  const src =
+                    track.dataset.src;
+
+                  const name =
+                    track.dataset.name ||
+                    "ASHINA Audio";
+
+                  if (
+                    !src ||
+                    !audio
+                  ) {
+
+                    return;
+
+                  }
+
+                  document
+                    .querySelectorAll(
+                      ".track"
+                    )
+                    .forEach(
+                      item =>
+                        item.classList.remove(
+                          "active"
+                        )
+                    );
+
+                  track.classList.add(
+                    "active"
+                  );
+
+                  audio.src =
+                    src;
+
+                  audio.currentTime =
+                    0;
+
+                  if (
+                    currentTrackName
+                  ) {
+
+                    currentTrackName.textContent =
+                      name;
+
+                  }
+
+                  try {
+
+                    localStorage.setItem(
+                      STORAGE.musicTrack,
+                      track.dataset.trackId ||
+                      src
+                    );
+
+                  } catch (_) {}
+
+                  updateMusicUI();
+
+                  await playMusic();
+
+                }
+              );
+
+            }
+          );
+
+      }
+
+      bindTrackButtons();
+
+      renderPlaylist();
+
+      /* =========================
+         MUSIC UPLOAD
+      ========================= */
+
+      const addMusicButton =
+        $("addMusicButton");
+
+      const musicFileInput =
+        $("musicFileInput");
+
+      addMusicButton?.addEventListener(
+        "click",
+        () => {
+
+          musicFileInput?.click();
+
+        }
+      );
+
+      musicFileInput?.addEventListener(
+        "change",
+        async event => {
+
+          const file =
+            event.target.files?.[0];
+
+          if (!file) {
+            return;
+          }
+
+          if (
+            !file.type.startsWith(
+              "audio/"
+            )
+          ) {
+
+            toast(
+              "Выберите аудиофайл"
+            );
+
+            event.target.value =
+              "";
+
+            return;
+
+          }
+
+          if (
+            file.size >
+            MAX_ATTACHMENT_SIZE
+          ) {
+
+            toast(
+              "Аудиофайл слишком большой. Максимум 25 МБ."
+            );
+
+            event.target.value =
+              "";
+
+            return;
+
+          }
+
+          const id =
+            "track_" +
+            Date.now() +
+            "_" +
+            Math.random()
+              .toString(16)
+              .slice(2);
+
+          try {
+
+            await dbPut(
+              TRACK_STORE,
+              {
+                id,
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                blob: file
+              }
+            );
+
+            await renderPlaylist();
+
+            toast(
+              "Музыка добавлена в плейлист"
+            );
+
+          } catch (error) {
+
+            console.error(
+              "Music upload error:",
+              error
+            );
+
+            toast(
+              "Не удалось сохранить музыку"
+            );
+
+          }
+
+          event.target.value =
+            "";
+
+        }
+      );
 
       /* =========================
          NEWS
       ========================= */
 
-      function getReactionData(key) {
+      function getReactionData(
+        key
+      ) {
 
         try {
 
           const raw =
-            localStorage.getItem(key);
+            localStorage.getItem(
+              key
+            );
 
           return raw
             ? JSON.parse(raw)
@@ -3103,7 +4048,10 @@
 
       }
 
-      function saveReactionData(key, data) {
+      function saveReactionData(
+        key,
+        data
+      ) {
 
         try {
 
@@ -3111,6 +4059,56 @@
             key,
             JSON.stringify(data)
           );
+
+        } catch (_) {}
+
+      }
+
+      function getSelectedReaction(
+        id
+      ) {
+
+        try {
+
+          return localStorage.getItem(
+            STORAGE.newsReaction +
+            "_" +
+            id
+          );
+
+        } catch (_) {
+
+          return null;
+
+        }
+
+      }
+
+      function setSelectedReaction(
+        id,
+        value
+      ) {
+
+        try {
+
+          if (value) {
+
+            localStorage.setItem(
+              STORAGE.newsReaction +
+              "_" +
+              id,
+              value
+            );
+
+          } else {
+
+            localStorage.removeItem(
+              STORAGE.newsReaction +
+              "_" +
+              id
+            );
+
+          }
 
         } catch (_) {}
 
@@ -3129,127 +4127,256 @@
           );
 
         document
-          .querySelectorAll(".news-card")
-          .forEach(card => {
+          .querySelectorAll(
+            ".news-card"
+          )
+          .forEach(
+            card => {
 
-            const id =
-              card.dataset.newsId;
+              const id =
+                card.dataset.newsId;
 
-            const likeButton =
-              card.querySelector(
-                '[data-reaction="like"]'
-              );
-
-            const dislikeButton =
-              card.querySelector(
-                '[data-reaction="dislike"]'
-              );
-
-            if (likeButton) {
-
-              const count =
-                Number(likes[id] || 0);
-
-              const counter =
-                likeButton.querySelector(
-                  ".like-count"
+              const likeButton =
+                card.querySelector(
+                  '[data-reaction="like"]'
                 );
 
-              if (counter) {
-                counter.textContent =
-                  String(count);
+              const dislikeButton =
+                card.querySelector(
+                  '[data-reaction="dislike"]'
+                );
+
+              const selected =
+                getSelectedReaction(
+                  id
+                );
+
+              if (likeButton) {
+
+                const count =
+                  Number(
+                    likes[id] || 0
+                  );
+
+                const counter =
+                  likeButton.querySelector(
+                    ".like-count"
+                  );
+
+                if (counter) {
+
+                  counter.textContent =
+                    String(count);
+
+                }
+
+                likeButton.classList.toggle(
+                  "active",
+                  selected === "like"
+                );
+
+              }
+
+              if (
+                dislikeButton
+              ) {
+
+                const count =
+                  Number(
+                    dislikes[id] || 0
+                  );
+
+                const counter =
+                  dislikeButton.querySelector(
+                    ".dislike-count"
+                  );
+
+                if (counter) {
+
+                  counter.textContent =
+                    String(count);
+
+                }
+
+                dislikeButton.classList.toggle(
+                  "active",
+                  selected === "dislike"
+                );
+
               }
 
             }
-
-            if (dislikeButton) {
-
-              const count =
-                Number(dislikes[id] || 0);
-
-              const counter =
-                dislikeButton.querySelector(
-                  ".dislike-count"
-                );
-
-              if (counter) {
-                counter.textContent =
-                  String(count);
-              }
-
-            }
-
-          });
+          );
 
       }
 
       document
-        .querySelectorAll(".news-card")
-        .forEach(card => {
+        .querySelectorAll(
+          ".news-card"
+        )
+        .forEach(
+          card => {
 
-          const id =
-            card.dataset.newsId;
+            const id =
+              card.dataset.newsId;
 
-          card
-            .querySelectorAll("[data-reaction]")
-            .forEach(button => {
+            card
+              .querySelectorAll(
+                "[data-reaction]"
+              )
+              .forEach(
+                button => {
 
-              button.addEventListener(
-                "click",
-                () => {
+                  button.addEventListener(
+                    "click",
+                    () => {
 
-                  const reaction =
-                    button.dataset.reaction;
+                      const reaction =
+                        button.dataset.reaction;
 
-                  const likes =
-                    getReactionData(
-                      STORAGE.newsLike
-                    );
+                      const likes =
+                        getReactionData(
+                          STORAGE.newsLike
+                        );
 
-                  const dislikes =
-                    getReactionData(
-                      STORAGE.newsDislike
-                    );
+                      const dislikes =
+                        getReactionData(
+                          STORAGE.newsDislike
+                        );
 
-                  if (reaction === "like") {
+                      const previous =
+                        getSelectedReaction(
+                          id
+                        );
 
-                    likes[id] =
-                      Number(likes[id] || 0) + 1;
+                      if (
+                        previous ===
+                        reaction
+                      ) {
 
-                    saveReactionData(
-                      STORAGE.newsLike,
-                      likes
-                    );
+                        if (
+                          reaction ===
+                          "like"
+                        ) {
 
-                  } else {
+                          likes[id] =
+                            Math.max(
+                              0,
+                              Number(
+                                likes[id] || 0
+                              ) - 1
+                            );
 
-                    dislikes[id] =
-                      Number(dislikes[id] || 0) + 1;
+                          saveReactionData(
+                            STORAGE.newsLike,
+                            likes
+                          );
 
-                    saveReactionData(
-                      STORAGE.newsDislike,
-                      dislikes
-                    );
+                        } else {
 
-                  }
+                          dislikes[id] =
+                            Math.max(
+                              0,
+                              Number(
+                                dislikes[id] || 0
+                              ) - 1
+                            );
 
-                  button.classList.add(
-                    "active"
+                          saveReactionData(
+                            STORAGE.newsDislike,
+                            dislikes
+                          );
+
+                        }
+
+                        setSelectedReaction(
+                          id,
+                          null
+                        );
+
+                      } else {
+
+                        if (
+                          previous ===
+                          "like"
+                        ) {
+
+                          likes[id] =
+                            Math.max(
+                              0,
+                              Number(
+                                likes[id] || 0
+                              ) - 1
+                            );
+
+                        }
+
+                        if (
+                          previous ===
+                          "dislike"
+                        ) {
+
+                          dislikes[id] =
+                            Math.max(
+                              0,
+                              Number(
+                                dislikes[id] || 0
+                              ) - 1
+                            );
+
+                        }
+
+                        if (
+                          reaction ===
+                          "like"
+                        ) {
+
+                          likes[id] =
+                            Number(
+                              likes[id] || 0
+                            ) + 1;
+
+                        } else {
+
+                          dislikes[id] =
+                            Number(
+                              dislikes[id] || 0
+                            ) + 1;
+
+                        }
+
+                        saveReactionData(
+                          STORAGE.newsLike,
+                          likes
+                        );
+
+                        saveReactionData(
+                          STORAGE.newsDislike,
+                          dislikes
+                        );
+
+                        setSelectedReaction(
+                          id,
+                          reaction
+                        );
+
+                      }
+
+                      renderNewsReactions();
+
+                    }
                   );
-
-                  renderNewsReactions();
 
                 }
               );
 
-            });
-
-        });
+          }
+        );
 
       renderNewsReactions();
 
       /* =========================
-         CHAT
+         CHAT STORAGE
       ========================= */
 
       function loadChat() {
@@ -3261,13 +4388,17 @@
               STORAGE.chat
             );
 
-          if (!raw) return [];
+          if (!raw) {
+            return [];
+          }
 
           const data =
             JSON.parse(raw);
 
           return Array.isArray(data)
-            ? data.slice(-MAX_CHAT_MESSAGES)
+            ? data.slice(
+                -MAX_CHAT_MESSAGES
+              )
             : [];
 
         } catch (_) {
@@ -3278,7 +4409,9 @@
 
       }
 
-      function saveChat(messages) {
+      function saveChat(
+        messages
+      ) {
 
         try {
 
@@ -3301,14 +4434,31 @@
 
       }
 
-      function escapeHtml(value) {
+      function escapeHtml(
+        value
+      ) {
 
         return String(value)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
+          .replaceAll(
+            "&",
+            "&amp;"
+          )
+          .replaceAll(
+            "<",
+            "&lt;"
+          )
+          .replaceAll(
+            ">",
+            "&gt;"
+          )
+          .replaceAll(
+            '"',
+            "&quot;"
+          )
+          .replaceAll(
+            "'",
+            "&#039;"
+          );
 
       }
 
@@ -3317,17 +4467,24 @@
         const container =
           $("chatMessages");
 
-        if (!container) return;
+        if (!container) {
+          return;
+        }
 
         const messages =
           loadChat();
 
-        container.innerHTML = "";
+        container.innerHTML =
+          "";
 
-        if (messages.length === 0) {
+        if (
+          messages.length === 0
+        ) {
 
           const empty =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
           empty.className =
             "muted small";
@@ -3349,60 +4506,116 @@
 
         }
 
-        messages.forEach(message => {
+        messages.forEach(
+          message => {
 
-          const item =
-            document.createElement("div");
+            const item =
+              document.createElement(
+                "div"
+              );
 
-          item.className =
-            "message" +
-            (message.me ? " me" : "");
+            item.className =
+              "message" +
+              (
+                message.me
+                  ? " me"
+                  : ""
+              );
 
-          const text =
-            document.createElement("div");
+            const text =
+              document.createElement(
+                "div"
+              );
 
-          text.className =
-            "message-text";
+            text.className =
+              "message-text";
 
-          text.innerHTML =
-            escapeHtml(
-              message.text || ""
+            text.innerHTML =
+              escapeHtml(
+                message.text ||
+                ""
+              );
+
+            item.appendChild(
+              text
             );
 
-          item.appendChild(text);
+            if (
+              message.file
+            ) {
 
-          if (message.file) {
+              const file =
+                document.createElement(
+                  "div"
+                );
 
-            const file =
-              document.createElement("div");
+              file.className =
+                "message-file";
 
-            file.className =
-              "message-file";
+              file.textContent =
+                "📎 " +
+                (
+                  message.file.name ||
+                  "Файл"
+                );
 
-            file.textContent =
-              "📎 " +
-              (message.file.name || "Файл");
+              item.appendChild(
+                file
+              );
 
-            item.appendChild(file);
+              const fileButton =
+                document.createElement(
+                  "button"
+                );
+
+              fileButton.type =
+                "button";
+
+              fileButton.className =
+                "message-file-button";
+
+              fileButton.textContent =
+                "Открыть файл";
+
+              fileButton.addEventListener(
+                "click",
+                () => {
+
+                  openAttachment(
+                    message.file.id
+                  );
+
+                }
+              );
+
+              item.appendChild(
+                fileButton
+              );
+
+            }
+
+            const time =
+              document.createElement(
+                "div"
+              );
+
+            time.className =
+              "message-time";
+
+            time.textContent =
+              message.time ||
+              "";
+
+            item.appendChild(
+              time
+            );
+
+            container.appendChild(
+              item
+            );
 
           }
-
-          const time =
-            document.createElement("div");
-
-          time.className =
-            "message-time";
-
-          time.textContent =
-            message.time || "";
-
-          item.appendChild(time);
-
-          container.appendChild(
-            item
-          );
-
-        });
+        );
 
         container.scrollTop =
           container.scrollHeight;
@@ -3415,8 +4628,10 @@
           .toLocaleTimeString(
             "ru-RU",
             {
-              hour: "2-digit",
-              minute: "2-digit"
+              hour:
+                "2-digit",
+              minute:
+                "2-digit"
             }
           );
 
@@ -3439,7 +4654,9 @@
               .slice(2),
 
           text:
-            String(text || ""),
+            String(
+              text || ""
+            ),
 
           me: true,
 
@@ -3451,8 +4668,97 @@
 
         });
 
-        saveChat(messages);
+        saveChat(
+          messages
+        );
+
         renderChat();
+
+      }
+
+      async function saveAttachment(
+        file
+      ) {
+
+        const id =
+          "attachment_" +
+          Date.now() +
+          "_" +
+          Math.random()
+            .toString(16)
+            .slice(2);
+
+        await dbPut(
+          ATTACHMENT_STORE,
+          {
+            id,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            blob: file
+          }
+        );
+
+        return {
+          id,
+          name: file.name,
+          type: file.type,
+          size: file.size
+        };
+
+      }
+
+      async function openAttachment(
+        id
+      ) {
+
+        try {
+
+          const record =
+            await dbGet(
+              ATTACHMENT_STORE,
+              id
+            );
+
+          if (
+            !record ||
+            !record.blob
+          ) {
+
+            toast(
+              "Файл не найден"
+            );
+
+            return;
+
+          }
+
+          const url =
+            URL.createObjectURL(
+              record.blob
+            );
+
+          window.open(
+            url,
+            "_blank",
+            "noopener"
+          );
+
+          setTimeout(
+            () =>
+              URL.revokeObjectURL(
+                url
+              ),
+            60000
+          );
+
+        } catch (_) {
+
+          toast(
+            "Не удалось открыть файл"
+          );
+
+        }
 
       }
 
@@ -3461,18 +4767,27 @@
         const input =
           $("chatInput");
 
-        if (!input) return;
+        if (!input) {
+          return;
+        }
 
         const text =
           input.value.trim();
 
-        if (!text) return;
+        if (!text) {
+          return;
+        }
 
-        addChatMessage(text);
+        addChatMessage(
+          text
+        );
 
-        input.value = "";
+        input.value =
+          "";
 
-        toast("Сообщение отправлено");
+        toast(
+          "Сообщение отправлено"
+        );
 
       }
 
@@ -3488,7 +4803,8 @@
           event => {
 
             if (
-              event.key === "Enter" &&
+              event.key ===
+              "Enter" &&
               !event.shiftKey
             ) {
 
@@ -3506,7 +4822,8 @@
           "click",
           () => {
 
-            $("fileInput")?.click();
+            $("fileInput")
+              ?.click();
 
           }
         );
@@ -3519,7 +4836,9 @@
             const file =
               event.target.files?.[0];
 
-            if (!file) return;
+            if (!file) {
+              return;
+            }
 
             if (
               file.size >
@@ -3527,10 +4846,11 @@
             ) {
 
               toast(
-                "Файл слишком большой. Максимум 5 МБ."
+                "Файл слишком большой. Максимум 25 МБ."
               );
 
-              event.target.value = "";
+              event.target.value =
+                "";
 
               return;
 
@@ -3538,56 +4858,67 @@
 
             try {
 
-              const reader =
-                new FileReader();
-
-              reader.onload = () => {
-
-                const fileData = {
-
-                  name:
-                    file.name,
-
-                  type:
-                    file.type,
-
-                  size:
-                    file.size,
-
-                  data:
-                    reader.result
-
-                };
-
-                addChatMessage(
-                  "Отправлен файл: " +
-                  file.name,
-                  fileData
+              const metadata =
+                await saveAttachment(
+                  file
                 );
 
-              };
-
-              reader.onerror = () => {
-
-                toast(
-                  "Не удалось прочитать файл"
-                );
-
-              };
-
-              reader.readAsDataURL(
-                file
+              addChatMessage(
+                "Отправлен файл: " +
+                file.name,
+                metadata
               );
 
-            } catch (_) {
+              if (
+                file.type.startsWith(
+                  "audio/"
+                )
+              ) {
+
+                const trackId =
+                  "track_" +
+                  Date.now() +
+                  "_" +
+                  Math.random()
+                    .toString(16)
+                    .slice(2);
+
+                await dbPut(
+                  TRACK_STORE,
+                  {
+                    id: trackId,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    blob: file
+                  }
+                );
+
+                await renderPlaylist();
+
+                toast(
+                  "Аудио также добавлено в плейлист"
+                );
+
+              }
+
+            } catch (
+              error
+            ) {
+
+              console.error(
+                "Attachment error:",
+                error
+              );
 
               toast(
-                "Ошибка обработки файла"
+                "Не удалось сохранить файл"
               );
 
             }
 
-            event.target.value = "";
+            event.target.value =
+              "";
 
           }
         );
@@ -3599,12 +4930,14 @@
       ========================= */
 
       function getJarvis() {
+
         return (
           window.JARVIS ||
           window.JARVIS_API ||
           window.ASHINA_JARVIS ||
           null
         );
+
       }
 
       function renderJarvisState() {
@@ -3614,14 +4947,22 @@
 
         if (!jarvis) {
 
-          if ($("aiStatus")) {
+          if (
+            $("aiStatus")
+          ) {
+
             $("aiStatus").textContent =
               "ОЖИДАНИЕ ЯДРА";
+
           }
 
-          if ($("aiCore")) {
+          if (
+            $("aiCore")
+          ) {
+
             $("aiCore").textContent =
-              "AI CORE · JARVIS LOADING";
+              "AI CORE · 2.0 · JARVIS LOADING";
+
           }
 
           return;
@@ -3629,51 +4970,82 @@
         }
 
         const state =
-          typeof jarvis.getState === "function"
+          typeof jarvis.getState ===
+          "function"
             ? jarvis.getState()
             : null;
 
-        if ($("aiStatus")) {
+        if (
+          $("aiStatus")
+        ) {
+
           $("aiStatus").textContent =
             state?.ready
               ? "READY"
               : "LOADING";
+
         }
 
-        if ($("aiCore")) {
+        if (
+          $("aiCore")
+        ) {
+
           $("aiCore").textContent =
             "AI CORE · 2.0 · JARVIS READY";
+
         }
 
-        if ($("homeJarvisStatus")) {
+        if (
+          $("homeJarvisStatus")
+        ) {
+
           $("homeJarvisStatus").textContent =
             state?.ready
               ? "READY"
               : "LOADING";
+
         }
 
-        if ($("settingsJarvisStatus")) {
+        if (
+          $("settingsJarvisStatus")
+        ) {
+
           $("settingsJarvisStatus").textContent =
             state?.ready
               ? "READY"
               : "LOADING";
+
         }
 
-        if ($("settingsJarvisVersion")) {
+        if (
+          $("settingsJarvisVersion")
+        ) {
+
           $("settingsJarvisVersion").textContent =
-            jarvis.version || "1.0";
+            jarvis.version ||
+            "1.0";
+
         }
 
-        if ($("settingsJarvisMode")) {
+        if (
+          $("settingsJarvisMode")
+        ) {
+
           $("settingsJarvisMode").textContent =
-            jarvis.mode || "LOCAL";
+            jarvis.mode ||
+            "LOCAL";
+
         }
 
-        if ($("settingsMemoryStatus")) {
+        if (
+          $("settingsMemoryStatus")
+        ) {
+
           $("settingsMemoryStatus").textContent =
             state?.memory
               ? "ACTIVE"
               : "OFF";
+
         }
 
         updateMemoryBox();
@@ -3688,21 +5060,30 @@
         const jarvis =
           getJarvis();
 
-        if (!box || !jarvis) {
+        if (
+          !box ||
+          !jarvis
+        ) {
+
           return;
+
         }
 
         try {
 
           const memory =
-            typeof jarvis.getMemory === "function"
+            typeof jarvis.getMemory ===
+            "function"
               ? jarvis.getMemory()
               : {};
 
           if (
             !memory ||
-            typeof memory !== "object" ||
-            Object.keys(memory).length === 0
+            typeof memory !==
+              "object" ||
+            Object.keys(
+              memory
+            ).length === 0
           ) {
 
             box.textContent =
@@ -3713,13 +5094,18 @@
           }
 
           box.textContent =
-            Object.entries(memory)
+            Object.entries(
+              memory
+            )
               .map(
                 ([key, value]) =>
-                  key + ": " +
+                  key +
+                  ": " +
                   String(value)
               )
-              .join("\n");
+              .join(
+                "\n"
+              );
 
         } catch (_) {
 
@@ -3739,7 +5125,8 @@
 
         if (
           !jarvis ||
-          typeof jarvis.ask !== "function"
+          typeof jarvis.ask !==
+            "function"
         ) {
 
           toast(
@@ -3751,18 +5138,25 @@
         }
 
         const text =
-          String(command || "")
-            .trim();
+          String(
+            command || ""
+          ).trim();
 
-        if (!text) return;
+        if (!text) {
+          return;
+        }
 
         try {
 
-          await jarvis.ask(text);
+          await jarvis.ask(
+            text
+          );
 
           renderJarvisState();
 
-        } catch (error) {
+        } catch (
+          error
+        ) {
 
           console.error(
             "JARVIS command error:",
@@ -3785,14 +5179,19 @@
             const input =
               $("command");
 
-            if (!input) return;
+            if (!input) {
+              return;
+            }
 
             const text =
               input.value.trim();
 
-            if (!text) return;
+            if (!text) {
+              return;
+            }
 
-            input.value = "";
+            input.value =
+              "";
 
             sendJarvisCommand(
               text
@@ -3807,12 +5206,14 @@
           event => {
 
             if (
-              event.key === "Enter"
+              event.key ===
+              "Enter"
             ) {
 
               event.preventDefault();
 
-              $("aiSendButton")?.click();
+              $("aiSendButton")
+                ?.click();
 
             }
 
@@ -3823,20 +5224,22 @@
         .querySelectorAll(
           "[data-ai-command]"
         )
-        .forEach(button => {
+        .forEach(
+          button => {
 
-          button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+              "click",
+              () => {
 
-              sendJarvisCommand(
-                button.dataset.aiCommand
-              );
+                sendJarvisCommand(
+                  button.dataset.aiCommand
+                );
 
-            }
-          );
+              }
+            );
 
-        });
+          }
+        );
 
       $("voiceButton")
         ?.addEventListener(
@@ -3895,7 +5298,9 @@
         ) {
 
           try {
+
             return jarvis.getSettings();
+
           } catch (_) {}
 
         }
@@ -3913,29 +5318,33 @@
           .querySelectorAll(
             "[data-switch]"
           )
-          .forEach(sw => {
+          .forEach(
+            sw => {
 
-            const key =
-              sw.dataset.switch;
+              const key =
+                sw.dataset.switch;
 
-            const value =
-              settings[key];
+              const value =
+                settings[key];
 
-            if (
-              typeof value ===
-              "boolean"
-            ) {
+              if (
+                typeof value ===
+                "boolean"
+              ) {
 
-              sw.classList.toggle(
-                "on",
-                value
-              );
+                sw.classList.toggle(
+                  "on",
+                  value
+                );
+
+              }
 
             }
+          );
 
-          });
-
-        if ($("aiMode")) {
+        if (
+          $("aiMode")
+        ) {
 
           const mode =
             settings.mode ||
@@ -3949,7 +5358,9 @@
           ];
 
           $("aiMode").value =
-            allowed.includes(mode)
+            allowed.includes(
+              mode
+            )
               ? mode
               : "LOCAL";
 
@@ -3961,64 +5372,65 @@
         .querySelectorAll(
           "[data-setting-toggle]"
         )
-        .forEach(row => {
+        .forEach(
+          row => {
 
-          row.addEventListener(
-            "click",
-            () => {
+            row.addEventListener(
+              "click",
+              () => {
 
-              const key =
-                row.dataset.settingToggle;
+                const key =
+                  row.dataset.settingToggle;
 
-              const jarvis =
-                getJarvis();
+                const jarvis =
+                  getJarvis();
 
-              if (
-                !jarvis ||
-                typeof jarvis.setSettings !==
-                  "function"
-              ) {
+                if (
+                  !jarvis ||
+                  typeof jarvis.setSettings !==
+                    "function"
+                ) {
 
-                toast(
-                  "JARVIS ещё загружается"
-                );
+                  toast(
+                    "JARVIS ещё загружается"
+                  );
 
-                return;
+                  return;
+
+                }
+
+                const current =
+                  getJarvisSettings();
+
+                const next =
+                  !Boolean(
+                    current[key]
+                  );
+
+                try {
+
+                  jarvis.setSettings({
+                    [key]:
+                      next
+                  });
+
+                  updateSettingUI();
+
+                  renderJarvisState();
+
+                } catch (_) {
+
+                  toast(
+                    "Не удалось изменить настройку"
+                  );
+
+                }
 
               }
+            );
 
-              const current =
-                getJarvisSettings();
-
-              const next =
-                !Boolean(current[key]);
-
-              try {
-
-                jarvis.setSettings({
-                  [key]: next
-                });
-
-                updateSettingUI();
-
-                toast(
-                  "Настройка обновлена"
-                );
-
-              } catch (error) {
-
-                console.error(error);
-
-                toast(
-                  "Не удалось изменить настройку"
-                );
-
-              }
-
-            }
-          );
-
-        });
+          }
+        );
 
       $("aiMode")
         ?.addEventListener(
@@ -4034,6 +5446,10 @@
                 "function"
             ) {
 
+              toast(
+                "JARVIS ещё загружается"
+              );
+
               return;
 
             }
@@ -4045,14 +5461,12 @@
                   $("aiMode").value
               });
 
-              toast(
-                "Режим AI изменён"
-              );
+              updateSettingUI();
 
             } catch (_) {
 
               toast(
-                "Не удалось изменить режим"
+                "Не удалось изменить режим AI"
               );
 
             }
@@ -4063,55 +5477,56 @@
       $("clearLocalDataButton")
         ?.addEventListener(
           "click",
-          () => {
+          async () => {
 
             const confirmed =
               window.confirm(
-                "Удалить локальные данные ASHINA и JARVIS?"
+                "Очистить локальные данные ASHINA? Чат, реакции и сохранённые настройки будут удалены."
               );
 
-            if (!confirmed) return;
+            if (!confirmed) {
+              return;
+            }
 
             try {
 
-              Object.values(
-                STORAGE
-              ).forEach(key => {
+              localStorage.clear();
 
-                localStorage.removeItem(
-                  key
+            } catch (_) {}
+
+            try {
+
+              const db =
+                await openDB();
+
+              const tx =
+                db.transaction(
+                  [
+                    ATTACHMENT_STORE,
+                    TRACK_STORE
+                  ],
+                  "readwrite"
                 );
 
-              });
+              tx.objectStore(
+                ATTACHMENT_STORE
+              ).clear();
 
-              const jarvis =
-                getJarvis();
+              tx.objectStore(
+                TRACK_STORE
+              ).clear();
 
-              if (
-                jarvis &&
-                typeof jarvis.clearMemory ===
-                  "function"
-              ) {
+            } catch (_) {}
 
-                jarvis.clearMemory();
+            toast(
+              "Локальные данные очищены"
+            );
 
-              }
-
-              toast(
-                "Локальные данные очищены"
-              );
-
-              renderChat();
-              renderNewsReactions();
-              updateMemoryBox();
-
-            } catch (_) {
-
-              toast(
-                "Не удалось очистить данные"
-              );
-
-            }
+            setTimeout(
+              () =>
+                location.reload(),
+              500
+            );
 
           }
         );
@@ -4120,199 +5535,211 @@
          DIAGNOSTICS
       ========================= */
 
-      async function runDiagnostics() {
+      function runDiagnostics() {
 
-        const jarvis =
-          getJarvis();
+        document
+          .querySelectorAll(
+            "[data-diagnostic]"
+          )
+          .forEach(
+            element => {
 
-        if (
-          !jarvis ||
-          typeof jarvis.diagnose !==
-            "function"
-        ) {
+              const type =
+                element.dataset.diagnostic;
 
-          return;
+              if (
+                type ===
+                "localStorage"
+              ) {
 
-        }
+                try {
 
-        try {
+                  const key =
+                    "__ashina_test__";
 
-          const result =
-            await jarvis.diagnose();
+                  localStorage.setItem(
+                    key,
+                    "1"
+                  );
 
-          const local =
-            document.querySelector(
-              '[data-diagnostic="localStorage"]'
-            );
+                  localStorage.removeItem(
+                    key
+                  );
 
-          const audioStatus =
-            document.querySelector(
-              '[data-diagnostic="audio"]'
-            );
+                  element.textContent =
+                    "OK";
 
-          const speech =
-            document.querySelector(
-              '[data-diagnostic="speech"]'
-            );
+                } catch (_) {
 
-          const network =
-            document.querySelector(
-              '[data-diagnostic="network"]'
-            );
+                  element.textContent =
+                    "ERROR";
 
-          if (local) {
-            local.textContent =
-              result.localStorage
-                ? "OK"
-                : "ERROR";
-          }
+                }
 
-          if (audioStatus) {
-            audioStatus.textContent =
-              result.audio
-                ? "OK"
-                : "ERROR";
-          }
+              } else if (
+                type ===
+                "audio"
+              ) {
 
-          if (speech) {
-            speech.textContent =
-              result.speechSynthesis
-                ? "OK"
-                : "N/A";
-          }
+                element.textContent =
+                  audio
+                    ? "OK"
+                    : "ERROR";
 
-          if (network) {
-            network.textContent =
-              navigator.onLine
-                ? "ONLINE"
-                : "OFFLINE";
-          }
+              } else if (
+                type ===
+                "speech"
+              ) {
 
-        } catch (error) {
+                element.textContent =
+                  "speechSynthesis" in
+                  window
+                    ? "OK"
+                    : "UNAVAILABLE";
 
-          console.error(
-            "Diagnostics error:",
-            error
+              } else if (
+                type ===
+                "network"
+              ) {
+
+                element.textContent =
+                  navigator.onLine
+                    ? "ONLINE"
+                    : "OFFLINE";
+
+              }
+
+            }
           );
 
-        }
-
       }
 
-      /* =========================
-         JARVIS READY EVENT
-      ========================= */
+      document
+        .querySelectorAll(
+          '[data-ai-command="Диагностика"]'
+        )
+        .forEach(
+          button => {
 
-      function waitForJarvis(
-        attempts = 30
-      ) {
+            button.addEventListener(
+              "click",
+              runDiagnostics
+            );
 
-        if (getJarvis()) {
-
-          renderJarvisState();
-          updateSettingUI();
-          runDiagnostics();
-
-          return;
-
-        }
-
-        if (attempts <= 0) {
-
-          if ($("aiStatus")) {
-            $("aiStatus").textContent =
-              "JARVIS OFFLINE";
           }
-
-          if ($("aiCore")) {
-            $("aiCore").textContent =
-              "AI CORE · JARVIS OFFLINE";
-          }
-
-          return;
-
-        }
-
-        setTimeout(
-          () => waitForJarvis(
-            attempts - 1
-          ),
-          100
         );
 
+      /* =========================
+         PUBLIC UI BRIDGE
+      ========================= */
+
+      window.ASHINA_UI = {
+
+        openSection,
+
+        playMusic,
+
+        pauseMusic,
+
+        toggleMusic:
+          toggleMusicLocal,
+
+        getAudio:
+          () => audio
+
+      };
+
+      /* =========================
+         STARTUP
+      ========================= */
+
+      function startup() {
+
+        updateNetworkStatus();
+
+        updateMusicUI();
+
+        renderNewsReactions();
+
+        renderChat();
+
+        renderJarvisState();
+
+        updateSettingUI();
+
+        runDiagnostics();
+
       }
+
+      startup();
+
+      const jarvisWait =
+        setInterval(
+          () => {
+
+            if (
+              getJarvis()
+            ) {
+
+              renderJarvisState();
+
+              updateSettingUI();
+
+              clearInterval(
+                jarvisWait
+              );
+
+            }
+
+          },
+          250
+        );
+
+      setTimeout(
+        () =>
+          clearInterval(
+            jarvisWait
+          ),
+        15000
+      );
 
       /* =========================
          SERVICE WORKER
       ========================= */
 
-      function registerServiceWorker() {
-
-        if (
-          !("serviceWorker" in navigator)
-        ) {
-          return;
-        }
-
-        navigator.serviceWorker
-          .register("./sw.js")
-          .catch(error => {
-
-            console.warn(
-              "Service Worker:",
-              error
-            );
-
-          });
-
-      }
-
-      /* =========================
-         INIT
-      ========================= */
-
-      function init() {
-
-        renderChat();
-        renderNewsReactions();
-
-        updateNetworkStatus();
-
-        restoreMusicState();
-
-        waitForJarvis();
-
-        registerServiceWorker();
-
-      }
-
       if (
-        document.readyState ===
-        "loading"
+        "serviceWorker" in
+        navigator
       ) {
 
-        document.addEventListener(
-          "DOMContentLoaded",
-          init,
-          { once: true }
+        window.addEventListener(
+          "load",
+          () => {
+
+            navigator.serviceWorker
+              .register(
+                "./sw.js"
+              )
+              .catch(
+                error =>
+                  console.warn(
+                    "Service Worker:",
+                    error
+                  )
+              );
+
+          }
         );
-
-      } else {
-
-        init();
 
       }
 
     })();
   </script>
 
-  <!--
-    ВАЖНО:
-    JARVIS подключается ПОСЛЕ UI-кода.
-    Само AI-ядро находится только в jarvis-core.js.
-  -->
-
-  <script src="./jarvis-core.js"></script>
+  <script
+    src="./jarvis-core.js"
+    defer
+  ></script>
 
 </body>
 </html>
