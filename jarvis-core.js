@@ -1,7 +1,7 @@
-```javascript
 /* =========================================================
-   ASHINA · JARVIS CORE 1.2
+   ASHINA · JARVIS CORE 1.4 SYNC
    Stable local AI core
+   Synchronized with ASHINA index.html
    ========================================================= */
 
 (() => {
@@ -10,7 +10,7 @@
   const CONFIG = {
     name: "JARVIS",
     project: "ASHINA",
-    version: "1.2",
+    version: "1.4",
 
     storage: {
       memory: "ASHINA_JARVIS_MEMORY",
@@ -24,8 +24,8 @@
 
     speech: {
       language: "ru-RU",
-      rate: 1.0,
-      pitch: 1.0,
+      rate: 0.92,
+      pitch: 0.82,
       volume: 1.0
     }
   };
@@ -39,15 +39,22 @@
   };
 
   const state = {
-    status: "ready",
+    ready: false,
+    status: "loading",
+
     lastCommand: "",
     lastTopic: "",
     lastUserMessage: "",
     lastAIMessage: "",
+
     commandCount: 0,
+
     memory: [],
     history: [],
-    settings: { ...DEFAULT_SETTINGS }
+
+    settings: {
+      ...DEFAULT_SETTINGS
+    }
   };
 
   let recognition = null;
@@ -61,9 +68,13 @@
   function loadJSON(key, fallback) {
     try {
       const value = localStorage.getItem(key);
-      if (!value) return fallback;
+
+      if (!value) {
+        return fallback;
+      }
 
       const parsed = JSON.parse(value);
+
       return parsed ?? fallback;
     } catch (error) {
       console.warn("[JARVIS] Storage read error:", error);
@@ -73,7 +84,11 @@
 
   function saveJSON(key, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem(
+        key,
+        JSON.stringify(value)
+      );
+
       return true;
     } catch (error) {
       console.warn("[JARVIS] Storage write error:", error);
@@ -82,23 +97,38 @@
   }
 
   function loadState() {
-    state.memory = loadJSON(CONFIG.storage.memory, []);
-    state.history = loadJSON(CONFIG.storage.history, []);
+    const memory = loadJSON(
+      CONFIG.storage.memory,
+      []
+    );
+
+    const history = loadJSON(
+      CONFIG.storage.history,
+      []
+    );
+
+    const settings = loadJSON(
+      CONFIG.storage.settings,
+      {}
+    );
+
+    state.memory =
+      Array.isArray(memory)
+        ? memory
+        : [];
+
+    state.history =
+      Array.isArray(history)
+        ? history
+        : [];
+
     state.settings = {
       ...DEFAULT_SETTINGS,
-      ...loadJSON(CONFIG.storage.settings, {})
+      ...(settings && typeof settings === "object"
+        ? settings
+        : {})
     };
-
-    if (!Array.isArray(state.memory)) {
-      state.memory = [];
-    }
-
-    if (!Array.isArray(state.history)) {
-      state.history = [];
-    }
   }
-
-  loadState();
 
   /* =========================================================
      HELPERS
@@ -112,18 +142,24 @@
   }
 
   function nowTime() {
-    return new Date().toLocaleTimeString("ru-RU", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
+    return new Date().toLocaleTimeString(
+      "ru-RU",
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
   }
 
   function nowDate() {
-    return new Date().toLocaleDateString("ru-RU", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
+    return new Date().toLocaleDateString(
+      "ru-RU",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }
+    );
   }
 
   function escapeHTML(text) {
@@ -166,17 +202,19 @@
       element.textContent = status;
 
       element.dataset.status = status;
+
       element.classList.remove(
         "ready",
         "thinking",
         "speaking",
         "listening",
+        "loading",
         "error"
       );
 
-      if (status) {
-        element.classList.add(String(status).toLowerCase());
-      }
+      element.classList.add(
+        String(status).toLowerCase()
+      );
     });
 
     renderJarvisState();
@@ -197,7 +235,10 @@
         element.dataset.status = state.status;
       });
     } catch (error) {
-      console.warn("[JARVIS] State render error:", error);
+      console.warn(
+        "[JARVIS] State render error:",
+        error
+      );
     }
   }
 
@@ -228,14 +269,25 @@
           : "JARVIS";
 
       row.innerHTML = `
-        <div class="jarvis-message-label">${escapeHTML(label)}</div>
-        <div class="jarvis-message-text">${escapeHTML(message)}</div>
-        <div class="jarvis-message-time">${escapeHTML(nowTime())}</div>
+        <div class="jarvis-message-label">
+          ${escapeHTML(label)}
+        </div>
+
+        <div class="jarvis-message-text">
+          ${escapeHTML(message)}
+        </div>
+
+        <div class="jarvis-message-time">
+          ${escapeHTML(nowTime())}
+        </div>
       `;
 
       log.appendChild(row);
 
-      while (log.children.length > CONFIG.visibleHistory * 2) {
+      while (
+        log.children.length >
+        CONFIG.visibleHistory * 2
+      ) {
         log.removeChild(log.firstChild);
       }
 
@@ -258,27 +310,44 @@
       time: new Date().toISOString()
     });
 
-    if (state.history.length > CONFIG.maxHistory) {
+    if (
+      state.history.length >
+      CONFIG.maxHistory
+    ) {
       state.history =
-        state.history.slice(-CONFIG.maxHistory);
+        state.history.slice(
+          -CONFIG.maxHistory
+        );
     }
 
-    saveJSON(CONFIG.storage.history, state.history);
+    saveJSON(
+      CONFIG.storage.history,
+      state.history
+    );
   }
 
-  function getHistory(limit = CONFIG.visibleHistory) {
+  function getHistory(
+    limit = CONFIG.visibleHistory
+  ) {
     return state.history.slice(-limit);
   }
 
   function getContext(limit = 10) {
     return getHistory(limit)
-      .map((item) => `${item.role}: ${item.text}`)
+      .map(
+        (item) =>
+          `${item.role}: ${item.text}`
+      )
       .join("\n");
   }
 
   function clearHistory() {
     state.history = [];
-    saveJSON(CONFIG.storage.history, []);
+
+    saveJSON(
+      CONFIG.storage.history,
+      []
+    );
 
     const log = getLogElement();
 
@@ -292,32 +361,49 @@
      ========================================================= */
 
   function remember(text) {
-    const value = String(text || "").trim();
+    const value =
+      String(text || "").trim();
 
-    if (!value) return false;
+    if (!value) {
+      return false;
+    }
 
     state.memory.push({
       text: value,
       time: new Date().toISOString()
     });
 
-    if (state.memory.length > CONFIG.maxMemories) {
+    if (
+      state.memory.length >
+      CONFIG.maxMemories
+    ) {
       state.memory =
-        state.memory.slice(-CONFIG.maxMemories);
+        state.memory.slice(
+          -CONFIG.maxMemories
+        );
     }
 
-    saveJSON(CONFIG.storage.memory, state.memory);
+    saveJSON(
+      CONFIG.storage.memory,
+      state.memory
+    );
 
     return true;
   }
 
   function getMemory() {
-    return state.memory.map((item) => item.text);
+    return state.memory.map(
+      (item) => item.text
+    );
   }
 
   function clearMemory() {
     state.memory = [];
-    saveJSON(CONFIG.storage.memory, []);
+
+    saveJSON(
+      CONFIG.storage.memory,
+      []
+    );
   }
 
   function renderMemory() {
@@ -332,72 +418,179 @@
     return window.speechSynthesis || null;
   }
 
+  function getBestRussianVoice() {
+    const synthesis =
+      getSpeechSynthesis();
+
+    if (!synthesis) {
+      return null;
+    }
+
+    let voices = [];
+
+    try {
+      voices = synthesis.getVoices() || [];
+    } catch (error) {
+      return null;
+    }
+
+    const russian =
+      voices.filter((voice) => {
+        return String(
+          voice.lang || ""
+        ).toLowerCase()
+          .startsWith("ru");
+      });
+
+    if (!russian.length) {
+      return voices[0] || null;
+    }
+
+    const preferredNames = [
+      "pavel",
+      "alexander",
+      "alex",
+      "dmitry",
+      "maxim",
+      "mikhail",
+      "male"
+    ];
+
+    for (
+      const preferred
+      of preferredNames
+    ) {
+      const found =
+        russian.find((voice) =>
+          String(
+            voice.name || ""
+          )
+            .toLowerCase()
+            .includes(preferred)
+        );
+
+      if (found) {
+        return found;
+      }
+    }
+
+    return russian[0];
+  }
+
   function speak(text) {
-    if (!state.settings.speech) {
+    if (
+      !state.settings.speech
+    ) {
       return Promise.resolve();
     }
 
-    const synthesis = getSpeechSynthesis();
+    const synthesis =
+      getSpeechSynthesis();
 
     if (!synthesis) {
       return Promise.resolve();
     }
 
-    const message = String(text || "").trim();
+    const message =
+      String(text || "").trim();
 
     if (!message) {
       return Promise.resolve();
     }
 
-    speechQueue = speechQueue
-      .catch(() => undefined)
-      .then(() => {
-        return new Promise((resolve) => {
-          try {
-            synthesis.cancel();
+    speechQueue =
+      speechQueue
+        .catch(() => undefined)
+        .then(() => {
+          return new Promise(
+            (resolve) => {
+              try {
+                synthesis.cancel();
 
-            const utterance =
-              new SpeechSynthesisUtterance(message);
+                const utterance =
+                  new SpeechSynthesisUtterance(
+                    message
+                  );
 
-            utterance.lang = CONFIG.speech.language;
-            utterance.rate = CONFIG.speech.rate;
-            utterance.pitch = CONFIG.speech.pitch;
-            utterance.volume = CONFIG.speech.volume;
+                utterance.lang =
+                  CONFIG.speech.language;
 
-            utterance.onstart = () => {
-              setStatus("speaking");
-            };
+                utterance.rate =
+                  CONFIG.speech.rate;
 
-            utterance.onend = () => {
-              setStatus("ready");
-              resolve();
-            };
+                utterance.pitch =
+                  CONFIG.speech.pitch;
 
-            utterance.onerror = () => {
-              setStatus("ready");
-              resolve();
-            };
+                utterance.volume =
+                  CONFIG.speech.volume;
 
-            synthesis.speak(utterance);
-          } catch (error) {
-            console.warn("[JARVIS] Speech error:", error);
-            setStatus("ready");
-            resolve();
-          }
+                const voice =
+                  getBestRussianVoice();
+
+                if (voice) {
+                  utterance.voice =
+                    voice;
+                }
+
+                utterance.onstart =
+                  () => {
+                    setStatus(
+                      "speaking"
+                    );
+                  };
+
+                utterance.onend =
+                  () => {
+                    setStatus(
+                      "ready"
+                    );
+
+                    resolve();
+                  };
+
+                utterance.onerror =
+                  () => {
+                    setStatus(
+                      "ready"
+                    );
+
+                    resolve();
+                  };
+
+                synthesis.speak(
+                  utterance
+                );
+              } catch (error) {
+                console.warn(
+                  "[JARVIS] Speech error:",
+                  error
+                );
+
+                setStatus(
+                  "ready"
+                );
+
+                resolve();
+              }
+            }
+          );
         });
-      });
 
     return speechQueue;
   }
 
   function stopSpeaking() {
-    const synthesis = getSpeechSynthesis();
+    const synthesis =
+      getSpeechSynthesis();
 
     if (synthesis) {
       try {
         synthesis.cancel();
       } catch (error) {
-        console.warn("[JARVIS] Speech stop error:", error);
+        console.warn(
+          "[JARVIS] Speech stop error:",
+          error
+        );
       }
     }
 
@@ -409,43 +602,57 @@
      ========================================================= */
 
   function playMusic() {
-    const audio = getAudioElement();
+    const audio =
+      getAudioElement();
 
     if (!audio) {
       return {
         success: false,
-        message: "Музыкальный проигрыватель не найден."
+        message:
+          "Музыкальный проигрыватель не найден."
       };
     }
 
     try {
-      const result = audio.play();
+      const result =
+        audio.play();
 
-      if (result && typeof result.catch === "function") {
+      if (
+        result &&
+        typeof result.catch ===
+          "function"
+      ) {
         result.catch(() => {});
       }
 
       return {
         success: true,
-        message: "Музыка запущена."
+        message:
+          "Музыка запущена."
       };
     } catch (error) {
-      console.warn("[JARVIS] Music play error:", error);
+      console.warn(
+        "[JARVIS] Music play error:",
+        error
+      );
 
       return {
         success: false,
-        message: "Не удалось запустить музыку."
+        message:
+          "Не удалось запустить музыку."
       };
     }
   }
 
   function stopMusic() {
-    const audio = getAudioElement();
+    const audio =
+      getAudioElement();
 
     if (!audio) {
       return {
         success: false,
-        message: "Музыкальный проигрыватель не найден."
+        message:
+          "Музыкальный проигрыватель не найден."
       };
     }
 
@@ -454,25 +661,32 @@
 
       return {
         success: true,
-        message: "Музыка остановлена."
+        message:
+          "Музыка остановлена."
       };
     } catch (error) {
-      console.warn("[JARVIS] Music stop error:", error);
+      console.warn(
+        "[JARVIS] Music stop error:",
+        error
+      );
 
       return {
         success: false,
-        message: "Не удалось остановить музыку."
+        message:
+          "Не удалось остановить музыку."
       };
     }
   }
 
   function toggleMusic() {
-    const audio = getAudioElement();
+    const audio =
+      getAudioElement();
 
     if (!audio) {
       return {
         success: false,
-        message: "Музыкальный проигрыватель не найден."
+        message:
+          "Музыкальный проигрыватель не найден."
       };
     }
 
@@ -484,81 +698,256 @@
   }
 
   /* =========================================================
+     NEXT / PREVIOUS TRACK
+     Works with ASHINA .track elements
+     ========================================================= */
+
+  function getTracks() {
+    return Array.from(
+      document.querySelectorAll(
+        ".track"
+      )
+    );
+  }
+
+  function getCurrentTrackIndex(
+    tracks
+  ) {
+    const audio =
+      getAudioElement();
+
+    if (!tracks.length) {
+      return -1;
+    }
+
+    if (audio) {
+      const source =
+        audio.currentSrc ||
+        audio.src ||
+        "";
+
+      const index =
+        tracks.findIndex(
+          (track) => {
+            const trackSource =
+              track.dataset?.src ||
+              "";
+
+            return (
+              trackSource &&
+              source.includes(
+                trackSource
+              )
+            );
+          }
+        );
+
+      if (index >= 0) {
+        return index;
+      }
+    }
+
+    const active =
+      tracks.findIndex(
+        (track) =>
+          track.classList.contains(
+            "active"
+          )
+      );
+
+    return active >= 0
+      ? active
+      : 0;
+  }
+
+  function selectTrack(
+    index
+  ) {
+    const tracks =
+      getTracks();
+
+    if (!tracks.length) {
+      return false;
+    }
+
+    let target =
+      tracks[index];
+
+    if (!target) {
+      target =
+        tracks[0];
+    }
+
+    try {
+      target.click();
+      return true;
+    } catch (error) {
+      console.warn(
+        "[JARVIS] Track click error:",
+        error
+      );
+
+      return false;
+    }
+  }
+
+  function nextMusic() {
+    const tracks =
+      getTracks();
+
+    if (!tracks.length) {
+      return {
+        success: false,
+        message:
+          "Список музыкальных треков не найден."
+      };
+    }
+
+    const current =
+      getCurrentTrackIndex(
+        tracks
+      );
+
+    const next =
+      current < 0
+        ? 0
+        : (current + 1) %
+          tracks.length;
+
+    const success =
+      selectTrack(next);
+
+    return {
+      success,
+      message: success
+        ? "Следующая песня запущена."
+        : "Не удалось переключить песню."
+    };
+  }
+
+  function previousMusic() {
+    const tracks =
+      getTracks();
+
+    if (!tracks.length) {
+      return {
+        success: false,
+        message:
+          "Список музыкальных треков не найден."
+      };
+    }
+
+    const current =
+      getCurrentTrackIndex(
+        tracks
+      );
+
+    const previous =
+      current <= 0
+        ? tracks.length - 1
+        : current - 1;
+
+    const success =
+      selectTrack(previous);
+
+    return {
+      success,
+      message: success
+        ? "Предыдущая песня запущена."
+        : "Не удалось переключить песню."
+    };
+  }
+
+  /* =========================================================
      NAVIGATION
      ========================================================= */
 
-  function openSection(sectionName) {
-    const name = normalize(sectionName);
+  function openSection(
+    sectionName
+  ) {
+    const name =
+      normalize(sectionName);
 
     const aliases = {
-      home: ["home", "главная"],
-      chat: ["chat", "чат"],
-      music: ["music", "музыка"],
-      news: ["news", "лента", "новости"],
-      ai: ["ai", "ии", "искусственный интеллект"]
+      home: [
+        "home",
+        "главная",
+        "домой"
+      ],
+
+      chat: [
+        "chat",
+        "чат"
+      ],
+
+      music: [
+        "music",
+        "музыка"
+      ],
+
+      news: [
+        "news",
+        "лента",
+        "новости"
+      ],
+
+      ai: [
+        "ai",
+        "ии",
+        "искусственный интеллект"
+      ]
     };
 
     let target = name;
 
-    Object.keys(aliases).forEach((key) => {
-      if (aliases[key].includes(name)) {
+    Object.keys(
+      aliases
+    ).forEach((key) => {
+      if (
+        aliases[key].includes(
+          name
+        )
+      ) {
         target = key;
       }
     });
 
     const selectors = [
       `[data-section="${target}"]`,
+      `[data-page="${target}"]`,
       `#${target}`,
-      `section[data-page="${target}"]`,
-      `[data-page="${target}"]`
+      `section[data-section="${target}"]`,
+      `section[data-page="${target}"]`
     ];
 
     let element = null;
 
-    for (const selector of selectors) {
+    for (
+      const selector
+      of selectors
+    ) {
       try {
-        element = document.querySelector(selector);
-        if (element) break;
+        element =
+          document.querySelector(
+            selector
+          );
+
+        if (element) {
+          break;
+        }
       } catch (error) {}
     }
 
     if (element) {
-      if (
-        element.tagName === "BUTTON" ||
-        element.tagName === "A" ||
-        element.onclick
-      ) {
-        try {
+      try {
+        if (
+          typeof element.click ===
+          "function"
+        ) {
           element.click();
           return true;
-        } catch (error) {}
-      }
-    }
-
-    const sections = document.querySelectorAll(
-      "section[data-section], section[data-page]"
-    );
-
-    if (sections.length) {
-      sections.forEach((section) => {
-        const sectionNameValue =
-          section.dataset.section ||
-          section.dataset.page ||
-          "";
-
-        const active =
-          normalize(sectionNameValue) === target;
-
-        section.classList.toggle("active", active);
-
-        if (active) {
-          section.removeAttribute("hidden");
-        } else {
-          section.setAttribute("hidden", "");
         }
-      });
-
-      return true;
+      } catch (error) {}
     }
 
     return false;
@@ -569,50 +958,68 @@
      ========================================================= */
 
   function diagnose() {
-    const audio = getAudioElement();
+    const audio =
+      getAudioElement();
 
-    const result = {
-      localStorage: false,
-      audio: false,
-      speech: false,
-      recognition: false,
-      serviceWorker: false,
-      indexedDB: false,
-      online: navigator.onLine
+    return {
+      localStorage: testStorage(),
+      audio: !!audio,
+      speech:
+        !!window.speechSynthesis,
+
+      recognition:
+        !!(
+          window.SpeechRecognition ||
+          window.webkitSpeechRecognition
+        ),
+
+      serviceWorker:
+        "serviceWorker" in navigator,
+
+      indexedDB:
+        "indexedDB" in window,
+
+      online:
+        navigator.onLine,
+
+      jarvis:
+        true,
+
+      ready:
+        state.ready,
+
+      version:
+        CONFIG.version
     };
+  }
 
+  function testStorage() {
     try {
-      const testKey = "__jarvis_test__";
+      const key =
+        "__jarvis_test__";
 
-      localStorage.setItem(testKey, "1");
-      localStorage.removeItem(testKey);
+      localStorage.setItem(
+        key,
+        "1"
+      );
 
-      result.localStorage = true;
+      localStorage.removeItem(
+        key
+      );
+
+      return true;
     } catch (error) {
-      result.localStorage = false;
+      return false;
     }
-
-    result.audio = !!audio;
-    result.speech = !!window.speechSynthesis;
-
-    result.recognition = !!(
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition
-    );
-
-    result.serviceWorker =
-      "serviceWorker" in navigator;
-
-    result.indexedDB =
-      "indexedDB" in window;
-
-    return result;
   }
 
   function diagnosticsText() {
-    const d = diagnose();
+    const d =
+      diagnose();
 
     return [
+      `JARVIS: ${d.ready ? "READY" : "LOADING"}`,
+      `Версия: ${d.version}`,
       `Хранилище: ${d.localStorage ? "OK" : "ошибка"}`,
       `Музыка: ${d.audio ? "OK" : "не найдена"}`,
       `Озвучивание: ${d.speech ? "OK" : "недоступно"}`,
@@ -627,12 +1034,21 @@
      INTENT DETECTION
      ========================================================= */
 
-  function has(text, words) {
-    return words.some((word) => text.includes(word));
+  function has(
+    text,
+    words
+  ) {
+    return words.some(
+      (word) =>
+        text.includes(word)
+    );
   }
 
-  function classifyCommand(command) {
-    const text = normalize(command);
+  function classifyCommand(
+    command
+  ) {
+    const text =
+      normalize(command);
 
     if (!text) {
       return "empty";
@@ -739,6 +1155,34 @@
       ])
     ) {
       return "clearMemory";
+    }
+
+    if (
+      has(text, [
+        "следующая песня",
+        "следующий трек",
+        "следующая музыка",
+        "включи следующую",
+        "переключи на следующую",
+        "смени мелодию",
+        "сменить мелодию",
+        "следующий трек"
+      ])
+    ) {
+      return "nextMusic";
+    }
+
+    if (
+      has(text, [
+        "предыдущая песня",
+        "предыдущий трек",
+        "предыдущая музыка",
+        "включи предыдущую",
+        "переключи на предыдущую",
+        "верни предыдущую"
+      ])
+    ) {
+      return "previousMusic";
     }
 
     if (
@@ -853,13 +1297,21 @@
      COMMAND PROCESSING
      ========================================================= */
 
-  async function processCommand(command) {
-    const original = String(command || "").trim();
-    const text = normalize(original);
+  async function processCommand(
+    command
+  ) {
+    const original =
+      String(command || "").trim();
 
-    const intent = classifyCommand(text);
+    const text =
+      normalize(original);
 
-    state.lastCommand = original;
+    const intent =
+      classifyCommand(text);
+
+    state.lastCommand =
+      original;
+
     state.commandCount++;
 
     switch (intent) {
@@ -877,6 +1329,7 @@
           "Я могу отвечать на команды,",
           "работать с памятью,",
           "управлять музыкой,",
+          "переключать треки,",
           "открывать разделы ASHINA,",
           "проверять состояние системы",
           "и работать с голосовым вводом."
@@ -905,11 +1358,21 @@
         ].join("\n");
 
       case "remember": {
-        const value = original
-          .replace(/^запомни\s*/i, "")
-          .replace(/^запиши в память\s*/i, "")
-          .replace(/^сохрани в память\s*/i, "")
-          .trim();
+        const value =
+          original
+            .replace(
+              /^запомни\s*/i,
+              ""
+            )
+            .replace(
+              /^запиши в память\s*/i,
+              ""
+            )
+            .replace(
+              /^сохрани в память\s*/i,
+              ""
+            )
+            .trim();
 
         if (!value) {
           return "Что именно нужно запомнить?";
@@ -925,17 +1388,37 @@
         return "Память очищена.";
 
       case "playMusic": {
-        const result = playMusic();
+        const result =
+          playMusic();
+
         return result.message;
       }
 
       case "stopMusic": {
-        const result = stopMusic();
+        const result =
+          stopMusic();
+
         return result.message;
       }
 
       case "toggleMusic": {
-        const result = toggleMusic();
+        const result =
+          toggleMusic();
+
+        return result.message;
+      }
+
+      case "nextMusic": {
+        const result =
+          nextMusic();
+
+        return result.message;
+      }
+
+      case "previousMusic": {
+        const result =
+          previousMusic();
+
         return result.message;
       }
 
@@ -973,6 +1456,9 @@
           "«Который час?»",
           "«Запусти музыку»",
           "«Останови музыку»",
+          "«Следующая песня»",
+          "«Предыдущая песня»",
+          "«Смени мелодию»",
           "«Открой чат»",
           "«Открой музыку»",
           "«Открой ленту»",
@@ -982,7 +1468,9 @@
 
       case "conversation":
       default:
-        return conversationFallback(original);
+        return conversationFallback(
+          original
+        );
     }
   }
 
@@ -990,8 +1478,11 @@
      BASIC CONVERSATION
      ========================================================= */
 
-  function conversationFallback(command) {
-    const text = normalize(command);
+  function conversationFallback(
+    command
+  ) {
+    const text =
+      normalize(command);
 
     if (
       has(text, [
@@ -1040,8 +1531,11 @@
      MAIN ASK
      ========================================================= */
 
-  async function ask(command) {
-    const text = String(command || "").trim();
+  async function ask(
+    command
+  ) {
+    const text =
+      String(command || "").trim();
 
     if (!text) {
       return "";
@@ -1049,16 +1543,27 @@
 
     setStatus("thinking");
 
-    addMessage("user", text);
+    addMessage(
+      "user",
+      text
+    );
 
-    state.lastUserMessage = text;
+    state.lastUserMessage =
+      text;
 
     try {
-      const response = await processCommand(text);
+      const response =
+        await processCommand(
+          text
+        );
 
-      state.lastAIMessage = response;
+      state.lastAIMessage =
+        response;
 
-      addMessage("ai", response);
+      addMessage(
+        "ai",
+        response
+      );
 
       setStatus("ready");
 
@@ -1071,14 +1576,21 @@
 
       return response;
     } catch (error) {
-      console.error("[JARVIS] Command error:", error);
+      console.error(
+        "[JARVIS] Command error:",
+        error
+      );
 
       const response =
         "Произошла внутренняя ошибка JARVIS.";
 
-      state.lastAIMessage = response;
+      state.lastAIMessage =
+        response;
 
-      addMessage("ai", response);
+      addMessage(
+        "ai",
+        response
+      );
 
       setStatus("error");
 
@@ -1099,51 +1611,75 @@
       return null;
     }
 
-    const instance = new Recognition();
+    const instance =
+      new Recognition();
 
-    instance.lang = "ru-RU";
-    instance.continuous = false;
-    instance.interimResults = false;
-    instance.maxAlternatives = 1;
+    instance.lang =
+      "ru-RU";
+
+    instance.continuous =
+      false;
+
+    instance.interimResults =
+      false;
+
+    instance.maxAlternatives =
+      1;
 
     instance.onstart = () => {
-      recognitionStarting = false;
-      setStatus("listening");
-    };
+      recognitionStarting =
+        false;
 
-    instance.onresult = (event) => {
-      try {
-        const result =
-          event.results?.[0]?.[0]?.transcript || "";
-
-        const command = result.trim();
-
-        if (command) {
-          ask(command);
-        }
-      } catch (error) {
-        console.warn(
-          "[JARVIS] Voice result error:",
-          error
-        );
-      }
-    };
-
-    instance.onerror = (event) => {
-      recognitionStarting = false;
-
-      console.warn(
-        "[JARVIS] Voice recognition error:",
-        event?.error
+      setStatus(
+        "listening"
       );
-
-      setStatus("ready");
     };
 
-    instance.onend = () => {
-      recognitionStarting = false;
-      setStatus("ready");
-    };
+    instance.onresult =
+      (event) => {
+        try {
+          const result =
+            event.results?.[0]?.[0]
+              ?.transcript || "";
+
+          const command =
+            result.trim();
+
+          if (command) {
+            ask(command);
+          }
+        } catch (error) {
+          console.warn(
+            "[JARVIS] Voice result error:",
+            error
+          );
+        }
+      };
+
+    instance.onerror =
+      (event) => {
+        recognitionStarting =
+          false;
+
+        console.warn(
+          "[JARVIS] Voice recognition error:",
+          event?.error
+        );
+
+        setStatus(
+          "ready"
+        );
+      };
+
+    instance.onend =
+      () => {
+        recognitionStarting =
+          false;
+
+        setStatus(
+          "ready"
+        );
+      };
 
     return instance;
   }
@@ -1151,38 +1687,45 @@
   function startVoice() {
     if (
       recognitionStarting ||
-      state.status === "listening"
+      state.status ===
+        "listening"
     ) {
       return false;
     }
 
     if (!recognition) {
-      recognition = createRecognition();
+      recognition =
+        createRecognition();
     }
 
     if (!recognition) {
-      const message =
-        "Голосовой ввод не поддерживается этим браузером.";
-
-      addMessage("ai", message);
+      addMessage(
+        "ai",
+        "Голосовой ввод не поддерживается этим браузером."
+      );
 
       return false;
     }
 
     try {
-      recognitionStarting = true;
+      recognitionStarting =
+        true;
+
       recognition.start();
 
       return true;
     } catch (error) {
-      recognitionStarting = false;
+      recognitionStarting =
+        false;
 
       console.warn(
         "[JARVIS] Voice start error:",
         error
       );
 
-      setStatus("ready");
+      setStatus(
+        "ready"
+      );
 
       return false;
     }
@@ -1195,8 +1738,13 @@
 
     try {
       recognition.stop();
-      recognitionStarting = false;
-      setStatus("ready");
+
+      recognitionStarting =
+        false;
+
+      setStatus(
+        "ready"
+      );
 
       return true;
     } catch (error) {
@@ -1205,8 +1753,12 @@
         error
       );
 
-      recognitionStarting = false;
-      setStatus("ready");
+      recognitionStarting =
+        false;
+
+      setStatus(
+        "ready"
+      );
 
       return false;
     }
@@ -1216,7 +1768,9 @@
      SETTINGS
      ========================================================= */
 
-  function setSettings(newSettings = {}) {
+  function setSettings(
+    newSettings = {}
+  ) {
     state.settings = {
       ...state.settings,
       ...newSettings
@@ -1227,11 +1781,15 @@
       state.settings
     );
 
-    return { ...state.settings };
+    return {
+      ...state.settings
+    };
   }
 
   function getSettings() {
-    return { ...state.settings };
+    return {
+      ...state.settings
+    };
   }
 
   /* =========================================================
@@ -1240,18 +1798,49 @@
 
   function getState() {
     return {
+      /* New index.html compatibility */
+      ready: state.ready,
+      memory:
+        state.memory.length > 0,
+      mode:
+        state.settings.mode ||
+        "LOCAL",
+
+      /* Original API compatibility */
       status: state.status,
-      lastCommand: state.lastCommand,
-      lastTopic: state.lastTopic,
-      lastUserMessage: state.lastUserMessage,
-      lastAIMessage: state.lastAIMessage,
-      commandCount: state.commandCount,
-      memoryCount: state.memory.length,
-      historyCount: state.history.length,
-      settings: { ...state.settings },
-      version: CONFIG.version,
-      name: CONFIG.name,
-      project: CONFIG.project
+      lastCommand:
+        state.lastCommand,
+
+      lastTopic:
+        state.lastTopic,
+
+      lastUserMessage:
+        state.lastUserMessage,
+
+      lastAIMessage:
+        state.lastAIMessage,
+
+      commandCount:
+        state.commandCount,
+
+      memoryCount:
+        state.memory.length,
+
+      historyCount:
+        state.history.length,
+
+      settings: {
+        ...state.settings
+      },
+
+      version:
+        CONFIG.version,
+
+      name:
+        CONFIG.name,
+
+      project:
+        CONFIG.project
     };
   }
 
@@ -1261,6 +1850,7 @@
 
   const API = {
     ask,
+
     speak,
     stopSpeaking,
 
@@ -1283,6 +1873,9 @@
     stopMusic,
     toggleMusic,
 
+    nextMusic,
+    previousMusic,
+
     openSection,
 
     setSettings,
@@ -1290,38 +1883,103 @@
 
     getState,
 
-    config: CONFIG
+    config:
+      CONFIG
   };
 
   /* =========================================================
      GLOBAL EXPORTS
+     IMPORTANT:
+     Export BEFORE initialization
      ========================================================= */
 
-  window.JARVIS = API;
-  window.JARVIS_API = API;
-  window.ASHINA_JARVIS = API;
+  window.JARVIS =
+    API;
+
+  window.JARVIS_API =
+    API;
+
+  window.ASHINA_JARVIS =
+    API;
+
+  /* Compatibility flags */
+
+  window.JARVIS_READY =
+    false;
 
   /* =========================================================
      INITIALIZATION
      ========================================================= */
 
   function init() {
-    renderJarvisState();
+    try {
+      loadState();
 
-    console.log(
-      `[JARVIS ${CONFIG.version}] ${CONFIG.project} core ready.`
-    );
+      state.ready =
+        true;
+
+      state.status =
+        "ready";
+
+      window.JARVIS_READY =
+        true;
+
+      renderJarvisState();
+
+      /*
+       * Tell index.html that the
+       * core is completely ready.
+       */
+      try {
+        window.dispatchEvent(
+          new CustomEvent(
+            "jarvis-ready",
+            {
+              detail:
+                getState()
+            }
+          )
+        );
+      } catch (error) {}
+
+      console.log(
+        `[JARVIS ${CONFIG.version}] ${CONFIG.project} core ready.`
+      );
+    } catch (error) {
+      console.error(
+        "[JARVIS] Initialization error:",
+        error
+      );
+
+      state.ready =
+        false;
+
+      state.status =
+        "error";
+
+      renderJarvisState();
+    }
   }
 
-  if (document.readyState === "loading") {
+  /*
+   * Do not wait for index.html.
+   * The core is exported immediately.
+   */
+  loadState();
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
     document.addEventListener(
       "DOMContentLoaded",
       init,
-      { once: true }
+      {
+        once: true
+      }
     );
   } else {
     init();
   }
 
 })();
-```
