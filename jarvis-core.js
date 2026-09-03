@@ -1,5 +1,5 @@
 /* =========================================================
-   ASHINA · JARVIS CORE 1.4 SYNC
+   ASHINA · JARVIS CORE 1.5
    Stable local AI core
    Synchronized with ASHINA index.html
    ========================================================= */
@@ -10,7 +10,7 @@
   const CONFIG = {
     name: "JARVIS",
     project: "ASHINA",
-    version: "1.4",
+    version: "1.5",
 
     storage: {
       memory: "ASHINA_JARVIS_MEMORY",
@@ -124,7 +124,8 @@
 
     state.settings = {
       ...DEFAULT_SETTINGS,
-      ...(settings && typeof settings === "object"
+      ...(settings &&
+      typeof settings === "object"
         ? settings
         : {})
     };
@@ -200,7 +201,6 @@
       if (!element) return;
 
       element.textContent = status;
-
       element.dataset.status = status;
 
       element.classList.remove(
@@ -231,8 +231,11 @@
       elements.forEach((element) => {
         if (!element) return;
 
-        element.textContent = state.status;
-        element.dataset.status = state.status;
+        element.textContent =
+          state.status;
+
+        element.dataset.status =
+          state.status;
       });
     } catch (error) {
       console.warn(
@@ -246,22 +249,30 @@
      CHAT LOG
      ========================================================= */
 
-  function addMessage(role, text, save = true) {
-    const message = String(text || "").trim();
+  function addMessage(
+    role,
+    text,
+    save = true
+  ) {
+    const message =
+      String(text || "").trim();
 
     if (!message) return;
 
-    const log = getLogElement();
+    const log =
+      getLogElement();
 
     if (log) {
-      const row = document.createElement("div");
+      const row =
+        document.createElement("div");
 
       row.className =
         role === "user"
           ? "jarvis-message user"
           : "jarvis-message ai";
 
-      row.dataset.role = role;
+      row.dataset.role =
+        role;
 
       const label =
         role === "user"
@@ -269,17 +280,9 @@
           : "JARVIS";
 
       row.innerHTML = `
-        <div class="jarvis-message-label">
-          ${escapeHTML(label)}
-        </div>
-
-        <div class="jarvis-message-text">
-          ${escapeHTML(message)}
-        </div>
-
-        <div class="jarvis-message-time">
-          ${escapeHTML(nowTime())}
-        </div>
+        <div class="jarvis-message-label">${escapeHTML(label)}</div>
+        <div class="jarvis-message-text">${escapeHTML(message)}</div>
+        <div class="jarvis-message-time">${escapeHTML(nowTime())}</div>
       `;
 
       log.appendChild(row);
@@ -288,14 +291,20 @@
         log.children.length >
         CONFIG.visibleHistory * 2
       ) {
-        log.removeChild(log.firstChild);
+        log.removeChild(
+          log.firstChild
+        );
       }
 
-      log.scrollTop = log.scrollHeight;
+      log.scrollTop =
+        log.scrollHeight;
     }
 
     if (save) {
-      addHistory(role, message);
+      addHistory(
+        role,
+        message
+      );
     }
   }
 
@@ -303,11 +312,15 @@
      HISTORY
      ========================================================= */
 
-  function addHistory(role, text) {
+  function addHistory(
+    role,
+    text
+  ) {
     state.history.push({
       role,
       text,
-      time: new Date().toISOString()
+      time:
+        new Date().toISOString()
     });
 
     if (
@@ -329,10 +342,14 @@
   function getHistory(
     limit = CONFIG.visibleHistory
   ) {
-    return state.history.slice(-limit);
+    return state.history.slice(
+      -limit
+    );
   }
 
-  function getContext(limit = 10) {
+  function getContext(
+    limit = 10
+  ) {
     return getHistory(limit)
       .map(
         (item) =>
@@ -349,7 +366,8 @@
       []
     );
 
-    const log = getLogElement();
+    const log =
+      getLogElement();
 
     if (log) {
       log.innerHTML = "";
@@ -370,7 +388,8 @@
 
     state.memory.push({
       text: value,
-      time: new Date().toISOString()
+      time:
+        new Date().toISOString()
     });
 
     if (
@@ -415,7 +434,10 @@
      ========================================================= */
 
   function getSpeechSynthesis() {
-    return window.speechSynthesis || null;
+    return (
+      window.speechSynthesis ||
+      null
+    );
   }
 
   function getBestRussianVoice() {
@@ -429,18 +451,21 @@
     let voices = [];
 
     try {
-      voices = synthesis.getVoices() || [];
+      voices =
+        synthesis.getVoices() ||
+        [];
     } catch (error) {
       return null;
     }
 
     const russian =
-      voices.filter((voice) => {
-        return String(
+      voices.filter((voice) =>
+        String(
           voice.lang || ""
-        ).toLowerCase()
-          .startsWith("ru");
-      });
+        )
+          .toLowerCase()
+          .startsWith("ru")
+      );
 
     if (!russian.length) {
       return voices[0] || null;
@@ -699,7 +724,6 @@
 
   /* =========================================================
      NEXT / PREVIOUS TRACK
-     Works with ASHINA .track elements
      ========================================================= */
 
   function getTracks() {
@@ -780,6 +804,7 @@
 
     try {
       target.click();
+
       return true;
     } catch (error) {
       console.warn(
@@ -898,7 +923,8 @@
       ]
     };
 
-    let target = name;
+    let target =
+      name;
 
     Object.keys(
       aliases
@@ -908,7 +934,8 @@
           name
         )
       ) {
-        target = key;
+        target =
+          key;
       }
     });
 
@@ -920,7 +947,8 @@
       `section[data-page="${target}"]`
     ];
 
-    let element = null;
+    let element =
+      null;
 
     for (
       const selector
@@ -945,6 +973,7 @@
           "function"
         ) {
           element.click();
+
           return true;
         }
       } catch (error) {}
@@ -962,8 +991,12 @@
       getAudioElement();
 
     return {
-      localStorage: testStorage(),
-      audio: !!audio,
+      localStorage:
+        testStorage(),
+
+      audio:
+        !!audio,
+
       speech:
         !!window.speechSynthesis,
 
@@ -974,10 +1007,12 @@
         ),
 
       serviceWorker:
-        "serviceWorker" in navigator,
+        "serviceWorker" in
+        navigator,
 
       indexedDB:
-        "indexedDB" in window,
+        "indexedDB" in
+        window,
 
       online:
         navigator.onLine,
@@ -1031,7 +1066,7 @@
   }
 
   /* =========================================================
-     INTENT DETECTION
+     INTENT DETECTION 1.5
      ========================================================= */
 
   function has(
@@ -1053,6 +1088,10 @@
     if (!text) {
       return "empty";
     }
+
+    /* -------------------------------------------------------
+       BASIC COMMANDS
+       ------------------------------------------------------- */
 
     if (
       has(text, [
@@ -1157,64 +1196,271 @@
       return "clearMemory";
     }
 
-    if (
-      has(text, [
-        "следующая песня",
-        "следующий трек",
-        "следующая музыка",
-        "включи следующую",
-        "переключи на следующую",
-        "смени мелодию",
-        "сменить мелодию",
-        "следующий трек"
-      ])
-    ) {
-      return "nextMusic";
-    }
+    /* -------------------------------------------------------
+       MUSIC OBJECTS
+       ------------------------------------------------------- */
+
+    const musicWords = [
+      "музыка",
+      "музыку",
+      "музыки",
+      "музыке",
+      "музыкой",
+
+      "трек",
+      "трека",
+      "треку",
+      "треком",
+      "треки",
+      "треков",
+
+      "песня",
+      "песню",
+      "песни",
+      "песне",
+      "песней",
+
+      "мелодия",
+      "мелодию",
+      "мелодии",
+      "мелодией",
+
+      "композиция",
+      "композицию",
+      "композиции",
+      "композицией"
+    ];
+
+    const hasMusicObject =
+      has(
+        text,
+        musicWords
+      );
+
+    /* -------------------------------------------------------
+       EXPLICIT PREVIOUS COMMANDS
+       ------------------------------------------------------- */
 
     if (
       has(text, [
         "предыдущая песня",
         "предыдущий трек",
         "предыдущая музыка",
+        "предыдущую песню",
+        "предыдущую музыку",
         "включи предыдущую",
         "переключи на предыдущую",
-        "верни предыдущую"
+        "верни предыдущую",
+        "верни прошлую песню",
+        "верни прошлый трек",
+        "прошлая песня",
+        "прошлый трек"
       ])
     ) {
       return "previousMusic";
     }
+
+    /* -------------------------------------------------------
+       EXPLICIT NEXT COMMANDS
+       ------------------------------------------------------- */
+
+    if (
+      has(text, [
+        "следующая песня",
+        "следующий трек",
+        "следующая музыка",
+        "следующую песню",
+        "следующую музыку",
+        "включи следующую",
+        "переключи на следующую",
+        "переключи на следующий",
+        "переключиться на следующую",
+        "следом следующая"
+      ])
+    ) {
+      return "nextMusic";
+    }
+
+    /* -------------------------------------------------------
+       TOGGLE MUSIC
+       IMPORTANT:
+       This is checked BEFORE generic "переключи".
+       ------------------------------------------------------- */
+
+    if (
+      has(text, [
+        "переключи музыку",
+        "переключить музыку",
+        "переключи воспроизведение",
+        "переключить воспроизведение"
+      ])
+    ) {
+      return "toggleMusic";
+    }
+
+    /* -------------------------------------------------------
+       NATURAL PREVIOUS MUSIC COMMANDS
+       ------------------------------------------------------- */
+
+    const previousWords = [
+      "предыдущий",
+      "предыдущая",
+      "предыдущее",
+      "предыдущие",
+      "предыдущую",
+
+      "прошлый",
+      "прошлая",
+      "прошлую",
+      "прошлое",
+
+      "назад",
+      "верни",
+      "вернуть",
+      "возврати",
+      "вернуться"
+    ];
+
+    const wantsPrevious =
+      has(
+        text,
+        previousWords
+      );
+
+    if (
+      hasMusicObject &&
+      wantsPrevious
+    ) {
+      return "previousMusic";
+    }
+
+    /* -------------------------------------------------------
+       NATURAL NEXT MUSIC COMMANDS
+       ------------------------------------------------------- */
+
+    const nextWords = [
+      "следующий",
+      "следующая",
+      "следующее",
+      "следующие",
+      "следующую",
+
+      "дальше",
+
+      "другой",
+      "другая",
+      "другое",
+      "другую",
+      "другие",
+
+      "новый",
+      "новая",
+      "новое",
+      "новую",
+
+      "сменить",
+      "смени",
+      "сменяй",
+
+      "поменяй",
+      "поменять",
+
+      "замени",
+      "заменить"
+    ];
+
+    const wantsNext =
+      has(
+        text,
+        nextWords
+      );
+
+    if (
+      hasMusicObject &&
+      wantsNext
+    ) {
+      return "nextMusic";
+    }
+
+    /* -------------------------------------------------------
+       ADDITIONAL NATURAL MUSIC SWITCH PHRASES
+       ------------------------------------------------------- */
+
+    if (
+      has(text, [
+        "другой трек",
+        "другую песню",
+        "другая песня",
+        "другое музыкальное",
+        "новый трек",
+        "новую музыку",
+        "новая музыка",
+        "смени мелодию",
+        "сменить мелодию",
+        "поменяй мелодию",
+        "поменять мелодию",
+        "замени трек",
+        "заменить трек",
+        "поставь другой трек",
+        "поставь другую песню"
+      ])
+    ) {
+      return "nextMusic";
+    }
+
+    /* -------------------------------------------------------
+       PLAY MUSIC
+       ------------------------------------------------------- */
 
     if (
       has(text, [
         "запусти музыку",
         "включи музыку",
         "начни музыку",
-        "воспроизведи музыку"
+        "воспроизведи музыку",
+        "запустить музыку",
+        "включить музыку",
+        "начать музыку",
+        "воспроизвести музыку"
       ])
     ) {
       return "playMusic";
     }
+
+    /* -------------------------------------------------------
+       STOP MUSIC
+       ------------------------------------------------------- */
 
     if (
       has(text, [
         "останови музыку",
         "выключи музыку",
         "поставь музыку на паузу",
-        "пауза музыки"
+        "пауза музыки",
+        "остановить музыку",
+        "выключить музыку",
+        "поставить музыку на паузу"
       ])
     ) {
       return "stopMusic";
     }
 
+    /* -------------------------------------------------------
+       GENERIC TOGGLE
+       ------------------------------------------------------- */
+
     if (
       has(text, [
-        "переключи музыку",
-        "переключить музыку"
+        "переключи воспроизведение",
+        "переключить воспроизведение"
       ])
     ) {
       return "toggleMusic";
     }
+
+    /* -------------------------------------------------------
+       NAVIGATION
+       ------------------------------------------------------- */
 
     if (
       has(text, [
@@ -1268,6 +1514,10 @@
       return "openAI";
     }
 
+    /* -------------------------------------------------------
+       VOICE
+       ------------------------------------------------------- */
+
     if (
       has(text, [
         "останови голос",
@@ -1278,6 +1528,10 @@
     ) {
       return "stopSpeaking";
     }
+
+    /* -------------------------------------------------------
+       HELP
+       ------------------------------------------------------- */
 
     if (
       has(text, [
@@ -1385,6 +1639,7 @@
 
       case "clearMemory":
         clearMemory();
+
         return "Память очищена.";
 
       case "playMusic": {
@@ -1424,26 +1679,32 @@
 
       case "openChat":
         openSection("chat");
+
         return "Открываю чат.";
 
       case "openMusic":
         openSection("music");
+
         return "Открываю музыку.";
 
       case "openNews":
         openSection("news");
+
         return "Открываю ленту.";
 
       case "openHome":
         openSection("home");
+
         return "Открываю главную.";
 
       case "openAI":
         openSection("ai");
+
         return "Открываю AI.";
 
       case "stopSpeaking":
         stopSpeaking();
+
         return "Голосовой вывод остановлен.";
 
       case "help":
@@ -1459,6 +1720,10 @@
           "«Следующая песня»",
           "«Предыдущая песня»",
           "«Смени мелодию»",
+          "«Смени музыку»",
+          "«Смени трек»",
+          "«Поменяй песню»",
+          "«Включи другой трек»",
           "«Открой чат»",
           "«Открой музыку»",
           "«Открой ленту»",
@@ -1541,7 +1806,9 @@
       return "";
     }
 
-    setStatus("thinking");
+    setStatus(
+      "thinking"
+    );
 
     addMessage(
       "user",
@@ -1565,7 +1832,9 @@
         response
       );
 
-      setStatus("ready");
+      setStatus(
+        "ready"
+      );
 
       if (
         state.settings.voice &&
@@ -1592,7 +1861,9 @@
         response
       );
 
-      setStatus("error");
+      setStatus(
+        "error"
+      );
 
       return response;
     }
@@ -1626,14 +1897,15 @@
     instance.maxAlternatives =
       1;
 
-    instance.onstart = () => {
-      recognitionStarting =
-        false;
+    instance.onstart =
+      () => {
+        recognitionStarting =
+          false;
 
-      setStatus(
-        "listening"
-      );
-    };
+        setStatus(
+          "listening"
+        );
+      };
 
     instance.onresult =
       (event) => {
@@ -1798,16 +2070,20 @@
 
   function getState() {
     return {
-      /* New index.html compatibility */
-      ready: state.ready,
+      ready:
+        state.ready,
+
       memory:
-        state.memory.length > 0,
+        state.memory.length >
+        0,
+
       mode:
         state.settings.mode ||
         "LOCAL",
 
-      /* Original API compatibility */
-      status: state.status,
+      status:
+        state.status,
+
       lastCommand:
         state.lastCommand,
 
@@ -1889,8 +2165,6 @@
 
   /* =========================================================
      GLOBAL EXPORTS
-     IMPORTANT:
-     Export BEFORE initialization
      ========================================================= */
 
   window.JARVIS =
@@ -1901,8 +2175,6 @@
 
   window.ASHINA_JARVIS =
     API;
-
-  /* Compatibility flags */
 
   window.JARVIS_READY =
     false;
@@ -1926,10 +2198,6 @@
 
       renderJarvisState();
 
-      /*
-       * Tell index.html that the
-       * core is completely ready.
-       */
       try {
         window.dispatchEvent(
           new CustomEvent(
@@ -1961,10 +2229,6 @@
     }
   }
 
-  /*
-   * Do not wait for index.html.
-   * The core is exported immediately.
-   */
   loadState();
 
   if (
