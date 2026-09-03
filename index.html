@@ -764,6 +764,148 @@
       transform: scale(.99);
     }
 
+    .chat-attachment-preview {
+      margin-top: 8px;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.22);
+    }
+
+    .chat-attachment-preview img,
+    .chat-attachment-preview video {
+      display: block;
+      width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      background: #05070a;
+    }
+
+    .chat-attachment-preview audio {
+      display: block;
+      width: 100%;
+    }
+
+    .chat-attachment-loading {
+      padding: 12px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .chat-attachment-open {
+      width: 100%;
+      padding: 9px 11px;
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+      border-top: 1px solid rgba(255,255,255,.06);
+      font-size: 11px;
+      text-align: left;
+    }
+
+    .ashina-attachment-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(0,0,0,.86);
+    }
+
+    .ashina-attachment-modal.show {
+      display: flex;
+    }
+
+    .ashina-attachment-dialog {
+      width: min(760px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .ashina-attachment-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .ashina-attachment-title {
+      flex: 1;
+      min-width: 0;
+      font-size: 12px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .ashina-attachment-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .ashina-attachment-content {
+      width: 100%;
+    }
+
+    .ashina-attachment-content img,
+    .ashina-attachment-content video {
+      display: block;
+      width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #05070a;
+    }
+
+    .ashina-attachment-content audio {
+      display: block;
+      width: 100%;
+      margin: 16px 0;
+    }
+
+    .ashina-attachment-content iframe {
+      display: block;
+      width: 100%;
+      height: 70vh;
+      border: 0;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .ashina-attachment-content pre {
+      max-height: 70vh;
+      overflow: auto;
+      margin: 0;
+      padding: 12px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      border-radius: 12px;
+      background: #080b10;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .ashina-attachment-download {
+      display: block;
+      margin-top: 10px;
+      padding: 12px;
+      text-align: center;
+      border-radius: 12px;
+      color: var(--text);
+      background: var(--accent);
+      font-weight: 800;
+    }
+
     .playlist-add {
       width: 100%;
       margin-top: 10px;
@@ -2453,6 +2595,40 @@
 
     </main>
 
+  </div>
+
+  <!-- =========================
+       CHAT ATTACHMENT VIEWER
+  ========================= -->
+  <div
+    id="attachmentModal"
+    class="ashina-attachment-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="attachmentModalTitle"
+  >
+    <div class="ashina-attachment-dialog">
+      <div class="ashina-attachment-head">
+        <div
+          id="attachmentModalTitle"
+          class="ashina-attachment-title"
+        >
+          Файл
+        </div>
+        <button
+          id="attachmentModalClose"
+          class="ashina-attachment-close"
+          type="button"
+          aria-label="Закрыть"
+        >
+          ✕
+        </button>
+      </div>
+      <div
+        id="attachmentModalContent"
+        class="ashina-attachment-content"
+      ></div>
+    </div>
   </div>
 
   <!-- =========================
@@ -4462,6 +4638,270 @@
 
       }
 
+      const attachmentObjectUrls = new Set();
+
+      function revokeAttachmentObjectUrls() {
+
+        attachmentObjectUrls.forEach(
+          url => {
+            try {
+              URL.revokeObjectURL(url);
+            } catch (_) {}
+          }
+        );
+
+        attachmentObjectUrls.clear();
+
+      }
+
+      function isImageType(type) {
+        return String(type || "")
+          .toLowerCase()
+          .startsWith("image/");
+      }
+
+      function isVideoType(type) {
+        return String(type || "")
+          .toLowerCase()
+          .startsWith("video/");
+      }
+
+      function isAudioType(type) {
+        return String(type || "")
+          .toLowerCase()
+          .startsWith("audio/");
+      }
+
+      function isPdfType(type, name) {
+        return String(type || "")
+          .toLowerCase() === "application/pdf" ||
+          String(name || "")
+            .toLowerCase()
+            .endsWith(".pdf");
+      }
+
+      function isTextType(type, name) {
+        const lowerType = String(type || "")
+          .toLowerCase();
+        const lowerName = String(name || "")
+          .toLowerCase();
+
+        return lowerType.startsWith("text/") ||
+          lowerName.endsWith(".txt") ||
+          lowerName.endsWith(".log") ||
+          lowerName.endsWith(".json") ||
+          lowerName.endsWith(".csv");
+      }
+
+      function getAttachmentUrl(blob) {
+        const url = URL.createObjectURL(blob);
+        attachmentObjectUrls.add(url);
+        return url;
+      }
+
+      function closeAttachmentModal() {
+        const modal = $("attachmentModal");
+        if (!modal) return;
+
+        const content = $("attachmentModalContent");
+        if (content) {
+          content.innerHTML = "";
+        }
+
+        modal.classList.remove("show");
+        document.body.style.overflow = "";
+      }
+
+      async function showAttachmentModal(id) {
+
+        const modal = $("attachmentModal");
+        const content = $("attachmentModalContent");
+        const title = $("attachmentModalTitle");
+
+        if (!modal || !content) {
+          return;
+        }
+
+        content.innerHTML = "";
+        content.appendChild(
+          Object.assign(
+            document.createElement("div"),
+            {
+              className: "chat-attachment-loading",
+              textContent: "Загрузка файла..."
+            }
+          )
+        );
+
+        modal.classList.add("show");
+        document.body.style.overflow = "hidden";
+
+        try {
+          const record = await dbGet(
+            ATTACHMENT_STORE,
+            id
+          );
+
+          if (!record || !record.blob) {
+            throw new Error("Файл не найден");
+          }
+
+          const name = record.name || "Файл";
+          const type = record.type || "application/octet-stream";
+
+          if (title) {
+            title.textContent = name;
+          }
+
+          content.innerHTML = "";
+
+          const url = getAttachmentUrl(record.blob);
+
+          if (isImageType(type)) {
+            const image = document.createElement("img");
+            image.src = url;
+            image.alt = name;
+            image.loading = "eager";
+            content.appendChild(image);
+          } else if (isVideoType(type)) {
+            const video = document.createElement("video");
+            video.src = url;
+            video.controls = true;
+            video.playsInline = true;
+            video.preload = "metadata";
+            content.appendChild(video);
+          } else if (isAudioType(type)) {
+            const audioPlayer = document.createElement("audio");
+            audioPlayer.src = url;
+            audioPlayer.controls = true;
+            audioPlayer.preload = "metadata";
+            content.appendChild(audioPlayer);
+          } else if (isPdfType(type, name)) {
+            const frame = document.createElement("iframe");
+            frame.src = url;
+            frame.title = name;
+            content.appendChild(frame);
+          } else if (isTextType(type, name)) {
+            const pre = document.createElement("pre");
+            pre.textContent = await record.blob.text();
+            content.appendChild(pre);
+          } else {
+            const info = document.createElement("div");
+            info.className = "chat-attachment-loading";
+            info.textContent =
+              "Предпросмотр этого формата недоступен. Файл можно сохранить на устройство.";
+            content.appendChild(info);
+          }
+
+          const download = document.createElement("a");
+          download.className = "ashina-attachment-download";
+          download.href = url;
+          download.download = name;
+          download.textContent = "Сохранить файл";
+          content.appendChild(download);
+
+        } catch (error) {
+          console.error("Attachment open error:", error);
+          content.innerHTML = "";
+
+          const errorBox = document.createElement("div");
+          errorBox.className = "chat-attachment-loading";
+          errorBox.textContent =
+            error?.message === "Файл не найден"
+              ? "Файл не найден в локальном хранилище."
+              : "Не удалось открыть файл.";
+          content.appendChild(errorBox);
+        }
+
+      }
+
+      function prepareAttachmentPreview(message, item) {
+
+        if (!message?.file || !item) {
+          return;
+        }
+
+        const preview = document.createElement("div");
+        preview.className = "chat-attachment-preview";
+
+        const loading = document.createElement("div");
+        loading.className = "chat-attachment-loading";
+        loading.textContent = "Подготовка вложения...";
+        preview.appendChild(loading);
+
+        item.appendChild(preview);
+
+        dbGet(
+          ATTACHMENT_STORE,
+          message.file.id
+        ).then(record => {
+
+          if (!record || !record.blob) {
+            loading.textContent = "Файл недоступен.";
+            return;
+          }
+
+          const type = record.type || message.file.type || "";
+          const name = record.name || message.file.name || "Файл";
+
+          loading.remove();
+
+          if (isImageType(type)) {
+            const image = document.createElement("img");
+            image.src = getAttachmentUrl(record.blob);
+            image.alt = name;
+            image.loading = "lazy";
+            image.addEventListener("click", () => {
+              showAttachmentModal(message.file.id);
+            });
+            image.style.cursor = "pointer";
+            preview.appendChild(image);
+          } else if (isVideoType(type)) {
+            const video = document.createElement("video");
+            video.src = getAttachmentUrl(record.blob);
+            video.controls = true;
+            video.playsInline = true;
+            video.preload = "metadata";
+            preview.appendChild(video);
+          } else if (isAudioType(type)) {
+            const audioPlayer = document.createElement("audio");
+            audioPlayer.src = getAttachmentUrl(record.blob);
+            audioPlayer.controls = true;
+            audioPlayer.preload = "metadata";
+            preview.appendChild(audioPlayer);
+          } else {
+            const label = document.createElement("div");
+            label.className = "chat-attachment-loading";
+            label.textContent =
+              isPdfType(type, name)
+                ? "PDF-документ"
+                : "Вложение";
+            preview.appendChild(label);
+          }
+
+          const open = document.createElement("button");
+          open.type = "button";
+          open.className = "chat-attachment-open";
+          open.textContent =
+            isImageType(type)
+              ? "Открыть изображение"
+              : isVideoType(type)
+                ? "Открыть видео"
+                : isAudioType(type)
+                  ? "Открыть аудио"
+                  : "Открыть файл";
+          open.addEventListener("click", () => {
+            showAttachmentModal(message.file.id);
+          });
+          preview.appendChild(open);
+
+        }).catch(error => {
+          console.error("Attachment preview error:", error);
+          loading.textContent = "Не удалось загрузить вложение.";
+        });
+
+      }
+
       function renderChat() {
 
         const container =
@@ -4470,6 +4910,8 @@
         if (!container) {
           return;
         }
+
+        revokeAttachmentObjectUrls();
 
         const messages =
           loadChat();
@@ -4540,58 +4982,11 @@
               text
             );
 
-            if (
-              message.file
-            ) {
-
-              const file =
-                document.createElement(
-                  "div"
-                );
-
-              file.className =
-                "message-file";
-
-              file.textContent =
-                "📎 " +
-                (
-                  message.file.name ||
-                  "Файл"
-                );
-
-              item.appendChild(
-                file
+            if (message.file) {
+              prepareAttachmentPreview(
+                message,
+                item
               );
-
-              const fileButton =
-                document.createElement(
-                  "button"
-                );
-
-              fileButton.type =
-                "button";
-
-              fileButton.className =
-                "message-file-button";
-
-              fileButton.textContent =
-                "Открыть файл";
-
-              fileButton.addEventListener(
-                "click",
-                () => {
-
-                  openAttachment(
-                    message.file.id
-                  );
-
-                }
-              );
-
-              item.appendChild(
-                fileButton
-              );
-
             }
 
             const time =
@@ -4711,55 +5106,7 @@
       async function openAttachment(
         id
       ) {
-
-        try {
-
-          const record =
-            await dbGet(
-              ATTACHMENT_STORE,
-              id
-            );
-
-          if (
-            !record ||
-            !record.blob
-          ) {
-
-            toast(
-              "Файл не найден"
-            );
-
-            return;
-
-          }
-
-          const url =
-            URL.createObjectURL(
-              record.blob
-            );
-
-          window.open(
-            url,
-            "_blank",
-            "noopener"
-          );
-
-          setTimeout(
-            () =>
-              URL.revokeObjectURL(
-                url
-              ),
-            60000
-          );
-
-        } catch (_) {
-
-          toast(
-            "Не удалось открыть файл"
-          );
-
-        }
-
+        await showAttachmentModal(id);
       }
 
       function sendChat() {
@@ -4924,6 +5271,31 @@
         );
 
       renderChat();
+
+      $("attachmentModalClose")
+        ?.addEventListener(
+          "click",
+          closeAttachmentModal
+        );
+
+      $("attachmentModal")
+        ?.addEventListener(
+          "click",
+          event => {
+            if (event.target.id === "attachmentModal") {
+              closeAttachmentModal();
+            }
+          }
+        );
+
+      document.addEventListener(
+        "keydown",
+        event => {
+          if (event.key === "Escape") {
+            closeAttachmentModal();
+          }
+        }
+      );
 
       /* =========================
          JARVIS UI
