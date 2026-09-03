@@ -1,14 +1,23 @@
-```html
 <!doctype html>
 <html lang="ru">
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090b10">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
+
+<meta
+  name="theme-color"
+  content="#090b10"
+>
 
 <title>ASHINA JARVIS CORE</title>
 
 <style>
+
 *{
 box-sizing:border-box;
 }
@@ -17,9 +26,16 @@ body{
 margin:0;
 min-height:100vh;
 background:
-radial-gradient(circle at 50% 15%,#35151b 0,#090b10 48%);
+radial-gradient(
+circle at 50% 15%,
+#35151b 0,
+#090b10 48%
+);
 color:#fff;
-font-family:system-ui,-apple-system,sans-serif;
+font-family:
+system-ui,
+-apple-system,
+sans-serif;
 }
 
 main{
@@ -84,21 +100,35 @@ animation:pulse 1.2s infinite;
 animation:thinking 1s infinite;
 }
 
+.core.listening{
+animation:pulse 1s infinite;
+}
+
+.core.speaking{
+animation:pulse 1.4s infinite;
+}
+
 @keyframes pulse{
+
 0%{
-box-shadow:0 0 12px rgba(190,30,45,.15);
+box-shadow:
+0 0 12px rgba(190,30,45,.15);
 }
 
 50%{
-box-shadow:0 0 55px rgba(220,40,55,.75);
+box-shadow:
+0 0 55px rgba(220,40,55,.75);
 }
 
 100%{
-box-shadow:0 0 12px rgba(190,30,45,.15);
+box-shadow:
+0 0 12px rgba(190,30,45,.15);
 }
+
 }
 
 @keyframes thinking{
+
 0%{
 transform:scale(1);
 }
@@ -110,6 +140,7 @@ transform:scale(1.04);
 100%{
 transform:scale(1);
 }
+
 }
 
 .core-text{
@@ -135,6 +166,7 @@ margin-bottom:8px;
 .status{
 font-size:13px;
 color:#9da2ac;
+white-space:pre-line;
 }
 
 .log{
@@ -194,6 +226,12 @@ padding:12px;
 outline:none;
 }
 
+input:focus{
+border-color:#63242b;
+box-shadow:
+0 0 0 2px rgba(99,36,43,.12);
+}
+
 button{
 border:1px solid #292e38;
 background:#171d27;
@@ -205,6 +243,11 @@ cursor:pointer;
 
 button:active{
 transform:scale(.97);
+}
+
+button:disabled{
+opacity:.45;
+cursor:not-allowed;
 }
 
 .send{
@@ -229,6 +272,7 @@ border-radius:13px;
 padding:10px;
 font-size:12px;
 line-height:1.5;
+min-height:42px;
 }
 
 .memory-row{
@@ -283,6 +327,43 @@ width:100%;
 margin-top:8px;
 }
 
+.diagnostic-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px;
+margin-top:10px;
+}
+
+.diagnostic-item{
+background:#090d13;
+border:1px solid #292e38;
+border-radius:11px;
+padding:9px;
+font-size:12px;
+}
+
+.diagnostic-label{
+color:#747b86;
+font-size:10px;
+margin-bottom:3px;
+}
+
+.diagnostic-value{
+font-weight:700;
+}
+
+.ready{
+color:#99d79c;
+}
+
+.error{
+color:#ef9c9c;
+}
+
+.loading{
+color:#e7cf88;
+}
+
 @media(max-width:500px){
 
 main{
@@ -333,8 +414,14 @@ width:100%;
 flex-basis:100%;
 }
 
+.diagnostic-grid{
+grid-template-columns:1fr;
 }
+
+}
+
 </style>
+
 </head>
 
 <body>
@@ -346,14 +433,29 @@ ASHINA
 </div>
 
 <div class="subtitle">
-JARVIS CORE · TEST 0.3
+JARVIS CORE · TEST 0.4 · SYNC 1.5
 </div>
 
-<div id="core" class="core">
+
+<!-- =====================================================
+     CORE VISUAL
+     ===================================================== -->
+
+<div
+  id="core"
+  class="core"
+>
+
 <div class="core-text">
 JARVIS
 </div>
+
 </div>
+
+
+<!-- =====================================================
+     STATUS
+     ===================================================== -->
 
 <div class="card">
 
@@ -361,11 +463,19 @@ JARVIS
 🧠 Состояние JARVIS
 </div>
 
-<div id="aiStatus" class="status">
+<div
+  id="aiStatus"
+  class="status loading"
+>
 Загрузка ядра...
 </div>
 
 </div>
+
+
+<!-- =====================================================
+     DIALOG
+     ===================================================== -->
 
 <div class="card">
 
@@ -373,34 +483,48 @@ JARVIS
 💬 Диалог
 </div>
 
-<div id="log" class="log"></div>
+<div
+  id="log"
+  class="log"
+></div>
+
 
 <div class="controls">
 
 <input
-id="command"
-type="text"
-maxlength="1000"
-placeholder="Скажи или напиши команду..."
-autocomplete="off">
+  id="command"
+  type="text"
+  maxlength="1000"
+  placeholder="Скажи или напиши команду..."
+  autocomplete="off"
+>
+
 
 <button
-id="mic"
-type="button"
-onclick="startVoice()">
+  id="mic"
+  type="button"
+  onclick="startVoice()"
+>
 🎙️
 </button>
 
+
 <button
-class="send"
-type="button"
-onclick="sendCommand()">
+  class="send"
+  type="button"
+  onclick="sendCommand()"
+>
 ➤
 </button>
 
 </div>
 
 </div>
+
+
+<!-- =====================================================
+     QUICK COMMANDS
+     ===================================================== -->
 
 <div class="card">
 
@@ -442,9 +566,30 @@ onclick="sendCommand()">
 ⏸️ Стоп
 </button>
 
+<button onclick="ask('Следующий трек')">
+⏭️ Следующий
+</button>
+
+<button onclick="ask('Предыдущий трек')">
+⏮️ Предыдущий
+</button>
+
+<button onclick="ask('Смени музыку')">
+🔄 Сменить
+</button>
+
+<button onclick="ask('Что ты помнишь?')">
+🧠 Что помнишь?
+</button>
+
 </div>
 
 </div>
+
+
+<!-- =====================================================
+     MEMORY
+     ===================================================== -->
 
 <div class="card">
 
@@ -452,11 +597,19 @@ onclick="sendCommand()">
 🧠 Память JARVIS
 </div>
 
-<div id="memory" class="memory">
+<div
+  id="memory"
+  class="memory"
+>
 Загрузка памяти...
 </div>
 
 </div>
+
+
+<!-- =====================================================
+     ADMIN
+     ===================================================== -->
 
 <div class="card admin">
 
@@ -472,22 +625,33 @@ onclick="sendCommand()">
 <div class="admin-code">
 
 <input
-id="adminPin"
-type="password"
-maxlength="20"
-placeholder="PIN администратора">
+  id="adminPin"
+  type="password"
+  maxlength="20"
+  placeholder="PIN администратора"
+>
 
-<button onclick="unlockAdmin()">
+<button
+  onclick="unlockAdmin()"
+>
 Открыть
 </button>
 
 </div>
 
-<div id="adminStatus" class="small">
+<div
+  id="adminStatus"
+  class="small"
+>
 Доступ закрыт.
 </div>
 
 </div>
+
+
+<!-- =====================================================
+     DIAGNOSTICS
+     ===================================================== -->
 
 <div class="card">
 
@@ -495,35 +659,897 @@ placeholder="PIN администратора">
 🛡️ Диагностика ASHINA
 </div>
 
-<div id="systemStatus" class="status">
+<div
+  id="systemStatus"
+  class="status"
+>
 Проверка...
 </div>
 
+<div
+  id="diagnosticGrid"
+  class="diagnostic-grid"
+></div>
+
 </div>
 
+
 <audio
-id="music"
-src="audio.wav"
-preload="metadata">
+  id="music"
+  src="audio.wav"
+  preload="metadata"
+>
 </audio>
+
 
 </main>
 
-<!--
-=====================================================
-JARVIS CORE
-=====================================================
 
-Вся основная логика теперь находится
-в отдельном файле jarvis-core.js.
-
-Это позволяет развивать интеллект отдельно
-от интерфейса.
-=====================================================
--->
+<!-- =====================================================
+     JARVIS CORE 1.5
+     ===================================================== -->
 
 <script src="jarvis-core.js"></script>
 
+
+<script>
+
+"use strict";
+
+/* =========================================================
+   AI TEST 0.4 · JARVIS 1.5 BRIDGE
+   ========================================================= */
+
+(function(){
+
+  function getJarvis(){
+
+    return (
+      window.JARVIS ||
+      window.JARVIS_API ||
+      window.ASHINA_JARVIS ||
+      null
+    );
+
+  }
+
+
+  /* =======================================================
+     CORE VISUAL
+     ======================================================= */
+
+  function updateCoreVisual(){
+
+    const core =
+      document.getElementById("core");
+
+    const jarvis =
+      getJarvis();
+
+    if(!core){
+      return;
+    }
+
+    core.classList.remove(
+      "active",
+      "thinking",
+      "listening",
+      "speaking"
+    );
+
+    if(!jarvis){
+      return;
+    }
+
+    let state = null;
+
+    try{
+      state =
+        typeof jarvis.getState === "function"
+          ? jarvis.getState()
+          : null;
+    }catch(error){
+      return;
+    }
+
+    if(!state){
+      return;
+    }
+
+    switch(state.status){
+
+      case "thinking":
+        core.classList.add("thinking");
+        break;
+
+      case "listening":
+        core.classList.add("listening");
+        break;
+
+      case "speaking":
+        core.classList.add("speaking");
+        break;
+
+      case "ready":
+        core.classList.add("active");
+        break;
+
+    }
+
+  }
+
+
+  /* =======================================================
+     STATUS
+     ======================================================= */
+
+  function renderStatus(){
+
+    const statusElement =
+      document.getElementById("aiStatus");
+
+    const jarvis =
+      getJarvis();
+
+    if(!statusElement){
+      return;
+    }
+
+    if(!jarvis){
+
+      statusElement.textContent =
+        "JARVIS ещё загружается...";
+
+      statusElement.className =
+        "status loading";
+
+      return;
+    }
+
+    try{
+
+      const state =
+        typeof jarvis.getState === "function"
+          ? jarvis.getState()
+          : null;
+
+      if(!state){
+
+        statusElement.textContent =
+          "JARVIS API недоступен.";
+
+        statusElement.className =
+          "status error";
+
+        return;
+      }
+
+      const ready =
+        state.ready === true;
+
+      statusElement.textContent =
+        ready
+          ? `JARVIS READY · версия ${state.version || "1.5"} · режим ${state.mode || "LOCAL"}`
+          : `JARVIS ${String(state.status || "LOADING").toUpperCase()}`;
+
+      statusElement.className =
+        ready
+          ? "status ready"
+          : "status loading";
+
+    }catch(error){
+
+      statusElement.textContent =
+        "Ошибка чтения состояния JARVIS.";
+
+      statusElement.className =
+        "status error";
+
+    }
+
+  }
+
+
+  /* =======================================================
+     MEMORY
+     ======================================================= */
+
+  function renderMemory(){
+
+    const element =
+      document.getElementById("memory");
+
+    const jarvis =
+      getJarvis();
+
+    if(!element){
+      return;
+    }
+
+    if(!jarvis){
+
+      element.textContent =
+        "JARVIS ещё загружается...";
+
+      return;
+    }
+
+    try{
+
+      const memory =
+        typeof jarvis.getMemory === "function"
+          ? jarvis.getMemory()
+          : [];
+
+      if(!Array.isArray(memory) ||
+         !memory.length){
+
+        element.textContent =
+          "Память пока пуста.";
+
+        return;
+      }
+
+      element.innerHTML =
+        memory
+          .map(
+            (item,index) => `
+              <div class="memory-row">
+                <span>
+                  ${index + 1}. ${escapeHTML(item)}
+                </span>
+              </div>
+            `
+          )
+          .join("");
+
+    }catch(error){
+
+      element.textContent =
+        "Не удалось загрузить память.";
+
+    }
+
+  }
+
+
+  /* =======================================================
+     HTML ESCAPE
+     ======================================================= */
+
+  function escapeHTML(text){
+
+    return String(text)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+
+  }
+
+
+  /* =======================================================
+     SEND COMMAND
+     ======================================================= */
+
+  async function sendCommand(){
+
+    const input =
+      document.getElementById("command");
+
+    if(!input){
+      return;
+    }
+
+    const text =
+      input.value.trim();
+
+    if(!text){
+      return;
+    }
+
+    const jarvis =
+      getJarvis();
+
+    if(!jarvis ||
+       typeof jarvis.ask !== "function"){
+
+      addSystemMessage(
+        "JARVIS ещё загружается. Повторите команду через несколько секунд."
+      );
+
+      return;
+    }
+
+    input.value = "";
+
+    try{
+
+      await jarvis.ask(text);
+
+    }catch(error){
+
+      console.error(
+        "[AI-TEST] Command error:",
+        error
+      );
+
+      addSystemMessage(
+        "Ошибка выполнения команды JARVIS."
+      );
+
+    }
+
+    renderMemory();
+    renderStatus();
+    renderDiagnostics();
+    updateCoreVisual();
+
+  }
+
+
+  /* =======================================================
+     ASK
+     ======================================================= */
+
+  async function ask(text){
+
+    const jarvis =
+      getJarvis();
+
+    if(!jarvis ||
+       typeof jarvis.ask !== "function"){
+
+      addSystemMessage(
+        "JARVIS ещё загружается."
+      );
+
+      return;
+    }
+
+    try{
+
+      await jarvis.ask(text);
+
+    }catch(error){
+
+      console.error(
+        "[AI-TEST] Ask error:",
+        error
+      );
+
+      addSystemMessage(
+        "Ошибка выполнения команды."
+      );
+
+    }
+
+    renderMemory();
+    renderStatus();
+    renderDiagnostics();
+    updateCoreVisual();
+
+  }
+
+
+  /* =======================================================
+     VOICE
+     ======================================================= */
+
+  function startVoice(){
+
+    const jarvis =
+      getJarvis();
+
+    if(!jarvis ||
+       typeof jarvis.startVoice !== "function"){
+
+      addSystemMessage(
+        "Голосовой модуль JARVIS ещё не готов."
+      );
+
+      return false;
+    }
+
+    try{
+
+      const result =
+        jarvis.startVoice();
+
+      renderStatus();
+      updateCoreVisual();
+
+      return result;
+
+    }catch(error){
+
+      console.error(
+        "[AI-TEST] Voice error:",
+        error
+      );
+
+      addSystemMessage(
+        "Не удалось запустить голосовой ввод."
+      );
+
+      return false;
+
+    }
+
+  }
+
+
+  /* =======================================================
+     STOP VOICE
+     ======================================================= */
+
+  function stopVoice(){
+
+    const jarvis =
+      getJarvis();
+
+    if(!jarvis ||
+       typeof jarvis.stopVoice !== "function"){
+
+      return false;
+    }
+
+    try{
+
+      const result =
+        jarvis.stopVoice();
+
+      renderStatus();
+      updateCoreVisual();
+
+      return result;
+
+    }catch(error){
+
+      return false;
+    }
+
+  }
+
+
+  /* =======================================================
+     SYSTEM MESSAGE
+     ======================================================= */
+
+  function addSystemMessage(
+    text
+  ){
+
+    const log =
+      document.getElementById("log");
+
+    if(!log){
+      return;
+    }
+
+    const row =
+      document.createElement("div");
+
+    row.className =
+      "message system";
+
+    row.innerHTML = `
+      <div class="message-label">
+        SYSTEM
+      </div>
+
+      <div>
+        ${escapeHTML(text)}
+      </div>
+    `;
+
+    log.appendChild(row);
+
+    log.scrollTop =
+      log.scrollHeight;
+
+  }
+
+
+  /* =======================================================
+     DIAGNOSTICS
+     ======================================================= */
+
+  function renderDiagnostics(){
+
+    const status =
+      document.getElementById(
+        "systemStatus"
+      );
+
+    const grid =
+      document.getElementById(
+        "diagnosticGrid"
+      );
+
+    const jarvis =
+      getJarvis();
+
+    if(!status){
+      return;
+    }
+
+    if(!jarvis){
+
+      status.textContent =
+        "JARVIS ещё не подключён.";
+
+      status.className =
+        "status loading";
+
+      if(grid){
+        grid.innerHTML = "";
+      }
+
+      return;
+    }
+
+    try{
+
+      const data =
+        typeof jarvis.diagnose === "function"
+          ? jarvis.diagnose()
+          : null;
+
+      if(!data){
+
+        status.textContent =
+          "Диагностика недоступна.";
+
+        status.className =
+          "status error";
+
+        return;
+      }
+
+      status.textContent =
+        data.ready
+          ? "Все доступные локальные компоненты проверены."
+          : "JARVIS ещё находится в состоянии загрузки.";
+
+      status.className =
+        data.ready
+          ? "status ready"
+          : "status loading";
+
+      if(!grid){
+        return;
+      }
+
+      const items = [
+
+        [
+          "JARVIS",
+          data.ready
+            ? "READY"
+            : "LOADING",
+          data.ready
+        ],
+
+        [
+          "Версия",
+          data.version || "—",
+          true
+        ],
+
+        [
+          "Хранилище",
+          data.localStorage
+            ? "OK"
+            : "ERROR",
+          data.localStorage
+        ],
+
+        [
+          "Музыка",
+          data.audio
+            ? "OK"
+            : "НЕ НАЙДЕНА",
+          data.audio
+        ],
+
+        [
+          "Озвучивание",
+          data.speech
+            ? "OK"
+            : "НЕДОСТУПНО",
+          data.speech
+        ],
+
+        [
+          "Голосовой ввод",
+          data.recognition
+            ? "OK"
+            : "НЕДОСТУПЕН",
+          data.recognition
+        ],
+
+        [
+          "Service Worker",
+          data.serviceWorker
+            ? "OK"
+            : "НЕТ",
+          data.serviceWorker
+        ],
+
+        [
+          "IndexedDB",
+          data.indexedDB
+            ? "OK"
+            : "НЕТ",
+          data.indexedDB
+        ],
+
+        [
+          "Сеть",
+          data.online
+            ? "ОНЛАЙН"
+            : "ОФЛАЙН",
+          data.online
+        ]
+
+      ];
+
+      grid.innerHTML =
+        items
+          .map(
+            (item) => {
+
+              const label =
+                item[0];
+
+              const value =
+                item[1];
+
+              const good =
+                item[2];
+
+              const cls =
+                typeof good === "boolean"
+                  ? (
+                    good
+                      ? "green"
+                      : "red"
+                  )
+                  : "";
+
+              return `
+                <div class="diagnostic-item">
+
+                  <div class="diagnostic-label">
+                    ${escapeHTML(label)}
+                  </div>
+
+                  <div class="diagnostic-value ${cls}">
+                    ${escapeHTML(value)}
+                  </div>
+
+                </div>
+              `;
+
+            }
+          )
+          .join("");
+
+    }catch(error){
+
+      status.textContent =
+        "Ошибка диагностики.";
+
+      status.className =
+        "status error";
+
+    }
+
+  }
+
+
+  /* =======================================================
+     ADMIN
+     ======================================================= */
+
+  function unlockAdmin(){
+
+    const input =
+      document.getElementById(
+        "adminPin"
+      );
+
+    const status =
+      document.getElementById(
+        "adminStatus"
+      );
+
+    if(!input ||
+       !status){
+
+      return;
+    }
+
+    /*
+      Это только тестовый локальный PIN.
+      Серверную авторизацию он не заменяет.
+    */
+
+    const pin =
+      input.value.trim();
+
+    if(!pin){
+
+      status.textContent =
+        "Введите PIN.";
+
+      status.className =
+        "small red";
+
+      return;
+    }
+
+    /*
+      Тестовый режим:
+      доступ не выдаём автоматически
+      и не считаем этот PIN реальной
+      защитой сервера.
+    */
+
+    status.textContent =
+      "Локальная проверка получена. Серверная авторизация пока не подключена.";
+
+    status.className =
+      "small yellow";
+
+  }
+
+
+  /* =======================================================
+     ENTER KEY
+     ======================================================= */
+
+  function connectInput(){
+
+    const input =
+      document.getElementById(
+        "command"
+      );
+
+    if(!input){
+      return;
+    }
+
+    input.addEventListener(
+      "keydown",
+      (event) => {
+
+        if(
+          event.key === "Enter" &&
+          !event.shiftKey
+        ){
+
+          event.preventDefault();
+
+          sendCommand();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     JARVIS READY EVENT
+     ======================================================= */
+
+  function connectJarvisReady(){
+
+    window.addEventListener(
+      "jarvis-ready",
+      () => {
+
+        renderStatus();
+        renderMemory();
+        renderDiagnostics();
+        updateCoreVisual();
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     PERIODIC UI SYNC
+     ======================================================= */
+
+  function startUISync(){
+
+    setInterval(
+      () => {
+
+        renderStatus();
+        renderMemory();
+        renderDiagnostics();
+        updateCoreVisual();
+
+      },
+      500
+    );
+
+  }
+
+
+  /* =======================================================
+     GLOBAL API FOR HTML BUTTONS
+     ======================================================= */
+
+  window.ask =
+    ask;
+
+  window.sendCommand =
+    sendCommand;
+
+  window.startVoice =
+    startVoice;
+
+  window.stopVoice =
+    stopVoice;
+
+  window.unlockAdmin =
+    unlockAdmin;
+
+
+  /* =======================================================
+     INIT
+     ======================================================= */
+
+  function init(){
+
+    connectInput();
+
+    connectJarvisReady();
+
+    renderStatus();
+
+    renderMemory();
+
+    renderDiagnostics();
+
+    updateCoreVisual();
+
+    startUISync();
+
+  }
+
+
+  if(
+    document.readyState ===
+    "loading"
+  ){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      init,
+      {
+        once:true
+      }
+    );
+
+  }else{
+
+    init();
+
+  }
+
+})();
+
+</script>
+
 </body>
 </html>
-```
