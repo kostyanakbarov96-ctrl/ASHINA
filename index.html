@@ -764,6 +764,40 @@
       transform: scale(.99);
     }
 
+    .voice-message {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 7px;
+      padding: 8px;
+      border-radius: 11px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .voice-message audio {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .voice-label {
+      flex: 0 0 auto;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .voice-recording {
+      background: rgba(255,59,48,.16) !important;
+      border-color: rgba(255,59,48,.55) !important;
+      animation: voicePulse 1s ease-in-out infinite;
+    }
+
+    @keyframes voicePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.035); }
+    }
+
     .chat-attachment-preview {
       margin-top: 8px;
       overflow: hidden;
@@ -2062,6 +2096,16 @@
               title="Файл"
             >
               ＋
+            </button>
+
+            <button
+              class="icon-button"
+              id="voiceRecordButton"
+              type="button"
+              title="Записать голосовое сообщение"
+              aria-label="Записать голосовое сообщение"
+            >
+              🎙
             </button>
 
             <input
@@ -4983,10 +5027,17 @@
             );
 
             if (message.file) {
-              prepareAttachmentPreview(
-                message,
-                item
-              );
+              if (message.file.voice) {
+                prepareVoiceMessage(
+                  message,
+                  item
+                );
+              } else {
+                prepareAttachmentPreview(
+                  message,
+                  item
+                );
+              }
             }
 
             const time =
@@ -5108,6 +5159,415 @@
       ) {
         await showAttachmentModal(id);
       }
+
+      function getVoiceMimeType() {
+
+        const candidates = [
+          "audio/webm;codecs=opus",
+          "audio/webm",
+          "audio/mp4",
+          "audio/ogg;codecs=opus"
+        ];
+
+        if (
+          typeof MediaRecorder ===
+          "undefined"
+        ) {
+          return "";
+        }
+
+        for (const type of candidates) {
+          try {
+            if (
+              MediaRecorder.isTypeSupported(type)
+            ) {
+              return type;
+            }
+          } catch (_) {}
+        }
+
+        return "";
+      }
+
+      function getVoiceExtension(type) {
+        if (type.includes("mp4")) return "m4a";
+        if (type.includes("ogg")) return "ogg";
+        return "webm";
+      }
+
+      function prepareVoiceMessage(
+        message,
+        item
+      ) {
+
+        if (!message?.file || !item) {
+          return;
+        }
+
+        const wrap =
+          document.createElement("div");
+
+        wrap.className =
+          "voice-message";
+
+        const label =
+          document.createElement("span");
+
+        label.className =
+          "voice-label";
+
+        label.textContent = "🎙";
+
+        wrap.appendChild(label);
+
+        const loading =
+          document.createElement("span");
+
+        loading.className =
+          "muted small";
+
+        loading.textContent =
+          "Загрузка...";
+
+        wrap.appendChild(loading);
+        item.appendChild(wrap);
+
+        dbGet(
+          ATTACHMENT_STORE,
+          message.file.id
+        ).then(record => {
+
+          if (!record || !record.blob) {
+            loading.textContent =
+              "Голосовое сообщение недоступно.";
+            return;
+          }
+
+          const player =
+            document.createElement("audio");
+
+          player.controls = true;
+          player.preload = "metadata";
+          player.src =
+            getAttachmentUrl(record.blob);
+
+          loading.remove();
+          wrap.appendChild(player);
+
+        }).catch(error => {
+
+          console.error(
+            "Voice preview error:",
+            error
+          );
+
+          loading.textContent =
+            "Не удалось открыть голосовое сообщение.";
+
+        });
+      }
+
+      let voiceRecorder = null;
+      let voiceStream = null;
+      let voiceChunks = [];
+      let voiceRecording = false;
+
+      async function startVoiceRecording() {
+
+        if (voiceRecording) {
+          return;
+        }
+
+        if (
+          !navigator.mediaDevices ||
+          typeof navigator.mediaDevices.getUserMedia !==
+            "function"
+        ) {
+          toast(
+            "Запись голоса недоступна в этом браузере"
+          );
+          return;
+        }
+
+        if (
+          typeof MediaRecorder ===
+          "undefined"
+        ) {
+          toast(
+            "MediaRecorder не поддерживается"
+          );
+          return;
+        }
+
+        const mimeType =
+          getVoiceMimeType();
+
+        try {
+
+          voiceStream =
+            await navigator.mediaDevices
+              .getUserMedia({
+                audio: {
+                  echoCancellation: true,
+                  noiseSuppression: true,
+                  autoGainControl: true
+                }
+              });
+
+          voiceChunks = [];
+
+          voiceRecorder =
+            mimeType
+              ? new MediaRecorder(
+                  voiceStream,
+                  { mimeType }
+                )
+              : new MediaRecorder(
+                  voiceStream
+                );
+
+          voiceRecorder.ondataavailable =
+            event => {
+              if (
+                event.data &&
+                event.data.size > 0
+              ) {
+                voiceChunks.push(
+                  event.data
+                );
+              }
+            };
+
+          voiceRecorder.onerror =
+            event => {
+              console.error(
+                "Voice recorder error:",
+                event.error
+              );
+              toast(
+                "Ошибка записи голоса"
+              );
+              stopVoiceStream();
+              setVoiceRecordingUI(false);
+            };
+
+          voiceRecorder.onstop =
+            async () => {
+
+              const actualType =
+                voiceRecorder?.mimeType ||
+                mimeType ||
+                "audio/webm";
+
+              const blob =
+                new Blob(
+                  voiceChunks,
+                  { type: actualType }
+                );
+
+              voiceChunks = [];
+
+              stopVoiceStream();
+              setVoiceRecordingUI(false);
+
+              if (!blob.size) {
+                toast(
+                  "Голосовое сообщение пустое"
+                );
+                return;
+              }
+
+              try {
+
+                const extension =
+                  getVoiceExtension(
+                    actualType
+                  );
+
+                const file =
+                  new File(
+                    [blob],
+                    "voice_" +
+                      Date.now() +
+                      "." +
+                      extension,
+                    {
+                      type: actualType,
+                      lastModified: Date.now()
+                    }
+                  );
+
+                const metadata =
+                  await saveAttachment(
+                    file
+                  );
+
+                metadata.voice = true;
+                metadata.duration = 0;
+
+                addChatMessage(
+                  "🎙 Голосовое сообщение",
+                  metadata
+                );
+
+                toast(
+                  "Голосовое сообщение отправлено"
+                );
+
+              } catch (error) {
+
+                console.error(
+                  "Voice save error:",
+                  error
+                );
+
+                toast(
+                  "Не удалось сохранить голосовое сообщение"
+                );
+
+              }
+
+            };
+
+          voiceRecorder.start(
+            250
+          );
+
+          voiceRecording = true;
+          setVoiceRecordingUI(true);
+          toast(
+            "Запись началась. Нажмите ещё раз, чтобы отправить."
+          );
+
+        } catch (error) {
+
+          console.error(
+            "Microphone error:",
+            error
+          );
+
+          stopVoiceStream();
+          setVoiceRecordingUI(false);
+
+          if (
+            error?.name ===
+            "NotAllowedError"
+          ) {
+            toast(
+              "Разрешите доступ к микрофону"
+            );
+          } else {
+            toast(
+              "Не удалось включить микрофон"
+            );
+          }
+
+        }
+      }
+
+      function stopVoiceStream() {
+
+        if (!voiceStream) {
+          return;
+        }
+
+        voiceStream
+          .getTracks()
+          .forEach(
+            track => {
+              try {
+                track.stop();
+              } catch (_) {}
+            }
+          );
+
+        voiceStream = null;
+      }
+
+      function stopVoiceRecording() {
+
+        if (
+          !voiceRecorder ||
+          voiceRecorder.state ===
+            "inactive"
+        ) {
+          voiceRecording = false;
+          stopVoiceStream();
+          setVoiceRecordingUI(false);
+          return;
+        }
+
+        voiceRecording = false;
+        try {
+          voiceRecorder.stop();
+        } catch (error) {
+          console.error(
+            "Voice stop error:",
+            error
+          );
+          stopVoiceStream();
+          setVoiceRecordingUI(false);
+        }
+      }
+
+      function setVoiceRecordingUI(
+        active
+      ) {
+
+        const button =
+          $("voiceRecordButton");
+
+        if (!button) {
+          return;
+        }
+
+        button.classList.toggle(
+          "voice-recording",
+          Boolean(active)
+        );
+
+        button.textContent =
+          active ? "■" : "🎙";
+
+        button.title =
+          active
+            ? "Остановить и отправить голосовое сообщение"
+            : "Записать голосовое сообщение";
+
+        button.setAttribute(
+          "aria-label",
+          button.title
+        );
+      }
+
+      $("voiceRecordButton")
+        ?.addEventListener(
+          "click",
+          () => {
+            if (voiceRecording) {
+              stopVoiceRecording();
+            } else {
+              startVoiceRecording();
+            }
+          }
+        );
+
+      window.addEventListener(
+        "beforeunload",
+        () => {
+          try {
+            if (
+              voiceRecorder &&
+              voiceRecorder.state !==
+                "inactive"
+            ) {
+              voiceRecorder.stop();
+            }
+          } catch (_) {}
+
+          stopVoiceStream();
+        }
+      );
 
       function sendChat() {
 
