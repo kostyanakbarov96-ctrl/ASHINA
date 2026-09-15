@@ -2794,7 +2794,8 @@
        JARVIS находится в jarvis-core.js
   ========================= -->
 
-  <script>
+  <script src="ashina-audio-devices.js"></script>
+<script>
     (() => {
       "use strict";
 
@@ -5247,6 +5248,8 @@
       let voiceCompressorNode = null;
       let voiceGainNode = null;
       let voiceProcessedDestination = null;
+      let voiceInputDevice = null;
+      let voiceInputIsBluetooth = false;
 
       function getBestVoiceAudioConstraints() {
         // 48 kHz — нативная частота Opus и оптимальный режим для речи.
@@ -5313,9 +5316,22 @@
 
         try {
 
-          voiceStream = await navigator.mediaDevices.getUserMedia({
-            audio: getBestVoiceAudioConstraints()
-          });
+          const baseVoiceConstraints = getBestVoiceAudioConstraints();
+
+          // ASHINA Audio Device Manager: после разрешения микрофона
+          // выбираем доступный Bluetooth-вход явно, если он предоставлен Android/Chrome.
+          if (window.ASHINA_AUDIO_DEVICES?.chooseBestInput) {
+            const selected = await window.ASHINA_AUDIO_DEVICES.chooseBestInput(baseVoiceConstraints);
+            voiceStream = selected.stream;
+            voiceInputDevice = selected.device || null;
+            voiceInputIsBluetooth = Boolean(selected.bluetooth);
+          } else {
+            voiceStream = await navigator.mediaDevices.getUserMedia({
+              audio: baseVoiceConstraints
+            });
+            voiceInputIsBluetooth = false;
+            voiceInputDevice = null;
+          }
 
           // Некоторые браузеры игнорируют часть ideal-настроек.
           // Применяем доступные настройки ещё раз к реальному треку,
@@ -5324,7 +5340,17 @@
 
           if (track && typeof track.applyConstraints === "function") {
             try {
-              await track.applyConstraints(getBestVoiceAudioConstraints());
+              const appliedConstraints = getBestVoiceAudioConstraints();
+              if (voiceInputIsBluetooth) {
+                // Bluetooth HFP/HSP may reject fixed sample-size/latency preferences.
+                // Keep only safe, widely supported speech constraints.
+                delete appliedConstraints.sampleSize;
+                delete appliedConstraints.latency;
+                appliedConstraints.echoCancellation = { ideal: true };
+                appliedConstraints.noiseSuppression = { ideal: true };
+                appliedConstraints.autoGainControl = { ideal: true };
+              }
+              await track.applyConstraints(appliedConstraints);
             } catch (constraintError) {
               console.warn("Some microphone constraints were not applied:", constraintError);
             }
@@ -5344,18 +5370,18 @@
               voiceSourceNode = voiceAudioContext.createMediaStreamSource(voiceStream);
               voiceHighPassNode = voiceAudioContext.createBiquadFilter();
               voiceHighPassNode.type = "highpass";
-              voiceHighPassNode.frequency.value = 70;
+              voiceHighPassNode.frequency.value = voiceInputIsBluetooth ? 90 : 70;
               voiceHighPassNode.Q.value = 0.707;
 
               voiceCompressorNode = voiceAudioContext.createDynamicsCompressor();
-              voiceCompressorNode.threshold.value = -18;
-              voiceCompressorNode.knee.value = 18;
-              voiceCompressorNode.ratio.value = 3.2;
-              voiceCompressorNode.attack.value = 0.004;
-              voiceCompressorNode.release.value = 0.18;
+              voiceCompressorNode.threshold.value = voiceInputIsBluetooth ? -22 : -18;
+              voiceCompressorNode.knee.value = voiceInputIsBluetooth ? 24 : 18;
+              voiceCompressorNode.ratio.value = voiceInputIsBluetooth ? 2.6 : 3.2;
+              voiceCompressorNode.attack.value = 0.006;
+              voiceCompressorNode.release.value = voiceInputIsBluetooth ? 0.24 : 0.18;
 
               voiceGainNode = voiceAudioContext.createGain();
-              voiceGainNode.gain.value = 1.05;
+              voiceGainNode.gain.value = voiceInputIsBluetooth ? 1.18 : 1.05;
               voiceProcessedDestination = voiceAudioContext.createMediaStreamDestination();
 
               voiceSourceNode
@@ -5466,7 +5492,9 @@
 
           voiceRecording = true;
           setVoiceRecordingUI(true);
-          toast("Запись началась. Нажмите ещё раз, чтобы отправить.");
+          toast(voiceInputIsBluetooth
+            ? "🎧 Bluetooth-микрофон активен. Запись оптимизирована."
+            : "🎙 Запись началась. Нажмите ещё раз, чтобы отправить.");
 
         } catch (error) {
 
@@ -5535,6 +5563,8 @@
         });
 
         voiceStream = null;
+        voiceInputDevice = null;
+        voiceInputIsBluetooth = false;
       }
 
       function stopVoiceRecording() {
