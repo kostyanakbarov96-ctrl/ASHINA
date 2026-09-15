@@ -5241,6 +5241,12 @@
       let voiceChunks = [];
       let voiceRecording = false;
       let voiceStartedAt = 0;
+      let voiceAudioContext = null;
+      let voiceSourceNode = null;
+      let voiceHighPassNode = null;
+      let voiceCompressorNode = null;
+      let voiceGainNode = null;
+      let voiceProcessedDestination = null;
 
       function getBestVoiceAudioConstraints() {
         // 48 kHz — нативная частота Opus и оптимальный режим для речи.
@@ -5326,7 +5332,54 @@
 
           voiceChunks = [];
           voiceStartedAt = Date.now();
-          voiceRecorder = createVoiceRecorder(voiceStream, mimeType);
+
+          // ASHINA Voice Engine: мягкая обработка речи перед кодированием.
+          // Это не «искусственная» громкость: убираем только низкочастотный
+          // гул, слегка выравниваем динамику и защищаем пики от клиппинга.
+          let recorderStream = voiceStream;
+          try {
+            if (typeof AudioContext !== "undefined" || typeof webkitAudioContext !== "undefined") {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              voiceAudioContext = new AudioCtx({ latencyHint: "interactive" });
+              voiceSourceNode = voiceAudioContext.createMediaStreamSource(voiceStream);
+              voiceHighPassNode = voiceAudioContext.createBiquadFilter();
+              voiceHighPassNode.type = "highpass";
+              voiceHighPassNode.frequency.value = 70;
+              voiceHighPassNode.Q.value = 0.707;
+
+              voiceCompressorNode = voiceAudioContext.createDynamicsCompressor();
+              voiceCompressorNode.threshold.value = -18;
+              voiceCompressorNode.knee.value = 18;
+              voiceCompressorNode.ratio.value = 3.2;
+              voiceCompressorNode.attack.value = 0.004;
+              voiceCompressorNode.release.value = 0.18;
+
+              voiceGainNode = voiceAudioContext.createGain();
+              voiceGainNode.gain.value = 1.05;
+              voiceProcessedDestination = voiceAudioContext.createMediaStreamDestination();
+
+              voiceSourceNode
+                .connect(voiceHighPassNode)
+                .connect(voiceCompressorNode)
+                .connect(voiceGainNode)
+                .connect(voiceProcessedDestination);
+
+              if (voiceAudioContext.state === "suspended") {
+                await voiceAudioContext.resume();
+              }
+
+              const processedTracks = voiceProcessedDestination.stream.getAudioTracks();
+              if (processedTracks.length) {
+                recorderStream = voiceProcessedDestination.stream;
+              }
+            }
+          } catch (processingError) {
+            console.warn("Voice processing unavailable, using raw microphone:", processingError);
+            stopVoiceProcessing();
+            recorderStream = voiceStream;
+          }
+
+          voiceRecorder = createVoiceRecorder(recorderStream, mimeType);
 
           voiceRecorder.ondataavailable = event => {
             if (event.data && event.data.size > 0) {
@@ -5436,7 +5489,40 @@
         }
       }
 
+      function stopVoiceProcessing() {
+
+        try {
+          voiceSourceNode?.disconnect();
+        } catch (_) {}
+        try {
+          voiceHighPassNode?.disconnect();
+        } catch (_) {}
+        try {
+          voiceCompressorNode?.disconnect();
+        } catch (_) {}
+        try {
+          voiceGainNode?.disconnect();
+        } catch (_) {}
+        try {
+          voiceProcessedDestination?.stream?.getTracks().forEach(track => track.stop());
+        } catch (_) {}
+        try {
+          if (voiceAudioContext && voiceAudioContext.state !== "closed") {
+            voiceAudioContext.close();
+          }
+        } catch (_) {}
+
+        voiceSourceNode = null;
+        voiceHighPassNode = null;
+        voiceCompressorNode = null;
+        voiceGainNode = null;
+        voiceProcessedDestination = null;
+        voiceAudioContext = null;
+      }
+
       function stopVoiceStream() {
+
+        stopVoiceProcessing();
 
         if (!voiceStream) {
           return;
