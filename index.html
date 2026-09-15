@@ -5162,25 +5162,22 @@
 
       function getVoiceMimeType() {
 
+        // Предпочитаем Opus/WebM: на Android Chrome это обычно
+        // самый качественный и компактный вариант для голоса.
         const candidates = [
           "audio/webm;codecs=opus",
           "audio/webm",
-          "audio/mp4",
-          "audio/ogg;codecs=opus"
+          "audio/ogg;codecs=opus",
+          "audio/mp4"
         ];
 
-        if (
-          typeof MediaRecorder ===
-          "undefined"
-        ) {
+        if (typeof MediaRecorder === "undefined") {
           return "";
         }
 
         for (const type of candidates) {
           try {
-            if (
-              MediaRecorder.isTypeSupported(type)
-            ) {
+            if (MediaRecorder.isTypeSupported(type)) {
               return type;
             }
           } catch (_) {}
@@ -5195,74 +5192,46 @@
         return "webm";
       }
 
-      function prepareVoiceMessage(
-        message,
-        item
-      ) {
+      function prepareVoiceMessage(message, item) {
 
         if (!message?.file || !item) {
           return;
         }
 
-        const wrap =
-          document.createElement("div");
+        const wrap = document.createElement("div");
+        wrap.className = "voice-message";
 
-        wrap.className =
-          "voice-message";
-
-        const label =
-          document.createElement("span");
-
-        label.className =
-          "voice-label";
-
+        const label = document.createElement("span");
+        label.className = "voice-label";
         label.textContent = "🎙";
-
         wrap.appendChild(label);
 
-        const loading =
-          document.createElement("span");
-
-        loading.className =
-          "muted small";
-
-        loading.textContent =
-          "Загрузка...";
-
+        const loading = document.createElement("span");
+        loading.className = "muted small";
+        loading.textContent = "Загрузка...";
         wrap.appendChild(loading);
         item.appendChild(wrap);
 
-        dbGet(
-          ATTACHMENT_STORE,
-          message.file.id
-        ).then(record => {
+        dbGet(ATTACHMENT_STORE, message.file.id).then(record => {
 
           if (!record || !record.blob) {
-            loading.textContent =
-              "Голосовое сообщение недоступно.";
+            loading.textContent = "Голосовое сообщение недоступно.";
             return;
           }
 
-          const player =
-            document.createElement("audio");
-
+          const player = document.createElement("audio");
           player.controls = true;
           player.preload = "metadata";
-          player.src =
-            getAttachmentUrl(record.blob);
+          player.setAttribute("playsinline", "true");
+          player.src = getAttachmentUrl(record.blob);
 
           loading.remove();
           wrap.appendChild(player);
 
         }).catch(error => {
 
-          console.error(
-            "Voice preview error:",
-            error
-          );
-
-          loading.textContent =
-            "Не удалось открыть голосовое сообщение.";
+          console.error("Voice preview error:", error);
+          loading.textContent = "Не удалось открыть голосовое сообщение.";
 
         });
       }
@@ -5271,6 +5240,49 @@
       let voiceStream = null;
       let voiceChunks = [];
       let voiceRecording = false;
+      let voiceStartedAt = 0;
+
+      function getBestVoiceAudioConstraints() {
+        // 48 kHz — нативная частота Opus и оптимальный режим для речи.
+        // Один канал снижает размер файла без потери полезной информации для голоса.
+        // AEC оставляем включённым, чтобы не записывать звук из динамика.
+        // NS/AGC отключаем: они часто делают голос металлическим/«под водой».
+        return {
+          channelCount: { ideal: 1 },
+          sampleRate: { ideal: 48000 },
+          sampleSize: { ideal: 24 },
+          echoCancellation: { ideal: true },
+          noiseSuppression: { ideal: false },
+          autoGainControl: { ideal: false },
+          latency: { ideal: 0 }
+        };
+      }
+
+      function createVoiceRecorder(stream, mimeType) {
+        const options = {
+          audioBitsPerSecond: 128000,
+          bitsPerSecond: 128000
+        };
+
+        if (mimeType) {
+          options.mimeType = mimeType;
+        }
+
+        try {
+          return new MediaRecorder(stream, options);
+        } catch (error) {
+          console.warn("High-quality MediaRecorder options rejected:", error);
+
+          try {
+            return mimeType
+              ? new MediaRecorder(stream, { mimeType })
+              : new MediaRecorder(stream);
+          } catch (fallbackError) {
+            console.error("MediaRecorder fallback error:", fallbackError);
+            throw fallbackError;
+          }
+        }
+      }
 
       async function startVoiceRecording() {
 
@@ -5280,188 +5292,147 @@
 
         if (
           !navigator.mediaDevices ||
-          typeof navigator.mediaDevices.getUserMedia !==
-            "function"
+          typeof navigator.mediaDevices.getUserMedia !== "function"
         ) {
-          toast(
-            "Запись голоса недоступна в этом браузере"
-          );
+          toast("Запись голоса недоступна в этом браузере");
           return;
         }
 
-        if (
-          typeof MediaRecorder ===
-          "undefined"
-        ) {
-          toast(
-            "MediaRecorder не поддерживается"
-          );
+        if (typeof MediaRecorder === "undefined") {
+          toast("MediaRecorder не поддерживается");
           return;
         }
 
-        const mimeType =
-          getVoiceMimeType();
+        const mimeType = getVoiceMimeType();
 
         try {
 
-          voiceStream =
-            await navigator.mediaDevices
-              .getUserMedia({
-                audio: {
-                  echoCancellation: true,
-                  noiseSuppression: true,
-                  autoGainControl: true
-                }
-              });
+          voiceStream = await navigator.mediaDevices.getUserMedia({
+            audio: getBestVoiceAudioConstraints()
+          });
+
+          // Некоторые браузеры игнорируют часть ideal-настроек.
+          // Применяем доступные настройки ещё раз к реальному треку,
+          // но не падаем, если конкретный параметр не поддерживается.
+          const track = voiceStream.getAudioTracks()[0];
+
+          if (track && typeof track.applyConstraints === "function") {
+            try {
+              await track.applyConstraints(getBestVoiceAudioConstraints());
+            } catch (constraintError) {
+              console.warn("Some microphone constraints were not applied:", constraintError);
+            }
+          }
 
           voiceChunks = [];
+          voiceStartedAt = Date.now();
+          voiceRecorder = createVoiceRecorder(voiceStream, mimeType);
 
-          voiceRecorder =
-            mimeType
-              ? new MediaRecorder(
-                  voiceStream,
-                  { mimeType }
-                )
-              : new MediaRecorder(
-                  voiceStream
-                );
+          voiceRecorder.ondataavailable = event => {
+            if (event.data && event.data.size > 0) {
+              voiceChunks.push(event.data);
+            }
+          };
 
-          voiceRecorder.ondataavailable =
-            event => {
-              if (
-                event.data &&
-                event.data.size > 0
-              ) {
-                voiceChunks.push(
-                  event.data
-                );
-              }
-            };
+          voiceRecorder.onerror = event => {
+            console.error("Voice recorder error:", event.error);
+            toast("Ошибка записи голоса");
+            stopVoiceStream();
+            voiceRecording = false;
+            setVoiceRecordingUI(false);
+          };
 
-          voiceRecorder.onerror =
-            event => {
-              console.error(
-                "Voice recorder error:",
-                event.error
+          voiceRecorder.onstop = async () => {
+
+            const recorder = voiceRecorder;
+            const actualType =
+              recorder?.mimeType ||
+              mimeType ||
+              "audio/webm";
+
+            const duration = Math.max(
+              0,
+              (Date.now() - voiceStartedAt) / 1000
+            );
+
+            const blob = new Blob(voiceChunks, {
+              type: actualType
+            });
+
+            voiceChunks = [];
+            voiceRecorder = null;
+            voiceStartedAt = 0;
+
+            stopVoiceStream();
+            setVoiceRecordingUI(false);
+
+            if (!blob.size) {
+              toast("Голосовое сообщение пустое");
+              return;
+            }
+
+            try {
+
+              const extension = getVoiceExtension(actualType);
+              const fileName =
+                "voice_" + Date.now() + "." + extension;
+
+              const file = new File(
+                [blob],
+                fileName,
+                {
+                  type: actualType,
+                  lastModified: Date.now()
+                }
               );
-              toast(
-                "Ошибка записи голоса"
+
+              const metadata = await saveAttachment(file);
+              metadata.voice = true;
+              metadata.duration = Math.round(duration * 10) / 10;
+              metadata.mimeType = actualType;
+              metadata.bitrate = recorder?.audioBitsPerSecond || 128000;
+
+              addChatMessage(
+                "🎙 Голосовое сообщение",
+                metadata
               );
-              stopVoiceStream();
-              setVoiceRecordingUI(false);
-            };
 
-          voiceRecorder.onstop =
-            async () => {
+              toast("Голосовое сообщение отправлено");
 
-              const actualType =
-                voiceRecorder?.mimeType ||
-                mimeType ||
-                "audio/webm";
+            } catch (error) {
 
-              const blob =
-                new Blob(
-                  voiceChunks,
-                  { type: actualType }
-                );
+              console.error("Voice save error:", error);
+              toast("Не удалось сохранить голосовое сообщение");
 
-              voiceChunks = [];
+            }
+          };
 
-              stopVoiceStream();
-              setVoiceRecordingUI(false);
-
-              if (!blob.size) {
-                toast(
-                  "Голосовое сообщение пустое"
-                );
-                return;
-              }
-
-              try {
-
-                const extension =
-                  getVoiceExtension(
-                    actualType
-                  );
-
-                const file =
-                  new File(
-                    [blob],
-                    "voice_" +
-                      Date.now() +
-                      "." +
-                      extension,
-                    {
-                      type: actualType,
-                      lastModified: Date.now()
-                    }
-                  );
-
-                const metadata =
-                  await saveAttachment(
-                    file
-                  );
-
-                metadata.voice = true;
-                metadata.duration = 0;
-
-                addChatMessage(
-                  "🎙 Голосовое сообщение",
-                  metadata
-                );
-
-                toast(
-                  "Голосовое сообщение отправлено"
-                );
-
-              } catch (error) {
-
-                console.error(
-                  "Voice save error:",
-                  error
-                );
-
-                toast(
-                  "Не удалось сохранить голосовое сообщение"
-                );
-
-              }
-
-            };
-
-          voiceRecorder.start(
-            250
-          );
+          // 1000 мс — достаточно крупные куски без лишней нагрузки.
+          // Качество задаётся encoder bitrate, а не частотой ondataavailable.
+          voiceRecorder.start(1000);
 
           voiceRecording = true;
           setVoiceRecordingUI(true);
-          toast(
-            "Запись началась. Нажмите ещё раз, чтобы отправить."
-          );
+          toast("Запись началась. Нажмите ещё раз, чтобы отправить.");
 
         } catch (error) {
 
-          console.error(
-            "Microphone error:",
-            error
-          );
+          console.error("Microphone error:", error);
 
           stopVoiceStream();
+          voiceRecorder = null;
+          voiceRecording = false;
           setVoiceRecordingUI(false);
 
-          if (
-            error?.name ===
-            "NotAllowedError"
-          ) {
-            toast(
-              "Разрешите доступ к микрофону"
-            );
+          if (error?.name === "NotAllowedError") {
+            toast("Разрешите доступ к микрофону");
+          } else if (error?.name === "NotFoundError") {
+            toast("Микрофон не найден");
+          } else if (error?.name === "NotReadableError") {
+            toast("Микрофон занят другим приложением");
           } else {
-            toast(
-              "Не удалось включить микрофон"
-            );
+            toast("Не удалось включить микрофон");
           }
-
         }
       }
 
@@ -5471,26 +5442,18 @@
           return;
         }
 
-        voiceStream
-          .getTracks()
-          .forEach(
-            track => {
-              try {
-                track.stop();
-              } catch (_) {}
-            }
-          );
+        voiceStream.getTracks().forEach(track => {
+          try {
+            track.stop();
+          } catch (_) {}
+        });
 
         voiceStream = null;
       }
 
       function stopVoiceRecording() {
 
-        if (
-          !voiceRecorder ||
-          voiceRecorder.state ===
-            "inactive"
-        ) {
+        if (!voiceRecorder || voiceRecorder.state === "inactive") {
           voiceRecording = false;
           stopVoiceStream();
           setVoiceRecordingUI(false);
@@ -5498,24 +5461,20 @@
         }
 
         voiceRecording = false;
+
         try {
           voiceRecorder.stop();
         } catch (error) {
-          console.error(
-            "Voice stop error:",
-            error
-          );
+          console.error("Voice stop error:", error);
           stopVoiceStream();
+          voiceRecorder = null;
           setVoiceRecordingUI(false);
         }
       }
 
-      function setVoiceRecordingUI(
-        active
-      ) {
+      function setVoiceRecordingUI(active) {
 
-        const button =
-          $("voiceRecordButton");
+        const button = $("voiceRecordButton");
 
         if (!button) {
           return;
@@ -5526,48 +5485,40 @@
           Boolean(active)
         );
 
-        button.textContent =
-          active ? "■" : "🎙";
+        button.textContent = active ? "■" : "🎙";
 
-        button.title =
-          active
-            ? "Остановить и отправить голосовое сообщение"
-            : "Записать голосовое сообщение";
+        button.title = active
+          ? "Остановить и отправить голосовое сообщение"
+          : "Записать голосовое сообщение";
 
-        button.setAttribute(
-          "aria-label",
-          button.title
-        );
+        button.setAttribute("aria-label", button.title);
       }
 
-      $("voiceRecordButton")
-        ?.addEventListener(
-          "click",
-          () => {
-            if (voiceRecording) {
-              stopVoiceRecording();
-            } else {
-              startVoiceRecording();
-            }
-          }
-        );
-
-      window.addEventListener(
-        "beforeunload",
-        () => {
-          try {
-            if (
-              voiceRecorder &&
-              voiceRecorder.state !==
-                "inactive"
-            ) {
-              voiceRecorder.stop();
-            }
-          } catch (_) {}
-
-          stopVoiceStream();
+      $("voiceRecordButton")?.addEventListener("click", () => {
+        if (voiceRecording) {
+          stopVoiceRecording();
+        } else {
+          startVoiceRecording();
         }
-      );
+      });
+
+      window.addEventListener("beforeunload", () => {
+        // При закрытии страницы не пытаемся сохранять незавершённую запись.
+        // Это предотвращает повреждённые/обрезанные голосовые сообщения.
+        try {
+          if (voiceRecorder && voiceRecorder.state !== "inactive") {
+            voiceRecorder.ondataavailable = null;
+            voiceRecorder.onstop = null;
+            voiceRecorder.onerror = null;
+            voiceRecorder.stop();
+          }
+        } catch (_) {}
+
+        voiceChunks = [];
+        voiceRecorder = null;
+        voiceRecording = false;
+        stopVoiceStream();
+      });
 
       function sendChat() {
 
